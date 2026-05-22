@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多Agent交互物流调度系统 - 演示Demo</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif; background:#f0f2f5; color:#333; }
+
+/* 顶部导航 */
+.top-bar { background:#1a1a2e; color:#fff; padding:12px 24px; display:flex; align-items:center; justify-content:space-between; position:fixed; top:0; left:0; right:0; z-index:100; }
+.top-bar h1 { font-size:16px; font-weight:600; }
+.top-bar .badge { background:#ff4757; border-radius:50%; width:18px; height:18px; font-size:11px; display:flex; align-items:center; justify-content:center; position:absolute; top:-4px; right:-8px; }
+.terminal-tabs { display:flex; gap:4px; }
+.terminal-tab { padding:8px 20px; border-radius:8px 8px 0 0; cursor:pointer; font-size:13px; transition:all .2s; background:rgba(255,255,255,.1); color:rgba(255,255,255,.7); border:none; }
+.terminal-tab.active { background:#fff; color:#1a1a2e; font-weight:600; }
+.terminal-tab:hover:not(.active) { background:rgba(255,255,255,.2); }
+
+/* 主容器 */
+.main { margin-top:52px; height:calc(100vh - 52px); overflow:hidden; }
+.terminal-view { display:none; height:100%; }
+.terminal-view.active { display:flex; }
+
+/* ========== PC端调度 ========== */
+.pc-layout { display:flex; width:100%; height:100%; }
+.pc-sidebar { width:260px; background:#fff; border-right:1px solid #e8e8e8; display:flex; flex-direction:column; }
+.pc-sidebar-header { padding:16px; border-bottom:1px solid #f0f0f0; font-weight:600; font-size:14px; display:flex; justify-content:space-between; align-items:center; }
+.pc-nav-item { padding:12px 16px; cursor:pointer; font-size:13px; display:flex; align-items:center; gap:10px; transition:background .15s; position:relative; }
+.pc-nav-item:hover { background:#f5f5f5; }
+.pc-nav-item.active { background:#e6f7ff; color:#1890ff; border-right:3px solid #1890ff; }
+.pc-nav-item .nav-icon { width:20px; text-align:center; }
+.pc-content { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.pc-sub-view { display:none; height:100%; flex-direction:column; }
+.pc-sub-view.active { display:flex; }
+
+/* PC对话页 */
+.pc-chat-layout { display:flex; flex:1; overflow:hidden; }
+.pc-chat-left { flex:1; display:flex; flex-direction:column; border-right:1px solid #e8e8e8; }
+.pc-chat-right { width:400px; background:#fafafa; display:flex; flex-direction:column; }
+.pc-chat-right-header { padding:16px; border-bottom:1px solid #e8e8e8; font-weight:600; font-size:14px; }
+
+/* 通用对话样式 */
+.chat-header { padding:14px 20px; background:#fff; border-bottom:1px solid #e8e8e8; font-weight:600; font-size:14px; display:flex; align-items:center; gap:8px; }
+.chat-header .dot { width:8px; height:8px; border-radius:50%; background:#52c41a; }
+.chat-messages { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:12px; }
+.chat-msg { max-width:80%; padding:10px 14px; border-radius:12px; font-size:13px; line-height:1.6; animation:fadeInUp .3s ease; }
+@keyframes fadeInUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+.chat-msg.agent { background:#fff; border:1px solid #e8e8e8; align-self:flex-start; border-radius:12px 12px 12px 2px; }
+.chat-msg.user { background:#1890ff; color:#fff; align-self:flex-end; border-radius:12px 12px 2px 12px; }
+.chat-msg .waybill-card { background:#f6ffed; border:1px solid #b7eb8f; border-radius:8px; padding:10px; margin-top:8px; font-size:12px; }
+.chat-msg .waybill-card .field { display:flex; justify-content:space-between; padding:3px 0; }
+.chat-msg .waybill-card .field label { color:#888; }
+.chat-msg .driver-list { margin-top:8px; }
+.chat-msg .driver-item { background:#fff; border:1px solid #d9d9d9; border-radius:6px; padding:10px; margin-top:6px; font-size:12px; cursor:pointer; transition:all .15s; }
+.chat-msg .driver-item:hover { border-color:#1890ff; background:#e6f7ff; }
+.chat-msg .driver-item .driver-name { font-weight:600; font-size:13px; margin-bottom:4px; }
+.chat-msg .driver-item .driver-info { display:flex; gap:8px; flex-wrap:wrap; color:#666; margin-bottom:6px; }
+.chat-msg .driver-item .driver-info span { background:#f5f5f5; padding:1px 6px; border-radius:3px; font-size:11px; }
+.chat-msg .driver-item .last-trip { background:#fafafa; border-top:1px dashed #e8e8e8; padding-top:6px; margin-top:2px; }
+.chat-msg .driver-item .last-trip .trip-label { font-size:11px; color:#999; margin-bottom:3px; }
+.chat-msg .driver-item .last-trip .trip-route { font-size:12px; color:#333; font-weight:500; }
+.chat-msg .driver-item .last-trip .trip-cargo { font-size:11px; color:#666; margin-top:2px; }
+.chat-msg .driver-item .loc-info { display:flex; align-items:center; gap:6px; margin-top:4px; }
+.chat-msg .driver-item .loc-info .loc-dot { width:8px; height:8px; border-radius:50%; background:#52c41a; flex-shrink:0; animation:locPulse 2s infinite; }
+@keyframes locPulse { 0%,100%{ opacity:1; } 50%{ opacity:.4; } }
+.chat-msg .driver-item .loc-info .loc-text { font-size:11px; color:#1890ff; }
+.chat-msg .driver-item .loc-info .dist-tag { background:#e6f7ff; color:#1890ff; padding:1px 6px; border-radius:3px; font-size:10px; font-weight:500; }
+.chat-msg .loc-query-result { background:#fff; border:1px solid #d9d9d9; border-radius:8px; margin-top:8px; overflow:hidden; }
+.chat-msg .loc-query-result .loc-header { background:#f5f5f5; padding:8px 10px; font-size:12px; font-weight:600; border-bottom:1px solid #e8e8e8; display:flex; align-items:center; gap:6px; }
+.chat-msg .loc-query-result .loc-row { display:flex; justify-content:space-between; align-items:center; padding:8px 10px; font-size:12px; border-bottom:1px solid #f5f5f5; }
+.chat-msg .loc-query-result .loc-row:last-child { border-bottom:none; }
+.chat-msg .loc-query-result .loc-row .driver-label { display:flex; align-items:center; gap:6px; }
+.chat-msg .loc-query-result .loc-row .driver-label .mini-dot { width:6px; height:6px; border-radius:50%; }
+.chat-msg .loc-query-result .loc-row .dist-info { text-align:right; }
+.chat-msg .loc-query-result .loc-row .dist-info .dist-value { color:#1890ff; font-weight:600; }
+.chat-msg .loc-query-result .loc-row .dist-info .eta { font-size:10px; color:#999; }
+.chat-msg .action-btns { display:flex; gap:8px; margin-top:8px; }
+.chat-msg .action-btn { padding:6px 16px; border-radius:6px; border:none; cursor:pointer; font-size:12px; transition:all .15s; }
+.chat-msg .action-btn.primary { background:#1890ff; color:#fff; }
+.chat-msg .action-btn.primary:hover { background:#40a9ff; }
+.chat-msg .action-btn.danger { background:#fff; color:#ff4d4f; border:1px solid #ff4d4f; }
+.chat-msg .action-btn.danger:hover { background:#fff1f0; }
+.chat-input-bar { padding:12px 16px; background:#fff; border-top:1px solid #e8e8e8; display:flex; gap:8px; align-items:center; }
+.chat-input-bar input { flex:1; padding:10px 14px; border:1px solid #d9d9d9; border-radius:8px; font-size:13px; outline:none; transition:border .2s; }
+.chat-input-bar input:focus { border-color:#1890ff; }
+.chat-input-bar button { padding:10px 20px; background:#1890ff; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:13px; white-space:nowrap; }
+.chat-input-bar button:hover { background:#40a9ff; }
+
+/* 运单详情面板 */
+.waybill-detail-panel { padding:16px; overflow-y:auto; flex:1; }
+.waybill-detail-panel .detail-section { margin-bottom:16px; }
+.waybill-detail-panel .detail-section h4 { font-size:13px; color:#888; margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid #f0f0f0; }
+.waybill-detail-panel .detail-row { display:flex; justify-content:space-between; padding:6px 0; font-size:13px; }
+.waybill-detail-panel .detail-row label { color:#999; }
+.waybill-detail-panel .detail-row span { font-weight:500; }
+.status-flow { display:flex; flex-direction:column; gap:0; margin-top:8px; }
+.status-flow .step { display:flex; align-items:flex-start; gap:10px; padding-bottom:16px; position:relative; }
+.status-flow .step::before { content:''; position:absolute; left:9px; top:22px; bottom:0; width:2px; background:#e8e8e8; }
+.status-flow .step:last-child::before { display:none; }
+.status-flow .step .dot { width:20px; height:20px; border-radius:50%; border:2px solid #d9d9d9; background:#fff; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; }
+.status-flow .step.done .dot { background:#52c41a; border-color:#52c41a; color:#fff; }
+.status-flow .step.current .dot { background:#1890ff; border-color:#1890ff; color:#fff; animation:pulse 1.5s infinite; }
+@keyframes pulse { 0%,100% { box-shadow:0 0 0 0 rgba(24,144,255,.4); } 50% { box-shadow:0 0 0 6px rgba(24,144,255,0); } }
+.status-flow .step .info { font-size:12px; }
+.status-flow .step .info .label { font-weight:500; }
+.status-flow .step .info .time { color:#999; font-size:11px; }
+
+/* ========== 运单列表 ========== */
+.list-header { padding:16px 20px; background:#fff; border-bottom:1px solid #e8e8e8; display:flex; justify-content:space-between; align-items:center; }
+.list-header h3 { font-size:15px; }
+.list-filters { display:flex; gap:8px; }
+.list-filters select, .list-filters input { padding:6px 10px; border:1px solid #d9d9d9; border-radius:6px; font-size:12px; outline:none; }
+.list-body { flex:1; overflow-y:auto; padding:16px 20px; }
+table.waybill-table { width:100%; border-collapse:collapse; font-size:13px; }
+table.waybill-table th { background:#fafafa; padding:10px 12px; text-align:left; font-weight:600; border-bottom:2px solid #e8e8e8; white-space:nowrap; }
+table.waybill-table td { padding:10px 12px; border-bottom:1px solid #f0f0f0; }
+table.waybill-table tr:hover { background:#fafafa; }
+.status-tag { padding:2px 8px; border-radius:4px; font-size:11px; font-weight:500; white-space:nowrap; }
+.status-tag.pending { background:#fff7e6; color:#fa8c16; }
+.status-tag.dispatched { background:#e6f7ff; color:#1890ff; }
+.status-tag.accepted { background:#f6ffed; color:#52c41a; }
+.status-tag.transit { background:#f9f0ff; color:#722ed1; }
+.status-tag.arrived { background:#e6fffb; color:#13c2c2; }
+.status-tag.unloaded { background:#fcffe6; color:#a0d911; }
+.status-tag.signed { background:#f6ffed; color:#389e0d; }
+.status-tag.cancelled { background:#fff1f0; color:#ff4d4f; }
+
+/* ========== 手机端框架 ========== */
+.phone-frame-container { display:flex; justify-content:center; align-items:center; height:100%; background:#f0f2f5; gap:40px; padding:20px; }
+.phone-frame { width:375px; height:calc(100vh - 92px); max-height:780px; background:#fff; border-radius:32px; box-shadow:0 8px 40px rgba(0,0,0,.15); overflow:hidden; display:flex; flex-direction:column; position:relative; border:8px solid #1a1a2e; }
+.phone-status-bar { height:36px; background:#1a1a2e; display:flex; align-items:center; justify-content:center; color:#fff; font-size:12px; padding:0 20px; }
+.phone-nav { padding:12px 16px; background:#fff; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; gap:8px; }
+.phone-nav .back { cursor:pointer; font-size:18px; }
+.phone-nav h3 { font-size:15px; flex:1; }
+.phone-bottom-nav { display:flex; border-top:1px solid #e8e8e8; background:#fff; }
+.phone-bottom-nav .nav-item { flex:1; padding:8px 0 6px; text-align:center; cursor:pointer; font-size:10px; color:#999; transition:color .15s; position:relative; }
+.phone-bottom-nav .nav-item.active { color:#1890ff; }
+.phone-bottom-nav .nav-item .icon { font-size:20px; display:block; margin-bottom:2px; }
+.phone-body { flex:1; overflow-y:auto; display:flex; flex-direction:column; }
+.phone-sub-view { display:none; flex:1; flex-direction:column; overflow:hidden; }
+.phone-sub-view.active { display:flex; }
+
+/* 手机端对话 */
+.phone-chat-messages { flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:10px; }
+.phone-chat-input { padding:8px 12px; background:#fff; border-top:1px solid #e8e8e8; display:flex; gap:6px; align-items:center; }
+.phone-chat-input input { flex:1; padding:8px 12px; border:1px solid #d9d9d9; border-radius:20px; font-size:13px; outline:none; }
+.phone-chat-input button { width:36px; height:36px; border-radius:50%; background:#1890ff; color:#fff; border:none; cursor:pointer; font-size:16px; }
+.phone-quick-actions { padding:6px 12px; display:flex; gap:6px; flex-wrap:wrap; }
+.quick-btn { padding:6px 12px; background:#f0f0f0; border:none; border-radius:16px; font-size:11px; cursor:pointer; transition:all .15s; }
+.quick-btn:hover { background:#1890ff; color:#fff; }
+
+/* 手机端运单卡片列表 */
+.phone-tabs { display:flex; padding:0 12px; background:#fff; border-bottom:1px solid #f0f0f0; }
+.phone-tab { flex:1; padding:10px 0; text-align:center; font-size:13px; color:#999; cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; }
+.phone-tab.active { color:#1890ff; border-bottom-color:#1890ff; font-weight:600; }
+.phone-card-list { flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:10px; }
+.waybill-card-item { background:#fff; border-radius:10px; padding:14px; box-shadow:0 1px 4px rgba(0,0,0,.06); border:1px solid #f0f0f0; }
+.waybill-card-item .card-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.waybill-card-item .card-top .no { font-weight:600; font-size:13px; }
+.waybill-card-item .route { display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:6px; }
+.waybill-card-item .route .arrow { color:#1890ff; }
+.waybill-card-item .card-bottom { display:flex; justify-content:space-between; font-size:11px; color:#999; }
+
+/* 消息页 */
+.msg-list { flex:1; overflow-y:auto; }
+.msg-item { padding:14px 16px; border-bottom:1px solid #f5f5f5; display:flex; gap:10px; cursor:pointer; transition:background .15s; }
+.msg-item:hover { background:#fafafa; }
+.msg-item.unread { background:#f0f8ff; }
+.msg-icon { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.msg-icon.dispatch { background:#e6f7ff; }
+.msg-icon.status { background:#f6ffed; }
+.msg-icon.alert { background:#fff2e8; }
+.msg-info { flex:1; }
+.msg-info .title { font-size:13px; font-weight:500; margin-bottom:3px; }
+.msg-info .desc { font-size:12px; color:#999; }
+.msg-info .time { font-size:11px; color:#bbb; margin-top:4px; }
+.msg-dot { width:8px; height:8px; border-radius:50%; background:#ff4d4f; flex-shrink:0; margin-top:6px; }
+
+/* 提示标签 */
+.demo-hint { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,.7); color:#fff; padding:8px 20px; border-radius:20px; font-size:12px; z-index:200; pointer-events:none; opacity:0; transition:opacity .3s; }
+.demo-hint.show { opacity:1; }
+
+/* 通知弹窗 */
+.notification { position:fixed; top:70px; right:20px; background:#fff; border-radius:10px; box-shadow:0 4px 20px rgba(0,0,0,.15); padding:14px 18px; z-index:150; transform:translateX(120%); transition:transform .4s cubic-bezier(.68,-.55,.27,1.55); max-width:320px; border-left:4px solid #1890ff; }
+.notification.show { transform:translateX(0); }
+.notification .noti-title { font-size:13px; font-weight:600; margin-bottom:4px; }
+.notification .noti-body { font-size:12px; color:#666; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>🚛 多Agent交互物流调度系统 - 演示Demo</h1>
+  <div class="terminal-tabs">
+    <button class="terminal-tab active" onclick="switchTerminal('pc')">💻 PC调度端</button>
+    <button class="terminal-tab" onclick="switchTerminal('mini')">📱 小程序调度端</button>
+    <button class="terminal-tab" onclick="switchTerminal('driver')">🚗 司机APP端</button>
+  </div>
+</div>
+
+<!-- ========== PC端 ========== -->
+<div class="main">
+<div class="terminal-view active" id="tv-pc">
+  <div class="pc-layout">
+    <div class="pc-sidebar">
+      <div class="pc-sidebar-header">调度工作台 <span style="font-size:11px;color:#999">v1.0</span></div>
+      <div class="pc-nav-item active" onclick="switchPcView('pc-chat')"><span class="nav-icon">💬</span> Agent对话</div>
+      <div class="pc-nav-item" onclick="switchPcView('pc-list')"><span class="nav-icon">📋</span> 运单列表</div>
+      <div class="pc-nav-item" onclick="switchPcView('pc-msg')" style="position:relative"><span class="nav-icon">🔔</span> 消息中心 <span class="badge" id="pc-msg-badge" style="background:#ff4757;border-radius:50%;width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;position:absolute;top:8px;right:12px;color:#fff">3</span></div>
+    </div>
+    <div class="pc-content">
+      <!-- PC对话页 -->
+      <div class="pc-sub-view active" id="pc-chat">
+        <div class="pc-chat-layout">
+          <div class="pc-chat-left">
+            <div class="chat-header"><span class="dot"></span> 调度Agent · 在线</div>
+            <div class="chat-messages" id="pc-chat-msgs">
+              <div class="chat-msg agent">您好，我是调度Agent。请告诉我货主的运输需求，我来帮您生成运单。<br><br>您可以直接描述，例如：<br>「明天有一批钢材从上海宝山发到南京江宁，大概20吨，需要平板车」<br><br>您也可以随时查询：<br>「车辆位置」「张师傅在哪」「距装货点多远」</div>
+            </div>
+            <div class="chat-input-bar">
+              <input id="pc-chat-input" placeholder="输入运输需求，如：明天有一批钢材从上海发到南京..." onkeydown="if(event.key==='Enter')pcSend()">
+              <button onclick="pcSend()">发送</button>
+            </div>
+          </div>
+          <div class="pc-chat-right">
+            <div class="pc-chat-right-header">运单详情面板</div>
+            <div class="waybill-detail-panel" id="pc-detail-panel">
+              <div style="color:#bbb;text-align:center;margin-top:80px;font-size:13px;">暂无运单<br>通过对话生成运单后将在此展示</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- PC运单列表 -->
+      <div class="pc-sub-view" id="pc-list">
+        <div class="list-header">
+          <h3>运单管理</h3>
+          <div class="list-filters">
+            <select><option>全部状态</option><option>待派车</option><option>运输中</option><option>已签收</option></select>
+            <input type="date" value="2026-03-20">
+          </div>
+        </div>
+        <div class="list-body">
+          <table class="waybill-table">
+            <thead><tr><th>运单号</th><th>货物</th><th>起点</th><th>终点</th><th>司机</th><th>车牌</th><th>状态</th><th>创建时间</th></tr></thead>
+            <tbody id="pc-waybill-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <!-- PC消息中心 -->
+      <div class="pc-sub-view" id="pc-msg">
+        <div class="list-header"><h3>消息中心</h3></div>
+        <div class="msg-list" id="pc-msg-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 小程序端 ========== -->
+<div class="terminal-view" id="tv-mini">
+  <div class="phone-frame-container">
+    <div class="phone-frame">
+      <div class="phone-status-bar">09:41 · 小程序调度端</div>
+      <div class="phone-body">
+        <div class="phone-sub-view active" id="mini-chat-view">
+          <div class="phone-nav"><h3>💬 调度Agent</h3></div>
+          <div class="phone-chat-messages" id="mini-chat-msgs">
+            <div class="chat-msg agent" style="max-width:85%;font-size:13px;">您好，请描述货主的运输需求，我来帮您生成运单和派车。</div>
+          </div>
+          <div class="phone-chat-input">
+            <input id="mini-chat-input" placeholder="描述运输需求..." onkeydown="if(event.key==='Enter')miniSend()">
+            <button onclick="miniSend()">➤</button>
+          </div>
+        </div>
+        <div class="phone-sub-view" id="mini-list-view">
+          <div class="phone-nav"><h3>📋 运单列表</h3></div>
+          <div class="phone-tabs">
+            <div class="phone-tab active">全部</div><div class="phone-tab">运输中</div><div class="phone-tab">已完成</div>
+          </div>
+          <div class="phone-card-list" id="mini-card-list"></div>
+        </div>
+        <div class="phone-sub-view" id="mini-msg-view">
+          <div class="phone-nav"><h3>🔔 消息</h3></div>
+          <div class="msg-list" id="mini-msg-list"></div>
+        </div>
+      </div>
+      <div class="phone-bottom-nav">
+        <div class="nav-item active" onclick="switchMiniView('mini-chat-view',this)"><span class="icon">💬</span><br>对话</div>
+        <div class="nav-item" onclick="switchMiniView('mini-list-view',this)"><span class="icon">📋</span><br>运单</div>
+        <div class="nav-item" onclick="switchMiniView('mini-msg-view',this)" style="position:relative"><span class="icon">🔔</span><br>消息</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 司机APP端 ========== -->
+<div class="terminal-view" id="tv-driver">
+  <div class="phone-frame-container">
+    <div class="phone-frame">
+      <div class="phone-status-bar">09:41 · 司机端APP</div>
+      <div class="phone-body">
+        <div class="phone-sub-view active" id="driver-chat-view">
+          <div class="phone-nav"><h3>🤖 司机Agent</h3><span class="dot" style="width:8px;height:8px;border-radius:50%;background:#52c41a;"></span></div>
+          <div class="phone-chat-messages" id="driver-chat-msgs">
+            <div class="chat-msg agent" style="max-width:85%;font-size:13px;">您好张师傅，我是您的司机助手。有新运单时会第一时间通知您。</div>
+          </div>
+          <div class="phone-quick-actions" id="driver-quick-actions">
+            <button class="quick-btn" onclick="driverQuick('我出发了')">🚀 发车</button>
+            <button class="quick-btn" onclick="driverQuick('到了')">📍 到达</button>
+            <button class="quick-btn" onclick="driverQuick('卸完了')">📦 卸货完成</button>
+            <button class="quick-btn" onclick="driverQuick('上传回单')">📷 上传回单</button>
+          </div>
+          <div class="phone-chat-input">
+            <input id="driver-chat-input" placeholder="输入消息..." onkeydown="if(event.key==='Enter')driverSend()">
+            <button onclick="driverSend()">➤</button>
+          </div>
+        </div>
+        <div class="phone-sub-view" id="driver-list-view">
+          <div class="phone-nav"><h3>📋 我的运单</h3></div>
+          <div class="phone-tabs">
+            <div class="phone-tab active">待接单</div><div class="phone-tab">进行中</div><div class="phone-tab">已完成</div>
+          </div>
+          <div class="phone-card-list" id="driver-card-list"></div>
+        </div>
+        <div class="phone-sub-view" id="driver-msg-view">
+          <div class="phone-nav"><h3>🔔 消息</h3></div>
+          <div class="msg-list" id="driver-msg-list"></div>
+        </div>
+      </div>
+      <div class="phone-bottom-nav">
+        <div class="nav-item active" onclick="switchDriverView('driver-chat-view',this)"><span class="icon">💬</span><br>对话</div>
+        <div class="nav-item" onclick="switchDriverView('driver-list-view',this)"><span class="icon">📋</span><br>运单</div>
+        <div class="nav-item" onclick="switchDriverView('driver-msg-view',this)"><span class="icon">🔔</span><br>消息</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="notification" id="notification"><div class="noti-title"></div><div class="noti-body"></div></div>
+<div class="demo-hint" id="demo-hint"></div>
+
+<script>
+// ===== 全局状态 =====
+const state = {
+  pcStep: 0, miniStep: 0, driverStep: 0,
+  waybills: [
+    { no:'WB20260320001', cargo:'电子元器件', weight:'5吨', origin:'深圳南山', dest:'广州白云', driver:'王师傅', plate:'粤B·88888', status:'signed', created:'03-19 14:20' },
+    { no:'WB20260320002', cargo:'服装面料', weight:'8吨', origin:'杭州萧山', dest:'上海松江', driver:'赵师傅', plate:'浙A·66666', status:'transit', created:'03-20 08:00' },
+    { no:'WB20260320003', cargo:'食品原料', weight:'12吨', origin:'成都龙泉', dest:'重庆渝北', driver:'—', plate:'—', status:'pending', created:'03-20 09:15' },
+  ],
+  drivers: {
+    1: { name:'张师傅', plate:'沪A·12345', vehicle:'13.5米平板', status:'当前空闲',
+         lastCargo:'钢材', lastWeight:'18吨', lastOrigin:'南京江宁', lastDest:'上海宝山', lastTime:'03-19 14:00',
+         curLocation:'上海市宝山区XX物流园', curCity:'上海', distToLoad:'8km', etaToLoad:'约15分钟' },
+    2: { name:'李师傅', plate:'苏A·67890', vehicle:'13米平板', status:'明早可用',
+         lastCargo:'水泥', lastWeight:'25吨', lastOrigin:'苏州昆山', lastDest:'杭州萧山', lastTime:'03-18 09:30',
+         curLocation:'苏州市昆山市花桥物流中心', curCity:'苏州', distToLoad:'120km', etaToLoad:'约2小时' },
+  },
+  currentWaybill: null,
+  messages: [
+    { type:'status', title:'运单状态更新', desc:'WB20260320002 赵师傅已发车，预计14:00到达', time:'08:32', unread:true },
+    { type:'alert', title:'超时预警', desc:'WB20260320003 待派车超过2小时', time:'11:15', unread:true },
+    { type:'dispatch', title:'接单通知', desc:'WB20260320001 王师傅已签收完成', time:'昨天 16:30', unread:true },
+  ],
+  driverMessages: [
+    { type:'dispatch', title:'新运单通知', desc:'等待调度派单...', time:'--', unread:false },
+  ]
+};
+
+// ===== 终端切换 =====
+function switchTerminal(id) {
+  document.querySelectorAll('.terminal-view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.terminal-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tv-'+id).classList.add('active');
+  event.target.classList.add('active');
+  renderLists();
+}
+
+// ===== PC端导航 =====
+function switchPcView(id) {
+  document.querySelectorAll('.pc-sub-view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.pc-nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.closest('.pc-nav-item').classList.add('active');
+  if(id==='pc-list' || id==='pc-msg') renderLists();
+}
+
+// ===== 小程序/司机端导航 =====
+function switchMiniView(id, el) {
+  document.querySelectorAll('#tv-mini .phone-sub-view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('#tv-mini .nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+  if(id==='mini-list-view' || id==='mini-msg-view') renderLists();
+}
+function switchDriverView(id, el) {
+  document.querySelectorAll('#tv-driver .phone-sub-view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('#tv-driver .nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+  if(id==='driver-list-view' || id==='driver-msg-view') renderLists();
+}
+
+// ===== 消息辅助 =====
+function addMsg(container, text, type) {
+  const div = document.createElement('div');
+  div.className = 'chat-msg ' + type;
+  div.style.maxWidth = container.closest('.phone-frame') ? '85%' : '80%';
+  div.style.fontSize = '13px';
+  div.innerHTML = text;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+function showNotification(title, body, duration) {
+  const n = document.getElementById('notification');
+  n.querySelector('.noti-title').textContent = title;
+  n.querySelector('.noti-body').textContent = body;
+  n.classList.add('show');
+  setTimeout(() => n.classList.remove('show'), duration || 3500);
+}
+function showHint(text) {
+  const h = document.getElementById('demo-hint');
+  h.textContent = text; h.classList.add('show');
+  setTimeout(() => h.classList.remove('show'), 2500);
+}
+function now() {
+  const d = new Date();
+  return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+
+// ===== PC端调度对话流程 =====
+const pcFlow = [
+  { match: /.+/, reply: function() {
+    return `已为您解析运输需求，生成运单草稿：
+<div class="waybill-card">
+  <div class="field"><label>货物</label><span>钢材</span></div>
+  <div class="field"><label>重量</label><span>20吨</span></div>
+  <div class="field"><label>起点</label><span>上海市宝山区</span></div>
+  <div class="field"><label>终点</label><span>南京市江宁区</span></div>
+  <div class="field"><label>车型</label><span>平板车</span></div>
+  <div class="field"><label>要求到达</label><span>2026-03-21 18:00</span></div>
+</div>
+为您推荐可用车辆：
+<div class="driver-list">
+  <div class="driver-item" onclick="pcSelectDriver(1)">
+    <div class="driver-name">🟢 ${state.drivers[1].name} · ${state.drivers[1].plate} · ${state.drivers[1].vehicle} · ${state.drivers[1].status}</div>
+    <div class="loc-info"><span class="loc-dot"></span><span class="loc-text">${state.drivers[1].curLocation}</span><span class="dist-tag">距装货点 ${state.drivers[1].distToLoad} · ${state.drivers[1].etaToLoad}</span></div>
+    <div class="last-trip">
+      <div class="trip-label">上一趟运输</div>
+      <div class="trip-route">${state.drivers[1].lastOrigin} → ${state.drivers[1].lastDest}</div>
+      <div class="trip-cargo">${state.drivers[1].lastCargo} ${state.drivers[1].lastWeight} · 完成时间 ${state.drivers[1].lastTime}</div>
+    </div>
+  </div>
+  <div class="driver-item" onclick="pcSelectDriver(2)">
+    <div class="driver-name">🟡 ${state.drivers[2].name} · ${state.drivers[2].plate} · ${state.drivers[2].vehicle} · ${state.drivers[2].status}</div>
+    <div class="loc-info"><span class="loc-dot" style="background:#faad14"></span><span class="loc-text">${state.drivers[2].curLocation}</span><span class="dist-tag">距装货点 ${state.drivers[2].distToLoad} · ${state.drivers[2].etaToLoad}</span></div>
+    <div class="last-trip">
+      <div class="trip-label">上一趟运输</div>
+      <div class="trip-route">${state.drivers[2].lastOrigin} → ${state.drivers[2].lastDest}</div>
+      <div class="trip-cargo">${state.drivers[2].lastCargo} ${state.drivers[2].lastWeight} · 完成时间 ${state.drivers[2].lastTime}</div>
+    </div>
+  </div>
+</div>
+请选择司机，或继续补充信息，选择司机后，会生成运单，并通知司机端。`;
+  }},
+];
+
+function pcSend() {
+  const input = document.getElementById('pc-chat-input');
+  const text = input.value.trim();
+  if(!text) return;
+  const msgs = document.getElementById('pc-chat-msgs');
+  addMsg(msgs, text, 'user');
+  input.value = '';
+
+  // 查询车辆位置/距离
+  if(state.pcStep >= 1 && /位置|在哪|距|多远|位置|定位|车辆位置|查.*位置|查.*车/.test(text)) {
+    setTimeout(() => {
+      const targetLoc = state.currentWaybill ? state.currentWaybill.origin : '上海宝山';
+      addMsg(msgs, `📍 已查询所有推荐车辆的位置信息（相对于装货点：${targetLoc}）：
+<div class="loc-query-result">
+  <div class="loc-header">🚛 车辆位置实时查询</div>
+  <div class="loc-row">
+    <div class="driver-label"><span class="mini-dot" style="background:#52c41a"></span>${state.drivers[1].name} · ${state.drivers[1].plate}</div>
+    <div class="dist-info"><div class="dist-value">${state.drivers[1].distToLoad}</div><div class="eta">${state.drivers[1].curLocation} · 预计${state.drivers[1].etaToLoad}到达</div></div>
+  </div>
+  <div class="loc-row">
+    <div class="driver-label"><span class="mini-dot" style="background:#faad14"></span>${state.drivers[2].name} · ${state.drivers[2].plate}</div>
+    <div class="dist-info"><div class="dist-value">${state.drivers[2].distToLoad}</div><div class="eta">${state.drivers[2].curLocation} · 预计${state.drivers[2].etaToLoad}到达</div></div>
+  </div>
+</div>
+💡 张师傅距离最近，建议优先选择。`, 'agent');
+    }, 800);
+    return;
+  }
+
+  if(state.pcStep === 0) {
+    setTimeout(() => {
+      addMsg(msgs, pcFlow[0].reply(), 'agent');
+      updatePcDetailPanel('draft');
+      state.pcStep = 1;
+    }, 800);
+  } else if(state.pcStep >= 2) {
+    setTimeout(() => {
+      addMsg(msgs, '好的，已记录补充信息。如需修改运单请随时告诉我。', 'agent');
+    }, 500);
+  }
+}
+
+function pcSelectDriver(idx) {
+  if(state.pcStep !== 1) return;
+  const msgs = document.getElementById('pc-chat-msgs');
+  const driverName = idx===1 ? '张师傅' : '李师傅';
+  const plate = idx===1 ? '沪A·12345' : '苏A·67890';
+  addMsg(msgs, '选' + driverName, 'user');
+
+  setTimeout(() => {
+    const wb = {
+      no:'WB20260321001', cargo:'钢材', weight:'20吨',
+      origin:'上海宝山', dest:'南京江宁',
+      driver: driverName, plate: plate,
+      status:'dispatched', created:'03-20 ' + now()
+    };
+    state.waybills.unshift(wb);
+    state.currentWaybill = wb;
+
+    addMsg(msgs, `✅ 运单已生成！<br><br>
+运单号：<b>WB20260321001</b><br>
+已派车通知${driverName}（${plate}）<br><br>
+运单已进入「已派车」状态，等待司机接单。<br>
+<span style="color:#999;font-size:11px;">💡 切换到「司机APP端」可体验司机接单流程</span>`, 'agent');
+
+    updatePcDetailPanel('dispatched');
+    state.pcStep = 2;
+
+    // 通知司机端
+    setTimeout(() => {
+      pushToDriver(wb);
+      showNotification('📤 派单成功', `运单 WB20260321001 已推送至${driverName}`);
+    }, 500);
+
+    // 添加消息
+    state.messages.unshift({ type:'dispatch', title:'运单已派车', desc:`WB20260321001 已派车给${driverName}`, time:now(), unread:true });
+  }, 800);
+}
+
+function updatePcDetailPanel(stage) {
+  const panel = document.getElementById('pc-detail-panel');
+  const wb = state.currentWaybill || { no:'WB20260321001', cargo:'钢材', weight:'20吨', origin:'上海宝山', dest:'南京江宁', driver:'—', plate:'—' };
+  const statusMap = { draft:'草稿', dispatched:'已派车', accepted:'已接单', transit:'运输中', arrived:'已到达', unloaded:'已卸车', signed:'已签收' };
+  const steps = ['已派车','已接单','运输中','已到达','已卸车','已签收'];
+  const stageIdx = { draft:-1, dispatched:0, accepted:1, transit:2, arrived:3, unloaded:4, signed:5 };
+  const ci = stageIdx[stage] ?? -1;
+
+  let stepsHtml = steps.map((s,i) => {
+    const cls = i < ci ? 'done' : i === ci ? 'current' : '';
+    return `<div class="step ${cls}"><div class="dot">${i<ci?'✓':i===ci?'●':''}</div><div class="info"><div class="label">${s}</div></div></div>`;
+  }).join('');
+
+  panel.innerHTML = `
+    <div class="detail-section"><h4>运单信息</h4>
+      <div class="detail-row"><label>运单号</label><span>${wb.no||'WB20260321001'}</span></div>
+      <div class="detail-row"><label>状态</label><span class="status-tag ${stage}">${statusMap[stage]||stage}</span></div>
+      <div class="detail-row"><label>货物</label><span>${wb.cargo} ${wb.weight}</span></div>
+      <div class="detail-row"><label>起点</label><span>${wb.origin}</span></div>
+      <div class="detail-row"><label>终点</label><span>${wb.dest}</span></div>
+    </div>
+    <div class="detail-section"><h4>车辆信息</h4>
+      <div class="detail-row"><label>司机</label><span>${wb.driver||'—'}</span></div>
+      <div class="detail-row"><label>车牌</label><span>${wb.plate||'—'}</span></div>
+      <div class="detail-row"><label>车型</label><span>13.5米平板车</span></div>
+    </div>
+    <div class="detail-section"><h4>状态流转</h4><div class="status-flow">${stepsHtml}</div></div>`;
+}
+
+// ===== 司机端推送与对话 =====
+function pushToDriver(wb) {
+  const msgs = document.getElementById('driver-chat-msgs');
+  addMsg(msgs, `📦 您有一条新运单！<br><br>
+<div class="waybill-card">
+  <div class="field"><label>运单号</label><span>${wb.no}</span></div>
+  <div class="field"><label>货物</label><span>${wb.cargo} ${wb.weight}</span></div>
+  <div class="field"><label>路线</label><span>${wb.origin} → ${wb.dest}</span></div>
+  <div class="field"><label>要求到达</label><span>2026-03-21 18:00</span></div>
+</div>
+<div class="action-btns">
+  <button class="action-btn primary" onclick="driverAccept()">✅ 接受</button>
+  <button class="action-btn danger" onclick="driverReject()">❌ 拒绝</button>
+</div>`, 'agent');
+
+  state.driverMessages.unshift({ type:'dispatch', title:'新运单 '+wb.no, desc:wb.cargo+' '+wb.origin+'→'+wb.dest, time:now(), unread:true });
+  state.driverStep = 0;
+}
+
+function driverAccept() {
+  if(state.driverStep !== 0) return;
+  const msgs = document.getElementById('driver-chat-msgs');
+  addMsg(msgs, '接受', 'user');
+  setTimeout(() => {
+    addMsg(msgs, `✅ 已接单！运单 WB20260321001<br><br>装货完成后，点击「🚀 发车」或告诉我"出发了"。<br><span style="color:#999;font-size:11px;">我会自动记录时间和位置</span>`, 'agent');
+    state.driverStep = 1;
+    if(state.currentWaybill) state.currentWaybill.status = 'accepted';
+    state.waybills.forEach(w => { if(w.no==='WB20260321001') w.status='accepted'; });
+    updatePcDetailPanel('accepted');
+    showNotification('✅ 司机已接单', '张师傅已接受运单 WB20260321001');
+    state.messages.unshift({ type:'status', title:'司机已接单', desc:'WB20260321001 张师傅已接单', time:now(), unread:true });
+    // 同步到PC对话
+    const pcMsgs = document.getElementById('pc-chat-msgs');
+    addMsg(pcMsgs, '📨 <b>司机Agent通知：</b>张师傅已接受运单 WB20260321001', 'agent');
+  }, 600);
+}
+
+function driverReject() {
+  if(state.driverStep !== 0) return;
+  const msgs = document.getElementById('driver-chat-msgs');
+  addMsg(msgs, '拒绝，明天有其他安排', 'user');
+  setTimeout(() => {
+    addMsg(msgs, '已将拒绝原因通知调度，等待重新派车。', 'agent');
+    showNotification('⚠️ 司机拒单', '张师傅拒绝了运单 WB20260321001，原因：明天有其他安排');
+    state.messages.unshift({ type:'alert', title:'司机拒单', desc:'WB20260321001 张师傅拒绝，原因：明天有其他安排', time:now(), unread:true });
+    const pcMsgs = document.getElementById('pc-chat-msgs');
+    addMsg(pcMsgs, '⚠️ <b>司机Agent通知：</b>张师傅拒绝了运单 WB20260321001<br>原因：明天有其他安排<br><br>是否需要我推荐其他司机？', 'agent');
+  }, 600);
+}
+
+const driverFlowMap = {
+  1: { keywords:['出发','发车','走了'], reply: function() {
+    state.driverStep = 2;
+    updateWbStatus('transit');
+    notifyPc('status', '司机已发车', 'WB20260321001 张师傅已发车，位置：上海市宝山区', `📨 <b>司机Agent通知：</b>张师傅已发车<br>时间：${now()}，位置：上海市宝山区<br>预计到达南京江宁：约14:00`);
+    return `🚀 已记录发车！<br>时间：${now()}，位置：上海市宝山区<br><br>预计到达南京江宁：约14:00<br>请注意行车安全！到达后告诉我"到了"。`;
+  }},
+  2: { keywords:['到了','到达','已到'], reply: function() {
+    state.driverStep = 3;
+    updateWbStatus('arrived');
+    notifyPc('status', '司机已到达', 'WB20260321001 张师傅已到达卸货点', `📨 <b>司机Agent通知：</b>张师傅已到达卸货点<br>时间：${now()}，位置：南京市江宁区XX物流园`);
+    return `📍 已记录到达卸货点！<br>时间：${now()}，位置：南京市江宁区XX物流园<br><br>卸货完成后请告诉我"卸完了"。`;
+  }},
+  3: { keywords:['卸完','卸货','卸好'], reply: function() {
+    state.driverStep = 4;
+    updateWbStatus('unloaded');
+    notifyPc('status', '卸货完成', 'WB20260321001 卸货完成，等待回单', `📨 <b>司机Agent通知：</b>WB20260321001 卸货完成<br>时间：${now()}，请等待司机上传回单`);
+    return `📦 已记录卸货完成！时间：${now()}<br><br>请上传回单照片，点击「📷 上传回单」或直接告诉我"上传回单"。`;
+  }},
+  4: { keywords:['上传','回单','签收','照片'], reply: function() {
+    state.driverStep = 5;
+    updateWbStatus('signed');
+    notifyPc('status', '运单已签收', 'WB20260321001 已签收完成', `📨 <b>司机Agent通知：</b>WB20260321001 已签收完成！<br>签收人：王经理 · 时间：${now()}<br>回单照片已上传<br><br>🎉 运单全流程完结`);
+    return `📷 已收到回单照片！OCR识别结果：
+<div class="waybill-card">
+  <div class="field"><label>签收人</label><span>王经理</span></div>
+  <div class="field"><label>签收时间</label><span>2026-03-21 ${now()}</span></div>
+  <div class="field"><label>签收状态</label><span style="color:#52c41a">正常签收</span></div>
+</div>
+<div class="action-btns">
+  <button class="action-btn primary" onclick="driverConfirmSign()">✅ 确认无误</button>
+  <button class="action-btn danger" onclick="showHint('可重新拍照上传')">🔄 重新识别</button>
+</div>`;
+  }},
+};
+
+function driverSend() {
+  const input = document.getElementById('driver-chat-input');
+  const text = input.value.trim();
+  if(!text) return;
+  driverQuick(text);
+  input.value = '';
+}
+
+function driverQuick(text) {
+  const msgs = document.getElementById('driver-chat-msgs');
+  addMsg(msgs, text, 'user');
+  const step = state.driverStep;
+  const flow = driverFlowMap[step];
+  if(flow && flow.keywords.some(k => text.includes(k))) {
+    setTimeout(() => addMsg(msgs, flow.reply(), 'agent'), 700);
+  } else if(step === 0) {
+    setTimeout(() => addMsg(msgs, '当前暂无待处理运单，有新运单时我会第一时间通知您。', 'agent'), 400);
+  } else if(step >= 5) {
+    setTimeout(() => addMsg(msgs, '当前运单已完结 🎉 有新运单时我会通知您。', 'agent'), 400);
+  } else {
+    const hints = { 1:'请告诉我"出发了"或点击发车按钮', 2:'请告诉我"到了"或点击到达按钮', 3:'请告诉我"卸完了"或点击卸货完成按钮', 4:'请上传回单照片或点击上传回单按钮' };
+    setTimeout(() => addMsg(msgs, '收到。当前运单下一步操作：' + (hints[step]||''), 'agent'), 400);
+  }
+}
+
+function driverConfirmSign() {
+  const msgs = document.getElementById('driver-chat-msgs');
+  addMsg(msgs, '确认无误', 'user');
+  setTimeout(() => addMsg(msgs, '🎉 运单 WB20260321001 已完结，辛苦了张师傅！<br><br>本次运输总结：<br>· 发车 → 到达：约5.5小时<br>· 全程顺利，无异常<br><br>有新运单时我会第一时间通知您。', 'agent'), 500);
+}
+
+function updateWbStatus(status) {
+  state.waybills.forEach(w => { if(w.no==='WB20260321001') w.status = status; });
+  if(state.currentWaybill) state.currentWaybill.status = status;
+  updatePcDetailPanel(status);
+}
+
+function notifyPc(type, title, desc, pcChatMsg) {
+  state.messages.unshift({ type, title, desc, time:now(), unread:true });
+  showNotification('📨 ' + title, desc);
+  if(pcChatMsg) {
+    const pcMsgs = document.getElementById('pc-chat-msgs');
+    addMsg(pcMsgs, pcChatMsg, 'agent');
+  }
+}
+
+// ===== 小程序端对话 =====
+function miniSend() {
+  const input = document.getElementById('mini-chat-input');
+  const text = input.value.trim();
+  if(!text) return;
+  const msgs = document.getElementById('mini-chat-msgs');
+  addMsg(msgs, text, 'user');
+  input.value = '';
+
+  // 查询车辆位置
+  if(state.miniStep >= 1 && /位置|在哪|距|多远|定位|车辆位置|查.*位置|查.*车/.test(text)) {
+    setTimeout(() => {
+      addMsg(msgs, `📍 车辆位置查询：
+<div class="loc-query-result">
+  <div class="loc-header">🚛 车辆位置</div>
+  <div class="loc-row">
+    <div class="driver-label"><span class="mini-dot" style="background:#52c41a"></span>张师傅 · 沪A·12345</div>
+    <div class="dist-info"><div class="dist-value">8km</div><div class="eta">上海宝山XX物流园 · 约15分钟</div></div>
+  </div>
+</div>`, 'agent');
+    }, 800);
+    return;
+  }
+
+  if(state.miniStep === 0) {
+    setTimeout(() => {
+      addMsg(msgs, `已解析需求，生成运单草稿：
+<div class="waybill-card">
+  <div class="field"><label>货物</label><span>钢材 20吨</span></div>
+  <div class="field"><label>路线</label><span>上海宝山 → 南京江宁</span></div>
+  <div class="field"><label>车型</label><span>平板车</span></div>
+</div>
+推荐司机：
+<div class="driver-list">
+  <div class="driver-item" onclick="miniSelectDriver()">
+    <div class="driver-name">🟢 张师傅 · 沪A·12345 · 空闲</div>
+    <div class="loc-info"><span class="loc-dot"></span><span class="loc-text">上海宝山区XX物流园</span><span class="dist-tag">距装货点 8km · 约15分钟</span></div>
+    <div class="last-trip">
+      <div class="trip-label">上一趟运输</div>
+      <div class="trip-route">南京江宁 → 上海宝山</div>
+      <div class="trip-cargo">钢材 18吨 · 完成时间 03-19 14:00</div>
+    </div>
+  </div>
+</div>`, 'agent');
+      state.miniStep = 1;
+    }, 800);
+  } else {
+    setTimeout(() => addMsg(msgs, '好的，已记录。如需修改运单请随时告诉我。', 'agent'), 500);
+  }
+}
+function miniSelectDriver() {
+  if(state.miniStep !== 1) return;
+  const msgs = document.getElementById('mini-chat-msgs');
+  addMsg(msgs, '选张师傅', 'user');
+  setTimeout(() => {
+    addMsg(msgs, '✅ 运单 WB20260321001 已生成并派车通知张师傅！<br><br><span style="color:#999;font-size:11px;">切换到「司机APP端」体验接单流程</span>', 'agent');
+    state.miniStep = 2;
+    showHint('运单已生成，可切换到司机APP端体验');
+  }, 700);
+}
+
+// ===== 列表渲染 =====
+const statusLabel = { pending:'待派车', dispatched:'已派车', accepted:'已接单', transit:'运输中', arrived:'已到达', unloaded:'已卸车', signed:'已签收', cancelled:'已取消' };
+
+function renderLists() {
+  // PC表格
+  const tbody = document.getElementById('pc-waybill-tbody');
+  tbody.innerHTML = state.waybills.map(w => `<tr>
+    <td style="color:#1890ff;cursor:pointer">${w.no}</td><td>${w.cargo}</td><td>${w.origin}</td><td>${w.dest}</td>
+    <td>${w.driver}</td><td>${w.plate}</td><td><span class="status-tag ${w.status}">${statusLabel[w.status]||w.status}</span></td><td>${w.created}</td>
+  </tr>`).join('');
+
+  // 小程序卡片
+  const miniList = document.getElementById('mini-card-list');
+  miniList.innerHTML = state.waybills.map(w => `<div class="waybill-card-item">
+    <div class="card-top"><span class="no">${w.no}</span><span class="status-tag ${w.status}">${statusLabel[w.status]||w.status}</span></div>
+    <div class="route">${w.origin} <span class="arrow">→</span> ${w.dest}</div>
+    <div class="card-bottom"><span>${w.cargo} ${w.weight}</span><span>${w.driver}</span></div>
+  </div>`).join('');
+
+  // 司机端卡片
+  const driverList = document.getElementById('driver-card-list');
+  const myWbs = state.waybills.filter(w => w.driver.includes('张'));
+  driverList.innerHTML = myWbs.length ? myWbs.map(w => `<div class="waybill-card-item">
+    <div class="card-top"><span class="no">${w.no}</span><span class="status-tag ${w.status}">${statusLabel[w.status]||w.status}</span></div>
+    <div class="route">${w.origin} <span class="arrow">→</span> ${w.dest}</div>
+    <div class="card-bottom"><span>${w.cargo} ${w.weight}</span><span>${w.created}</span></div>
+  </div>`).join('') : '<div style="text-align:center;color:#bbb;margin-top:40px;font-size:13px;">暂无运单</div>';
+
+  // 消息列表
+  renderMsgList('pc-msg-list', state.messages);
+  renderMsgList('mini-msg-list', state.messages);
+  renderMsgList('driver-msg-list', state.driverMessages.concat(state.messages.filter(m=>m.title.includes('签收')||m.title.includes('派车'))));
+}
+
+function renderMsgList(containerId, msgs) {
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  const iconMap = { dispatch:'dispatch', status:'status', alert:'alert' };
+  const emojiMap = { dispatch:'📋', status:'🔔', alert:'⚠️' };
+  el.innerHTML = msgs.map(m => `<div class="msg-item ${m.unread?'unread':''}">
+    <div class="msg-icon ${iconMap[m.type]||''}">${emojiMap[m.type]||'📋'}</div>
+    <div class="msg-info"><div class="title">${m.title}</div><div class="desc">${m.desc}</div><div class="time">${m.time}</div></div>
+    ${m.unread?'<div class="msg-dot"></div>':''}
+  </div>`).join('');
+}
+
+// 初始化
+renderLists();
+</script>
+</body>
+</html>

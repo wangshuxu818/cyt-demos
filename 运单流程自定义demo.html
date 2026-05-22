@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>运单流程自定义 - 交互Demo</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif; background: #f5f6fa; color: #1f2329; }
+
+/* Layout */
+.layout { display: flex; height: 100vh; }
+.sidebar { width: 220px; background: #1e2433; color: #fff; flex-shrink: 0; overflow-y: auto; }
+.sidebar .logo { padding: 20px; font-size: 16px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,.1); }
+.sidebar .menu-group { padding: 8px 0; }
+.sidebar .menu-group-title { padding: 8px 20px; font-size: 12px; color: #8f959e; }
+.sidebar .menu-item { padding: 10px 20px 10px 36px; font-size: 14px; cursor: pointer; transition: all .15s; }
+.sidebar .menu-item:hover { background: rgba(255,255,255,.08); }
+.sidebar .menu-item.active { background: #3370ff; }
+
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+.header { padding: 16px 24px; background: #fff; border-bottom: 1px solid #e5e6eb; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.header h2 { font-size: 18px; font-weight: 600; }
+.content { flex: 1; overflow-y: auto; padding: 24px; }
+
+/* Step wizard */
+.wizard { display: flex; gap: 0; margin-bottom: 24px; background: #fff; border-radius: 8px; padding: 24px 32px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+.step { flex: 1; display: flex; align-items: center; gap: 12px; }
+.step:not(:last-child)::after { content: ''; flex: 1; height: 2px; background: #e5e6eb; margin: 0 12px; }
+.step:not(:last-child).done::after { background: #3370ff; }
+.step-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; border: 2px solid #e5e6eb; color: #8f959e; flex-shrink: 0; transition: all .2s; }
+.step.active .step-num { background: #3370ff; border-color: #3370ff; color: #fff; }
+.step.done .step-num { background: #34c724; border-color: #34c724; color: #fff; }
+.step-label { font-size: 14px; color: #8f959e; white-space: nowrap; }
+.step.active .step-label { color: #1f2329; font-weight: 500; }
+
+/* Card */
+.card { background: #fff; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,.06); margin-bottom: 20px; }
+.card-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.badge { font-size: 11px; background: #e8f3ff; color: #3370ff; padding: 2px 8px; border-radius: 10px; font-weight: 400; }
+
+/* Form */
+.form-row { display: flex; gap: 16px; margin-bottom: 16px; }
+.form-group { flex: 1; }
+.form-group label { display: block; font-size: 13px; color: #646a73; margin-bottom: 6px; font-weight: 500; }
+.form-group label .req { color: #f54a45; }
+.form-group input, .form-group select { width: 100%; height: 36px; border: 1px solid #e5e6eb; border-radius: 6px; padding: 0 12px; font-size: 14px; outline: none; transition: border-color .2s; background: #fff; }
+.form-group input:focus, .form-group select:focus { border-color: #3370ff; }
+
+/* Checkbox group */
+.checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.checkbox-tag { display: inline-flex; align-items: center; padding: 6px 14px; border: 1px solid #e5e6eb; border-radius: 4px; font-size: 13px; cursor: pointer; transition: all .15s; user-select: none; }
+.checkbox-tag:hover { border-color: #3370ff; color: #3370ff; }
+.checkbox-tag.checked { background: #e8f3ff; border-color: #3370ff; color: #3370ff; }
+
+/* Flow editor */
+.flow-editor { margin-top: 8px; }
+.flow-lane { display: flex; align-items: center; gap: 0; margin-bottom: 16px; }
+.flow-lane-label { width: 90px; font-size: 13px; font-weight: 600; color: #646a73; text-align: center; background: #f5f6fa; border-radius: 6px; padding: 12px 8px; flex-shrink: 0; margin-right: 12px; }
+.flow-lane-nodes { display: flex; align-items: center; flex: 1; min-height: 56px; border: 1px dashed #dee0e3; border-radius: 8px; padding: 10px 16px; gap: 0; flex-wrap: wrap; }
+.flow-node { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
+.flow-node-box { min-width: 80px; padding: 8px 14px; border: 2px solid #e5e6eb; border-radius: 8px; font-size: 13px; text-align: center; cursor: pointer; transition: all .15s; background: #fff; user-select: none; font-weight: 500; }
+.flow-node-box:hover { border-color: #3370ff; box-shadow: 0 2px 8px rgba(51,112,255,.15); }
+.flow-node-box.fixed { border-color: #3370ff; background: #e8f3ff; color: #3370ff; }
+.flow-node-box.added { border-color: #3370ff; background: #e8f3ff; color: #3370ff; }
+.flow-node-box .node-icon { margin-right: 2px; }
+.flow-node-actions { display: flex; gap: 2px; margin-top: 2px; }
+.flow-node-actions button { border: none; background: none; font-size: 11px; cursor: pointer; padding: 2px 6px; border-radius: 3px; }
+.btn-config { color: #3370ff; }
+.btn-config:hover { background: #e8f3ff; }
+.btn-remove { color: #f54a45; }
+.btn-remove:hover { background: #fef0ef; }
+
+.flow-connector { width: 20px; height: 2px; background: #dee0e3; flex-shrink: 0; }
+
+.flow-add-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px dashed #3370ff; background: #fff; color: #3370ff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .15s; line-height: 1; }
+.flow-add-btn:hover { background: #e8f3ff; transform: scale(1.1); }
+
+/* Modal */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 100; align-items: center; justify-content: center; }
+.modal-overlay.show { display: flex; }
+.modal { background: #fff; border-radius: 12px; padding: 24px; width: 520px; max-height: 80vh; overflow-y: auto; }
+.modal h3 { font-size: 16px; margin-bottom: 16px; }
+.modal .close-btn { float: right; border: none; background: none; font-size: 20px; cursor: pointer; color: #8f959e; }
+
+/* Field config panel */
+.field-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.field-item { display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1px solid #e5e6eb; border-radius: 6px; font-size: 13px; }
+.field-item .field-check { width: 16px; height: 16px; accent-color: #3370ff; }
+.field-item .field-required { font-size: 11px; color: #f54a45; margin-left: 4px; display: flex; align-items: center; gap: 2px; }
+.field-item .field-required input { width: 14px; height: 14px; accent-color: #f54a45; }
+.field-item.locked { background: #f5f6fa; border-color: #dee0e3; }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 20px; border-radius: 6px; font-size: 14px; cursor: pointer; border: none; transition: all .15s; font-weight: 500; }
+.btn-primary { background: #3370ff; color: #fff; }
+.btn-primary:hover { background: #2860e1; }
+.btn-default { background: #fff; color: #1f2329; border: 1px solid #e5e6eb; }
+.btn-default:hover { border-color: #3370ff; color: #3370ff; }
+.btn-text { background: none; border: none; color: #3370ff; padding: 4px 8px; font-size: 13px; cursor: pointer; }
+.btn-text:hover { background: #e8f3ff; }
+.btn-sm { padding: 4px 12px; font-size: 12px; }
+.footer-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 16px; border-top: 1px solid #e5e6eb; }
+
+/* Table */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: #f5f6fa; padding: 10px 12px; text-align: left; font-weight: 600; color: #646a73; border-bottom: 1px solid #e5e6eb; white-space: nowrap; }
+td { padding: 10px 12px; border-bottom: 1px solid #e5e6eb; }
+tr:hover td { background: #fafbfc; }
+
+/* Tabs */
+.tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #e5e6eb; }
+.tab { padding: 10px 20px; font-size: 14px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; color: #646a73; transition: all .15s; }
+.tab:hover { color: #3370ff; }
+.tab.active { color: #3370ff; border-bottom-color: #3370ff; font-weight: 500; }
+
+/* Info banner */
+.info-banner { background: #fffbe6; border: 1px solid #ffe58f; border-radius: 6px; padding: 10px 16px; font-size: 13px; color: #ad6800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <div class="sidebar">
+    <div class="logo">财运通</div>
+    <div class="menu-group">
+      <div class="menu-group-title">公司管理</div>
+      <div class="menu-item">组织管理</div>
+      <div class="menu-item">员工管理</div>
+      <div class="menu-item">权限管理</div>
+      <div class="menu-item active">业务流程管理</div>
+      <div class="menu-item">系统设置</div>
+    </div>
+    <div class="menu-group">
+      <div class="menu-group-title">运单管理</div>
+      <div class="menu-item">创建运单</div>
+      <div class="menu-item">运单列表</div>
+      <div class="menu-item">修改运单</div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="header">
+      <h2 id="pageTitle">业务流程管理</h2>
+      <div id="headerActions"></div>
+    </div>
+    <div class="content" id="pageContent"></div>
+  </div>
+</div>
+
+<!-- Add Node Modal -->
+<div class="modal-overlay" id="addNodeModal">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal('addNodeModal')">&times;</button>
+    <h3>添加节点</h3>
+    <p style="font-size:13px;color:#646a73;margin-bottom:12px;">选择要添加的操作节点：</p>
+    <div id="addNodeOptions"></div>
+    <div style="margin-top:16px;display:flex;justify-content:flex-end;gap:8px;">
+      <button class="btn btn-default" onclick="closeModal('addNodeModal')">取消</button>
+      <button class="btn btn-primary" onclick="confirmAddNode()">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- Field Config Modal -->
+<div class="modal-overlay" id="fieldConfigModal">
+  <div class="modal" style="width:600px;">
+    <button class="close-btn" onclick="closeModal('fieldConfigModal')">&times;</button>
+    <h3 id="fieldConfigTitle">字段配置</h3>
+    <div class="info-banner">勾选"显示"控制该字段是否出现，勾选"必填"控制该字段是否必须填写。发车时间、到达时间、到达地址为系统必填项，不可关闭。</div>
+    <div class="field-list" id="fieldConfigList"></div>
+    <div style="margin-top:16px;display:flex;justify-content:flex-end;gap:8px;">
+      <button class="btn btn-default" onclick="closeModal('fieldConfigModal')">取消</button>
+      <button class="btn btn-primary" onclick="saveFieldConfig()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== Data Definitions (MUST be before getDefaultFlowData) =====
+const FIELDS = {
+  depart: [
+    { key: 'depart_time', label: '发车时间', show: true, required: true, locked: true },
+    { key: 'pickup_customer', label: '提货客户', show: false, required: false },
+    { key: 'depart_km', label: '发车公里数', show: false, required: false },
+    { key: 'load_gross', label: '装车毛重', show: false, required: false },
+    { key: 'load_tare', label: '装车皮重', show: false, required: false },
+    { key: 'load_net', label: '装车净重', show: false, required: false },
+    { key: 'load_photo', label: '装车照片', show: false, required: false },
+    { key: 'load_wait', label: '装车等待时长', show: false, required: false },
+    { key: 'pickup_photo', label: '提货单照片', show: false, required: false },
+    { key: 'receipt_photo', label: '回单照片', show: false, required: false },
+    { key: 'entrust_no', label: '委托单号', show: false, required: false },
+    { key: 'depart_remark', label: '发车备注', show: false, required: false },
+    { key: 'load_weigh_time', label: '装货过磅时间', show: false, required: false },
+    { key: 'cargo_name', label: '货物名称', show: false, required: false },
+  ],
+  arrive: [
+    { key: 'arrive_time', label: '到达时间', show: true, required: true, locked: true },
+    { key: 'arrive_addr', label: '到达地址', show: true, required: true, locked: true },
+    { key: 'deliver_customer', label: '卸货客户', show: false, required: false },
+    { key: 'arrive_km', label: '到达公里数', show: false, required: false },
+    { key: 'unload_wait', label: '卸货等待时长', show: false, required: false },
+    { key: 'single_fuel', label: '单程油耗', show: false, required: false },
+    { key: 'unload_gross', label: '卸车毛重', show: false, required: false },
+    { key: 'unload_tare', label: '卸车皮重', show: false, required: false },
+    { key: 'unload_net', label: '卸车净重', show: false, required: false },
+    { key: 'arrive_remark', label: '到达备注', show: false, required: false },
+    { key: 'unload_weigh_time', label: '卸货过磅时间', show: false, required: false },
+    { key: 'unload_photo', label: '卸车照片', show: false, required: false },
+    { key: 'receipt_photo', label: '回单照片', show: false, required: false },
+  ],
+  unload: [
+    { key: 'unload_start', label: '卸车开始时间', show: false, required: false },
+    { key: 'unload_end', label: '卸车完成时间', show: false, required: false },
+    { key: 'single_fuel', label: '单程油耗', show: false, required: false },
+    { key: 'arrive_km', label: '到达公里数', show: false, required: false },
+    { key: 'unload_wait', label: '卸货等待时长', show: false, required: false },
+    { key: 'unload_net', label: '卸车净重', show: false, required: false },
+    { key: 'unload_gross', label: '卸车毛重', show: false, required: false },
+    { key: 'unload_tare', label: '卸车皮重', show: false, required: false },
+    { key: 'unload_remark', label: '卸车备注', show: false, required: false },
+    { key: 'unload_photo', label: '卸车照片', show: false, required: false },
+    { key: 'unload_time', label: '卸车时间', show: false, required: false },
+  ]
+};
+
+const NODE_POOL = {
+  pre: ['签到', '发车点检', '靠台'],
+  load: ['到达'],
+  unload: ['卸车', '发车'],
+  empty_depart: ['发车'],
+  empty_arrive: ['到达'],
+  post: ['收车点检'],
+};
+
+const NODE_ICONS = { '开单':'📋','接单':'✋','装车':'📦','发车':'🚀','到达':'📍','签到':'✅','发车点检':'🔍','靠台':'🏗️','卸车':'📤','收车点检':'🏁' };
+
+function getDefaultFlowData() {
+  return {
+    name: '',
+    org: '全集团',
+    driverTypes: [],
+    vehicleTypes: [],
+    lanes: [
+      { id: 'pre', label: '运输前', nodes: [
+        { id: 'n_open', label: '开单', fixed: true },
+        { id: 'n_accept', label: '接单', fixed: true },
+        { id: 'n_load', label: '装车', fixed: true },
+      ]},
+      { id: 'load', label: '装货节点', nodes: [
+        { id: 'n_depart', label: '发车', fixed: true, type: 'depart', fields: JSON.parse(JSON.stringify(FIELDS.depart)) },
+      ]},
+      { id: 'unload', label: '卸货节点', nodes: [
+        { id: 'n_arrive', label: '到达', fixed: false, type: 'arrive', fields: JSON.parse(JSON.stringify(FIELDS.arrive)) },
+      ]},
+      { id: 'empty_depart', label: '空发节点', nodes: [] },
+      { id: 'empty_arrive', label: '空到节点', nodes: [] },
+      { id: 'post', label: '运输后', nodes: [] },
+    ]
+  };
+}
+
+const MOCK_LIST = [
+  { name: '自有车标准流程', org: '全集团', driverType: '自有', vehicleType: '自有', emptyLoaded: '重驶', creator: '张三', updateTime: '2024-04-10 14:30' },
+  { name: '外调车简化流程', org: '本级及下级', driverType: '外调', vehicleType: '外调', emptyLoaded: '重驶', creator: '李四', updateTime: '2024-04-08 09:15' },
+  { name: '空驶段流程', org: '全集团', driverType: '全部', vehicleType: '全部', emptyLoaded: '空驶', creator: '王五', updateTime: '2024-04-05 16:42' },
+];
+
+// ===== State =====
+let currentView = 'list';
+let currentStep = 1;
+let flowData = getDefaultFlowData();
+let pendingAddLane = null;
+let pendingAddAvailable = [];
+let selectedAddNode = null;
+let fieldConfigTarget = null;
+
+// ===== Render =====
+function render() {
+  const title = document.getElementById('pageTitle');
+  const actions = document.getElementById('headerActions');
+  const content = document.getElementById('pageContent');
+
+  if (currentView === 'list') {
+    title.textContent = '业务流程管理';
+    actions.innerHTML = '<button class="btn btn-primary" onclick="startCreate()">+ 新建流程</button>';
+    content.innerHTML = renderList();
+  } else if (currentView === 'create') {
+    title.textContent = currentStep === 1 ? '新建流程 - 条件配置' : '新建流程 - 流程配置';
+    actions.innerHTML = '';
+    content.innerHTML = renderWizard() + (currentStep === 1 ? renderStep1() : renderStep2());
+  }
+}
+
+function renderList() {
+  let html = `<div class="card">
+    <div class="card-title">流程列表 <span class="badge">${MOCK_LIST.length} 条</span></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>操作</th><th>流程名称</th><th>使用组织</th><th>司机类型</th><th>车辆类型</th><th>空/重驶</th><th>创建人</th><th>修改时间</th></tr></thead>
+      <tbody>`;
+  MOCK_LIST.forEach((item, i) => {
+    html += `<tr>
+      <td><button class="btn-text" onclick="editFlow(${i})">修改</button><button class="btn-text" onclick="copyFlow(${i})">复制</button><button class="btn-text" style="color:#f54a45;" onclick="deleteFlow(${i})">删除</button></td>
+      <td style="color:#3370ff;cursor:pointer;font-weight:500;" onclick="editFlow(${i})">${item.name}</td>
+      <td>${item.org}</td><td>${item.driverType}</td><td>${item.vehicleType}</td><td>${item.emptyLoaded}</td><td>${item.creator}</td><td>${item.updateTime}</td>
+    </tr>`;
+  });
+  html += `</tbody></table></div></div>`;
+
+  return html;
+}
+
+function renderWizard() {
+  return `<div class="wizard">
+    <div class="step ${currentStep >= 1 ? (currentStep > 1 ? 'done' : 'active') : ''}">
+      <div class="step-num">${currentStep > 1 ? '&#10003;' : '1'}</div>
+      <div class="step-label">条件配置</div>
+    </div>
+    <div class="step ${currentStep >= 2 ? (currentStep > 2 ? 'done' : 'active') : ''}">
+      <div class="step-num">${currentStep > 2 ? '&#10003;' : '2'}</div>
+      <div class="step-label">流程配置</div>
+    </div>
+  </div>`;
+}
+
+function renderStep1() {
+  const orgs = ['全集团', '本级组织', '本级及下级', '本级及下级自营组织', '本级及下级加盟组织'];
+  const driverTypes = ['自有', '外调', '加盟'];
+  const vehicleTypes = ['自有', '外调', '加盟'];
+
+  let html = `<div class="card">
+    <div class="card-title">条件设置 <span class="badge">Step 1</span></div>
+    <div class="info-banner">条件用于匹配运单。创建运单时，系统根据车辆类型、司机类型、节点装卸类型匹配对应流程。</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>流程名称 <span class="req">*</span></label>
+        <input id="flowName" placeholder="请输入流程名称，同一集团不可重复" value="${flowData.name}">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>使用组织</label>
+        <select id="flowOrg">
+          ${orgs.map(o => `<option value="${o}" ${flowData.org === o ? 'selected' : ''}>${o}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>司机类型 <span class="badge">多选</span></label>
+        <div class="checkbox-group">
+          ${driverTypes.map(t => `<div class="checkbox-tag ${flowData.driverTypes.includes(t) ? 'checked' : ''}" onclick="toggleDriverType('${t}',this)">${t}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>车辆类型 <span class="badge">多选</span></label>
+        <div class="checkbox-group">
+          ${vehicleTypes.map(t => `<div class="checkbox-tag ${flowData.vehicleTypes.includes(t) ? 'checked' : ''}" onclick="toggleVehicleType('${t}',this)">${t}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>`;
+  html += `<div class="footer-actions">
+    <button class="btn btn-default" onclick="currentView='list';render();">取消</button>
+    <button class="btn btn-primary" onclick="goStep2()">下一步</button>
+  </div>`;
+  return html;
+}
+
+function renderStep2() {
+  let html = `<div class="card">
+    <div class="card-title">流程配置 <span class="badge">Step 2</span></div>
+    <div class="info-banner">配置运单各环节的操作节点和字段。点击"配置"设置每个节点需要填写的字段，点击"+"添加可选节点。</div>
+    <div class="flow-editor">`;
+
+  flowData.lanes.forEach((lane, li) => {
+    html += `<div class="flow-lane">
+      <div class="flow-lane-label">${lane.label}</div>
+      <div class="flow-lane-nodes">`;
+
+    if (lane.nodes.length === 0) {
+      html += `<span style="font-size:12px;color:#8f959e;padding:4px;">暂无操作节点</span>`;
+    }
+
+    lane.nodes.forEach((node, ni) => {
+      if (ni > 0) html += `<div class="flow-connector"></div>`;
+      const nodeClass = node.fixed ? 'fixed' : 'added';
+      const icon = NODE_ICONS[node.label] || '';
+
+      html += `<div class="flow-node">
+        <div class="flow-node-box ${nodeClass}" ${node.type ? `onclick="openFieldConfig('${lane.id}','${node.id}')"` : ''}>
+          <span class="node-icon">${icon}</span>${node.label}
+        </div>
+        <div class="flow-node-actions">
+          ${node.type ? `<button class="btn-config" onclick="openFieldConfig('${lane.id}','${node.id}')">配置</button>` : ''}
+          ${!node.fixed ? `<button class="btn-remove" onclick="removeNode(${li},${ni})">移除</button>` : ''}
+        </div>
+      </div>`;
+    });
+
+    const existingLabels = lane.nodes.map(n => n.label);
+    const pool = NODE_POOL[lane.id] || [];
+    const available = pool.filter(n => !existingLabels.includes(n));
+    if (available.length > 0) {
+      html += `<div class="flow-connector"></div>`;
+      html += `<button class="flow-add-btn" onclick="openAddNode(${li})" title="添加节点">+</button>`;
+    }
+
+    html += `</div></div>`;
+  });
+
+  html += `</div></div>`;
+  html += `<div class="footer-actions">
+    <button class="btn btn-default" onclick="goStep1()">上一步</button>
+    <button class="btn btn-default" onclick="cancelCreate()">取消</button>
+    <button class="btn btn-primary" onclick="saveFlow()">保存</button>
+  </div>`;
+  return html;
+}
+
+function compressNodes(nodes) {
+  return nodes.map((n, i) => ({ ...n, num: i + 1 }));
+}
+
+// ===== Actions =====
+function startCreate() {
+  currentView = 'create';
+  currentStep = 1;
+  flowData = getDefaultFlowData();
+  render();
+}
+
+function editFlow(i) {
+  flowData = getDefaultFlowData();
+  flowData.name = MOCK_LIST[i].name;
+  flowData.org = MOCK_LIST[i].org;
+  currentView = 'create';
+  currentStep = 2;
+  render();
+}
+
+function copyFlow(i) {
+  flowData = getDefaultFlowData();
+  flowData.name = MOCK_LIST[i].name + '复制';
+  flowData.org = MOCK_LIST[i].org;
+  currentView = 'create';
+  currentStep = 2;
+  render();
+}
+
+function deleteFlow(i) {
+  if (confirm('删除流程后，原运单的流程不会改变，新的单据将按新的流程流转，确定删除吗？')) {
+    MOCK_LIST.splice(i, 1);
+    render();
+  }
+}
+
+function goStep2() {
+  const nameInput = document.getElementById('flowName');
+  flowData.name = nameInput ? nameInput.value : '';
+  if (!flowData.name.trim()) { alert('请输入流程名称'); return; }
+  const orgSelect = document.getElementById('flowOrg');
+  if (orgSelect) flowData.org = orgSelect.value;
+  currentStep = 2;
+  render();
+}
+
+function goStep1() { currentStep = 1; render(); }
+
+function cancelCreate() {
+  if (confirm('确定取消该流程配置吗？取消后内容将不保存。')) {
+    currentView = 'list';
+    render();
+  }
+}
+
+function saveFlow() {
+  alert('流程已保存！返回列表页。');
+  if (!flowData.name) flowData.name = '新建流程';
+  MOCK_LIST.unshift({
+    name: flowData.name, org: flowData.org,
+    driverType: flowData.driverTypes.join(',') || '全部',
+    vehicleType: flowData.vehicleTypes.join(',') || '全部',
+    emptyLoaded: '重驶', creator: '小火炉',
+    updateTime: new Date().toLocaleString('zh-CN', {year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(/\//g,'-')
+  });
+  currentView = 'list';
+  render();
+}
+
+function toggleDriverType(type, el) {
+  const idx = flowData.driverTypes.indexOf(type);
+  if (idx >= 0) { flowData.driverTypes.splice(idx, 1); el.classList.remove('checked'); }
+  else { flowData.driverTypes.push(type); el.classList.add('checked'); }
+}
+
+function toggleVehicleType(type, el) {
+  const idx = flowData.vehicleTypes.indexOf(type);
+  if (idx >= 0) { flowData.vehicleTypes.splice(idx, 1); el.classList.remove('checked'); }
+  else { flowData.vehicleTypes.push(type); el.classList.add('checked'); }
+}
+
+function removeNode(laneIdx, nodeIdx) {
+  flowData.lanes[laneIdx].nodes.splice(nodeIdx, 1);
+  render();
+}
+
+function openAddNode(laneIdx) {
+  const lane = flowData.lanes[laneIdx];
+  const existing = lane.nodes.map(n => n.label);
+  const pool = NODE_POOL[lane.id] || [];
+  pendingAddAvailable = pool.filter(n => !existing.includes(n));
+  pendingAddLane = laneIdx;
+  selectedAddNode = null;
+
+  const optionsEl = document.getElementById('addNodeOptions');
+  optionsEl.innerHTML = pendingAddAvailable.map((n, i) =>
+    `<div class="checkbox-tag" style="margin:4px;padding:8px 16px;font-size:14px;" onclick="selectAddNode(${i},this)" id="addOpt${i}">${NODE_ICONS[n] || ''} ${n}</div>`
+  ).join('');
+
+  document.getElementById('addNodeModal').classList.add('show');
+}
+
+function selectAddNode(idx, el) {
+  selectedAddNode = idx;
+  document.querySelectorAll('#addNodeOptions .checkbox-tag').forEach(e => e.classList.remove('checked'));
+  el.classList.add('checked');
+}
+
+function confirmAddNode() {
+  if (selectedAddNode === null) { alert('请选择一个节点'); return; }
+  const label = pendingAddAvailable[selectedAddNode];
+  const typeMap = { '发车': 'depart', '到达': 'arrive', '卸车': 'unload' };
+  const type = typeMap[label] || null;
+  const fields = type ? JSON.parse(JSON.stringify(FIELDS[type])) : null;
+
+  flowData.lanes[pendingAddLane].nodes.push({
+    id: 'n_' + label + '_' + Date.now(),
+    label,
+    fixed: false,
+    type,
+    fields,
+  });
+  closeModal('addNodeModal');
+  render();
+}
+
+function openFieldConfig(laneId, nodeId) {
+  const lane = flowData.lanes.find(l => l.id === laneId);
+  const node = lane ? lane.nodes.find(n => n.id === nodeId) : null;
+  if (!node || !node.fields) return;
+
+  fieldConfigTarget = { laneId, nodeId };
+  document.getElementById('fieldConfigTitle').textContent = node.label + ' - 字段配置';
+
+  const listEl = document.getElementById('fieldConfigList');
+  listEl.innerHTML = node.fields.map((f, i) => `
+    <div class="field-item ${f.locked ? 'locked' : ''}">
+      <input type="checkbox" class="field-check" ${f.show ? 'checked' : ''} ${f.locked ? 'disabled' : ''} onchange="toggleFieldShow(${i},this.checked)">
+      <span>${f.label}</span>
+      ${f.show && !f.locked ? `<label class="field-required">必填<input type="checkbox" ${f.required ? 'checked' : ''} onchange="toggleFieldRequired(${i},this.checked)"></label>` : ''}
+      ${f.locked && f.required ? '<span style="font-size:11px;color:#f54a45;margin-left:4px;">(必填)</span>' : ''}
+    </div>
+  `).join('');
+
+  document.getElementById('fieldConfigModal').classList.add('show');
+}
+
+function toggleFieldShow(idx, checked) {
+  const { laneId, nodeId } = fieldConfigTarget;
+  const lane = flowData.lanes.find(l => l.id === laneId);
+  const node = lane.nodes.find(n => n.id === nodeId);
+  node.fields[idx].show = checked;
+  if (!checked) node.fields[idx].required = false;
+  openFieldConfig(laneId, nodeId);
+}
+
+function toggleFieldRequired(idx, checked) {
+  const { laneId, nodeId } = fieldConfigTarget;
+  const lane = flowData.lanes.find(l => l.id === laneId);
+  const node = lane.nodes.find(n => n.id === nodeId);
+  node.fields[idx].required = checked;
+  openFieldConfig(laneId, nodeId);
+}
+
+function saveFieldConfig() { closeModal('fieldConfigModal'); }
+
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// ===== Init =====
+render();
+</script>
+</body>
+</html>

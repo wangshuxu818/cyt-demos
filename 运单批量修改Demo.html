@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>财运通 - 运单批量修改 Demo</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft YaHei",tahoma,arial,"Hiragino Sans GB",sans-serif;font-size:12px;color:#333;background:#ecf0f4;min-width:1280px}
+
+/* 顶栏 */
+.topbar{position:fixed;top:0;left:0;right:0;height:44px;background:linear-gradient(180deg,#0a3d6b,#01224f);z-index:100;display:flex;align-items:center;padding:0 16px}
+.topbar-logo{color:#fff;font-size:18px;font-weight:700}
+.topbar-right{margin-left:auto;color:rgba(255,255,255,.8);font-size:12px}
+
+/* 侧栏 */
+.sidebar{position:fixed;top:44px;left:0;bottom:0;width:180px;background:#fff;border-right:1px solid #d3d3d3;overflow-y:auto;z-index:90}
+.sidebar-item{height:34px;padding:0 14px;font-size:13px;color:#333;display:flex;align-items:center;gap:8px;cursor:pointer}
+.sidebar-item:hover{background:#e4eef6;color:#0097cf}
+.sidebar-item.active{background:#a9dafb;color:#0097cf}
+
+/* 主区域 */
+.main{margin-left:180px;margin-top:44px;padding:10px;background:#ecf0f4;min-height:calc(100vh - 44px)}
+
+/* 按钮 */
+.fn-btn{height:28px;padding:0 10px;border-radius:2px;font-size:12px;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:4px;transition:all .15s}
+.fn-btn--primary{background:linear-gradient(270deg,#0cace7,#23c2ff);color:#fff}
+.fn-btn--primary:hover{opacity:.85}
+.fn-btn--primary:disabled{background:#b9ccd7;cursor:not-allowed;opacity:.6}
+.fn-btn--danger{background:linear-gradient(270deg,#e64340,#ff6b6b);color:#fff}
+.fn-btn--danger:hover{opacity:.85}
+.fn-btn--default{background:linear-gradient(-180deg,#fff,#f7f7f7 96%);border:1px solid #b9ccd7;color:#333}
+.fn-btn--default:hover{border-color:#378cbe;color:#0097cf}
+.fn-btn--success{background:linear-gradient(270deg,#35cd04,#4ade80);color:#fff}
+.fn-btn--success:hover{opacity:.85}
+.fn-btn--warn{background:linear-gradient(270deg,#ff9800,#ffb74d);color:#fff}
+.fn-btn--warn:hover{opacity:.85}
+
+/* 输入框 */
+.fn-input,.fn-select,.fn-textarea{border:1px solid rgba(34,36,38,.2);border-radius:2px;padding:0 5px;font-size:12px;background:#fff;outline:none;font-family:inherit}
+.fn-input{height:24px}
+.fn-select{height:24px}
+.fn-textarea{height:60px;padding:5px;resize:vertical}
+.fn-input:focus,.fn-select:focus,.fn-textarea:focus{background:#e2f7ff;border-color:#0097cf}
+
+/* 筛选栏 */
+.filter-bar{background:#ecf0f4;padding:8px 10px;margin-bottom:4px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* 操作按钮栏 - 常显 */
+.action-bar{background:#fff;border:1px solid #d3d3d3;border-bottom:none;padding:6px 10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.action-bar .sep{width:1px;height:20px;background:#d3d3d3;margin:0 4px}
+
+/* 批量提示 */
+.batch-tip{display:none;padding:5px 10px;background:#e2f7ff;border:1px solid #b3e0f5;border-top:none;font-size:12px;color:#0a3d6b;align-items:center;gap:8px}
+.batch-tip.show{display:flex}
+.batch-tip .count{color:#0097cf;font-weight:700;font-size:14px}
+
+/* 表格 */
+.fn-table-wrap{border:1px solid #d3d3d3;background:#fff;overflow:auto;max-height:560px}
+.fn-table{width:100%;border-collapse:collapse}
+.fn-table th{background:linear-gradient(180deg,#fdfdfd,#ebebeb);font-weight:400;font-size:12px;color:#333;border-right:1px solid #d3d3d3;border-bottom:1px solid #d3d3d3;padding:0 4px;height:30px;text-align:center;position:sticky;top:0;z-index:1;white-space:nowrap}
+.fn-table td{padding:0 4px;height:30px;text-align:center;border-right:1px solid #ccc;border-bottom:1px solid #eee;white-space:nowrap}
+.fn-table tr:hover td{background:#fffde3}
+.fn-table a{color:#0097cf;cursor:pointer;text-decoration:none}
+.fn-table a:hover{text-decoration:underline}
+
+/* 状态标签 */
+.c-state{display:inline-flex;align-items:center;gap:4px}
+.c-state::before{content:'';width:10px;height:10px;border-radius:5px;border:2px solid}
+.c-state-green{color:#14aa65}
+.c-state-green::before{background:#35cd04;border-color:#c2efb2}
+.c-state-yellow{color:#e35d00}
+.c-state-yellow::before{background:#ff9904;border-color:#fee1b3}
+.c-state-blue{color:#0097cf}
+.c-state-blue::before{background:#0097cf;border-color:#b3e0f5}
+
+/* 分页 */
+.fn-page{display:flex;gap:4px;padding:8px 10px;background:#fff;border-top:1px solid #eee;justify-content:space-between;align-items:center}
+.fn-page-btn{height:24px;min-width:24px;padding:0 6px;border:1px solid #b9ccd7;background:linear-gradient(-180deg,#fff,#f7f7f7 96%);color:#0097cf;border-radius:2px;cursor:pointer;font-size:12px}
+.fn-page-btn:hover{border-color:#378cbe;background:#378cbe;color:#fff}
+.fn-page-btn.active{background:#0097cf;color:#fff;border-color:#0097cf}
+.fn-page-info{color:#999;font-size:12px}
+
+/* Checkbox */
+.fn-checkbox{width:14px;height:14px;cursor:pointer;accent-color:#0097cf}
+
+/* 弹窗 */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.fn-dialog{background:#fff;min-width:720px;max-width:860px;box-shadow:0 4px 20px rgba(0,0,0,.2);max-height:85vh;display:flex;flex-direction:column}
+.fn-dialog-header{background:#eaeaea;height:36px;display:flex;align-items:center;padding:0 14px;font-size:14px;font-weight:700;border-bottom:1px solid #d3d3d3;flex-shrink:0}
+.fn-dialog-close{margin-left:auto;cursor:pointer;color:#666;font-size:18px;line-height:36px}
+.fn-dialog-close:hover{color:#333}
+.fn-dialog-body{padding:16px 20px;overflow-y:auto;flex:1}
+.fn-dialog-footer{padding:10px 20px;border-top:1px solid #d3d3d3;display:flex;justify-content:flex-end;gap:8px;flex-shrink:0;background:#fafafa}
+
+/* 表单分组 - 可折叠 */
+.form-group{margin-bottom:12px;border:1px solid #e4eef6;border-radius:2px;overflow:hidden}
+.form-group-header{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f7fafd;cursor:pointer;user-select:none;font-size:13px;font-weight:700;color:#0a3d6b;transition:background .15s}
+.form-group-header:hover{background:#e4eef6}
+.form-group-header::before{content:'';width:3px;height:14px;background:#0097cf;border-radius:1px;flex-shrink:0}
+.form-group-arrow{margin-left:auto;font-size:10px;color:#999;transition:transform .2s}
+.form-group.collapsed .form-group-arrow{transform:rotate(-90deg)}
+.form-group-body{padding:12px 12px 8px;transition:all .2s}
+.form-group.collapsed .form-group-body{display:none}
+.form-row{display:flex;gap:12px;margin-bottom:8px;align-items:flex-start}
+.form-item{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
+.form-label{color:#666;white-space:nowrap;min-width:76px;text-align:right;font-size:12px}
+.form-field{flex:1;min-width:0}
+.form-field .fn-input,.form-field .fn-select,.form-field .fn-textarea{width:100%}
+
+/* 进度弹窗 */
+.progress-dialog{min-width:780px;max-width:900px}
+.progress-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.progress-stats{display:flex;gap:16px;font-size:12px}
+.progress-stats span{display:inline-flex;align-items:center;gap:4px}
+.progress-stats .s-success{color:#14aa65}
+.progress-stats .s-fail{color:#e64340}
+.progress-stats .s-pending{color:#999}
+.progress-stats .s-approval{color:#0097cf}
+.progress-table{width:100%;border-collapse:collapse;font-size:12px;border:1px solid #d3d3d3}
+.progress-table th{background:linear-gradient(180deg,#fdfdfd,#ebebeb);font-weight:400;padding:6px 8px;border-right:1px solid #d3d3d3;border-bottom:1px solid #d3d3d3;text-align:center;white-space:nowrap}
+.progress-table td{padding:6px 8px;border-right:1px solid #eee;border-bottom:1px solid #eee;text-align:center}
+.progress-table tr:hover td{background:#fffde3}
+.progress-table .route-text{max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag-success{display:inline-flex;align-items:center;gap:4px;color:#14aa65;font-size:12px}
+.tag-success::before{content:'✓';display:inline-flex;width:16px;height:16px;border-radius:50%;background:#35cd04;color:#fff;font-size:10px;align-items:center;justify-content:center;font-weight:700}
+.tag-fail{display:inline-flex;align-items:center;gap:4px;color:#e64340;font-size:12px}
+.tag-fail::before{content:'✕';display:inline-flex;width:16px;height:16px;border-radius:50%;background:#e64340;color:#fff;font-size:10px;align-items:center;justify-content:center;font-weight:700}
+.tag-approval{display:inline-flex;align-items:center;gap:4px;color:#0097cf;font-size:12px}
+.tag-approval::before{content:'i';display:inline-flex;width:16px;height:16px;border-radius:50%;background:#0097cf;color:#fff;font-size:10px;align-items:center;justify-content:center;font-weight:700;font-style:italic}
+.tag-pending{display:inline-flex;align-items:center;gap:4px;color:#999;font-size:12px}
+.tag-pending::before{content:'';display:inline-flex;width:16px;height:16px;border-radius:50%;background:#eee;border:1px solid #ccc}
+/* 进度条 */
+.progress-bar-wrap{height:6px;background:#eee;border-radius:3px;overflow:hidden;margin-bottom:12px}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,#0cace7,#35cd04);border-radius:3px;transition:width .5s ease}
+
+/* Toast */
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#35cd04;color:#fff;padding:10px 24px;border-radius:4px;font-size:14px;font-weight:700;z-index:300;box-shadow:0 4px 12px rgba(53,205,4,.3);display:none;align-items:center;gap:8px}
+.toast.show{display:flex;animation:toastIn .3s ease}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:#c1c1c1;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#999}
+</style>
+</head>
+<body>
+
+<!-- 顶栏 -->
+<div class="topbar">
+  <div class="topbar-logo">财运通 - 运单批量修改 Demo</div>
+  <div class="topbar-right">演示账号 | 2026-05-22</div>
+</div>
+
+<!-- 侧栏 -->
+<div class="sidebar">
+  <div class="sidebar-item">首页</div>
+  <div class="sidebar-item active">运单管理</div>
+  <div class="sidebar-item">客户管理</div>
+  <div class="sidebar-item">车线管理</div>
+  <div class="sidebar-item">在途费用</div>
+  <div class="sidebar-item">财务对账</div>
+  <div class="sidebar-item">费用管理</div>
+  <div class="sidebar-item">报表分析</div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- 主区域 -->
+<div class="main">
+  <!-- 筛选栏 -->
+  <div class="filter-bar">
+    <span>运单状态:</span>
+    <select class="fn-select" id="filterStatus">
+      <option value="">全部</option>
+      <option>已完成</option>
+      <option>已签收</option>
+      <option>已发车</option>
+      <option>已装车</option>
+    </select>
+    <span>车线:</span>
+    <select class="fn-select">
+      <option value="">全部</option>
+      <option>北京-天津</option>
+      <option>北京-辽宁</option>
+      <option>北京-河南</option>
+      <option>北京-山东</option>
+    </select>
+    <span>开单日期:</span>
+    <input type="date" class="fn-input" value="2026-05-01">
+    <span>至</span>
+    <input type="date" class="fn-input" value="2026-05-22">
+    <button class="fn-btn fn-btn--primary" onclick="showToast('筛选功能演示')">查询</button>
+    <button class="fn-btn fn-btn--default" onclick="showToast('已重置')">重置</button>
+  </div>
+
+  <!-- 操作按钮栏 - 常显 -->
+  <div class="action-bar">
+    <button class="fn-btn fn-btn--primary" id="btnBatchModify" onclick="openBatchModify()">批量修改</button>
+    <div class="sep"></div>
+    <button class="fn-btn fn-btn--warn">发车</button>
+    <button class="fn-btn fn-btn--success">到达</button>
+    <button class="fn-btn fn-btn--default">卸车</button>
+    <button class="fn-btn fn-btn--default">装车</button>
+    <button class="fn-btn fn-btn--default">修改里程</button>
+    <button class="fn-btn fn-btn--default">批量打印</button>
+    <button class="fn-btn fn-btn--default">导出</button>
+    <div class="sep"></div>
+    <button class="fn-btn fn-btn--danger">批量作废</button>
+  </div>
+
+  <!-- 选中提示 -->
+  <div class="batch-tip" id="batchTip">
+    已选择 <span class="count" id="selectedCount">0</span> 条运单
+    <a style="color:#0097cf;cursor:pointer;margin-left:8px" onclick="clearSelection()">取消选择</a>
+  </div>
+
+  <!-- 运单列表 -->
+  <div class="fn-table-wrap">
+    <table class="fn-table" id="waybillTable">
+      <thead>
+        <tr>
+          <th style="width:36px"><input type="checkbox" class="fn-checkbox" id="checkAll" onchange="toggleAll(this)"></th>
+          <th>运单号</th>
+          <th>开单时间</th>
+          <th>发车批次</th>
+          <th>车线</th>
+          <th>客户名称</th>
+          <th>车牌号</th>
+          <th>司机</th>
+          <th>货物吨数</th>
+          <th>应收运费</th>
+          <th>应收点位费</th>
+          <th>应付运费</th>
+          <th>运单备注</th>
+          <th>运单状态</th>
+        </tr>
+      </thead>
+      <tbody id="waybillBody"></tbody>
+    </table>
+  </div>
+
+  <!-- 分页 -->
+  <div class="fn-page">
+    <div class="fn-page-info">共 <span id="totalCount">0</span> 条记录</div>
+    <div style="display:flex;gap:4px;align-items:center">
+      <button class="fn-page-btn">上一页</button>
+      <button class="fn-page-btn active">1</button>
+      <button class="fn-page-btn">2</button>
+      <button class="fn-page-btn">3</button>
+      <button class="fn-page-btn">下一页</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 批量修改弹窗 ========== -->
+<div class="modal-overlay" id="batchModal">
+  <div class="fn-dialog" style="min-width:760px;max-width:860px">
+    <div class="fn-dialog-header">
+      批量修改运单
+      <span class="fn-dialog-close" onclick="closeBatchModal()">&times;</span>
+    </div>
+    <div class="fn-dialog-body">
+
+      <!-- 提示 -->
+      <div style="background:#e2f7ff;padding:8px 12px;border:1px solid #b3e0f5;border-radius:2px;margin-bottom:16px;font-size:12px;color:#0a3d6b">
+        已选择 <strong id="modalSelectedCount">0</strong> 条运单，以下填写的内容将覆盖选中运单的对应字段（留空的字段不修改）
+      </div>
+
+      <!-- 应收费用（含自定义应收费用） -->
+      <div class="form-group" id="grpReceivable">
+        <div class="form-group-header" onclick="toggleGroup('grpReceivable')">
+          应收费用
+          <span class="form-group-arrow">▼</span>
+        </div>
+        <div class="form-group-body">
+          <div class="form-row">
+            <div class="form-item">
+              <div class="form-label">应收运费</div>
+              <div class="form-field"><input type="number" class="fn-input" id="f_recvFreight" placeholder="请输入" step="0.01"></div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">应收点位费</div>
+              <div class="form-field"><input type="number" class="fn-input" id="f_recvPointFee" placeholder="请输入" step="0.01"></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-item">
+              <div class="form-label">应收上楼费</div>
+              <div class="form-field"><input type="number" class="fn-input" id="f_recvUpstairsFee" placeholder="请输入" step="0.01"></div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">应收装卸费</div>
+              <div class="form-field"><input type="number" class="fn-input" id="f_recvLoadingFee" placeholder="请输入" step="0.01"></div>
+            </div>
+          </div>
+          <!-- 自定义应收费用 -->
+          <div style="border-top:1px dashed #d3d3d3;margin:6px 0;padding-top:8px">
+            <div style="font-size:11px;color:#999;margin-bottom:6px">以下为费用管理中维护的自定义费用</div>
+          </div>
+          <div class="form-row">
+            <div class="form-item">
+              <div class="form-label">应收过路费</div>
+              <div class="form-field"><input type="number" class="fn-input" id="f_recvTollFee" placeholder="请输入" step="0.01"></div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">应收保险费</div>
+              <div class="form-field"><input type="number" class="fn-input" id="f_recvInsuranceFee" placeholder="请输入" step="0.01"></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-item">
+              <div class="form-label">应收仓储费</div>
+              <div class="form-field"><input type="number" class="fn-input" id="f_recvStorageFee" placeholder="请输入" step="0.01"></div>
+            </div>
+            <div class="form-item"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 应付费用（含自定义应付费用） -->
+      <div class="form-group" id="grpPayable">
+        <div class="form-group-header" onclick="toggleGroup('grpPayable')">
+          应付费用
+          <span class="form-group-arrow">▼</span>
+        </div>
+        <div class="form-group-body">
+          <div class="form-row">
+            <div class="form-item">
+              <div class="form-label">应付运费</div>
+              <div class="form-field"><input type="number" class="fn-input" id="f_payFreight" placeholder="请输入" step="0.01"></div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">应付点位费</div>
+              <div class="form-field"><input type="number" class="fn-input" id="f_payPointFee" placeholder="请输入" step="0.01"></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-item">
+              <div class="form-label">应付上楼费</div>
+              <div class="form-field"><input type="number" class="fn-input" id="f_payUpstairsFee" placeholder="请输入" step="0.01"></div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">应付装卸费</div>
+              <div class="form-field"><input type="number" class="fn-input" id="f_payLoadingFee" placeholder="请输入" step="0.01"></div>
+            </div>
+          </div>
+          <!-- 自定义应付费用 -->
+          <div style="border-top:1px dashed #d3d3d3;margin:6px 0;padding-top:8px">
+            <div style="font-size:11px;color:#999;margin-bottom:6px">以下为费用管理中维护的自定义费用</div>
+          </div>
+          <div class="form-row">
+            <div class="form-item">
+              <div class="form-label">应付过路费</div>
+              <div class="form-field"><input type="number" class="fn-input" id="f_payTollFee" placeholder="请输入" step="0.01"></div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">应付保险费</div>
+              <div class="form-field"><input type="number" class="fn-input" id="f_payInsuranceFee" placeholder="请输入" step="0.01"></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-item">
+              <div class="form-label">应付仓储费</div>
+              <div class="form-field"><input type="number" class="fn-input" id="f_payStorageFee" placeholder="请输入" step="0.01"></div>
+            </div>
+            <div class="form-item"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 备注信息 -->
+      <div class="form-group" id="grpRemark">
+        <div class="form-group-header" onclick="toggleGroup('grpRemark')">
+          备注信息
+          <span class="form-group-arrow">▼</span>
+        </div>
+        <div class="form-group-body">
+          <div class="form-row">
+            <div class="form-item" style="flex:1">
+              <div class="form-label">运单备注</div>
+              <div class="form-field"><textarea class="fn-textarea" id="f_waybillRemark" placeholder="请输入运单备注"></textarea></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-item" style="flex:1">
+              <div class="form-label">备注</div>
+              <div class="form-field"><textarea class="fn-textarea" id="f_remark" placeholder="请输入备注"></textarea></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 自定义字段 -->
+      <div class="form-group collapsed" id="grpCustom">
+        <div class="form-group-header" onclick="toggleGroup('grpCustom')">
+          自定义字段
+          <span class="form-group-arrow">▼</span>
+        </div>
+        <div class="form-group-body">
+          <div class="form-row">
+            <div class="form-item">
+              <div class="form-label">自定义字段1</div>
+              <div class="form-field"><input type="text" class="fn-input" id="f_custom1" placeholder="请输入"></div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">自定义字段2</div>
+              <div class="form-field"><input type="text" class="fn-input" id="f_custom2" placeholder="请输入"></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-item">
+              <div class="form-label">自定义字段3</div>
+              <div class="form-field"><input type="text" class="fn-input" id="f_custom3" placeholder="请输入"></div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">自定义字段4</div>
+              <div class="form-field"><input type="text" class="fn-input" id="f_custom4" placeholder="请输入"></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-item">
+              <div class="form-label">自定义字段5</div>
+              <div class="form-field"><input type="text" class="fn-input" id="f_custom5" placeholder="请输入"></div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">自定义字段6</div>
+              <div class="form-field"><input type="text" class="fn-input" id="f_custom6" placeholder="请输入"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="fn-dialog-footer">
+      <button class="fn-btn fn-btn--default" onclick="closeBatchModal()">取消</button>
+      <button class="fn-btn fn-btn--primary" onclick="submitBatchModify()">确认修改</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 处理进度弹窗 ========== -->
+<div class="modal-overlay" id="progressModal">
+  <div class="fn-dialog progress-dialog">
+    <div class="fn-dialog-header">
+      批量修改进度
+      <span class="fn-dialog-close" onclick="closeProgressModal()">&times;</span>
+    </div>
+    <div class="fn-dialog-body">
+      <div class="progress-header">
+        <div class="progress-stats">
+          <span class="s-success"><i></i> 成功: <strong id="pSuccess">0</strong></span>
+          <span class="s-approval"><i></i> 待审批: <strong id="pApproval">0</strong></span>
+          <span class="s-fail"><i></i> 失败: <strong id="pFail">0</strong></span>
+          <span class="s-pending"><i></i> 待处理: <strong id="pPending">0</strong></span>
+        </div>
+        <div style="font-size:12px;color:#999">共 <strong id="pTotal">0</strong> 条</div>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="pBar" style="width:0%"></div></div>
+      <table class="progress-table">
+        <thead>
+          <tr>
+            <th style="width:50px">序号</th>
+            <th>发车批次</th>
+            <th>车辆线路</th>
+            <th>车牌号</th>
+            <th style="width:160px">处理状态</th>
+          </tr>
+        </thead>
+        <tbody id="progressBody"></tbody>
+      </table>
+    </div>
+    <div class="fn-dialog-footer">
+      <button class="fn-btn fn-btn--default" onclick="closeProgressModal()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============ 模拟数据 ============
+const waybills = [
+  {id:'YD202605220001',time:'2026-05-22 08:15',batch:'RW260511006',routeFull:'北京市海淀区金隅智造工场→南京市浦口区南京洛普股份有限公司(新科三路)',route:'北京-南京',customer:'顺达物流有限公司',plate:'京A88KCR',driver:'杨磊敏',tons:26.84,recvFreight:4042.57,recvPoint:200,recvUpstairs:0,recvLoading:150,payFreight:3500,payPoint:180,payUpstairs:0,payLoading:120,remark:'加急配送',status:'已完成'},
+  {id:'YD202605220002',time:'2026-05-22 09:30',batch:'RW260515002',routeFull:'北京市海淀区金隅智造工场→南京市浦口区南京洛普股份有限公司(新科三路)',route:'北京-南京',customer:'平煤神马有限公司',plate:'晋KJ4753',driver:'郭霞敏',tons:23.95,recvFreight:1824.32,recvPoint:0,recvUpstairs:80,recvLoading:100,payFreight:1600,payPoint:0,payUpstairs:60,payLoading:80,remark:'',status:'已签收'},
+  {id:'YD202605220003',time:'2026-05-22 10:05',batch:'RW260518003',routeFull:'北京市朝阳区望京SOHO→济南市历下区齐鲁软件园',route:'北京-济南',customer:'中远海运有限公司',plate:'鲁B56HJK',driver:'张建国',tons:31.20,recvFreight:5600.00,recvPoint:300,recvUpstairs:0,recvLoading:200,payFreight:4800,payPoint:250,payUpstairs:0,payLoading:160,remark:'大件货物',status:'已发车'},
+  {id:'YD202605220004',time:'2026-05-22 11:20',batch:'RW260519001',routeFull:'北京市大兴区亦庄开发区→郑州市金水区千玺广场',route:'北京-郑州',customer:'顺达物流有限公司',plate:'豫C78LMN',driver:'李卫东',tons:18.50,recvFreight:2800.00,recvPoint:150,recvUpstairs:100,recvLoading:0,payFreight:2400,payPoint:120,payUpstairs:80,payLoading:0,remark:'',status:'已装车'},
+  {id:'YD202605220005',time:'2026-05-22 13:45',batch:'RW260520004',routeFull:'北京市海淀区金隅智造工场→天津市滨海新区开发区',route:'北京-天津',customer:'华北配送中心',plate:'津D22PQR',driver:'王志强',tons:15.80,recvFreight:1200.00,recvPoint:0,recvUpstairs:0,recvLoading:80,payFreight:1000,payPoint:0,payUpstairs:0,payLoading:60,remark:'常规',status:'已完成'},
+  {id:'YD202605220006',time:'2026-05-22 14:10',batch:'RW260515002',routeFull:'北京市海淀区金隅智造工场→南京市浦口区南京洛普股份有限公司(新科三路)',route:'北京-南京',customer:'平煤神马有限公司',plate:'晋KJ4753',driver:'赵明远',tons:28.60,recvFreight:4500.00,recvPoint:250,recvUpstairs:0,recvLoading:180,payFreight:3900,payPoint:200,payUpstairs:0,payLoading:140,remark:'',status:'已签收'},
+  {id:'YD202605220007',time:'2026-05-22 15:30',batch:'RW260521001',routeFull:'北京市通州区物流基地→青岛市崂山区海尔工业园',route:'北京-青岛',customer:'中远海运有限公司',plate:'鲁F67VWX',driver:'刘海涛',tons:22.10,recvFreight:3200.00,recvPoint:0,recvUpstairs:120,recvLoading:100,payFreight:2700,payPoint:0,payUpstairs:90,payLoading:80,remark:'易碎品',status:'已发车'},
+  {id:'YD202605220008',time:'2026-05-22 16:00',batch:'RW260519001',routeFull:'北京市大兴区亦庄开发区→郑州市金水区千玺广场',route:'北京-郑州',customer:'华北配送中心',plate:'豫G89YZ1',driver:'陈国华',tons:35.40,recvFreight:6800.00,recvPoint:400,recvUpstairs:0,recvLoading:250,payFreight:5900,payPoint:350,payUpstairs:0,payLoading:200,remark:'',status:'已完成'},
+  {id:'YD202605220009',time:'2026-05-22 17:20',batch:'RW260520004',routeFull:'北京市海淀区金隅智造工场→天津市滨海新区开发区',route:'北京-天津',customer:'顺达物流有限公司',plate:'津H12AB2',driver:'周大伟',tons:12.30,recvFreight:980.00,recvPoint:0,recvUpstairs:60,recvLoading:0,payFreight:800,payPoint:0,payUpstairs:40,payLoading:0,remark:'',status:'已装车'},
+  {id:'YD202605220010',time:'2026-05-22 18:45',batch:'RW260511006',routeFull:'北京市海淀区金隅智造工场→南京市浦口区南京洛普股份有限公司(新科三路)',route:'北京-南京',customer:'平煤神马有限公司',plate:'晋KJ4753',driver:'吴建平',tons:20.70,recvFreight:3100.00,recvPoint:180,recvUpstairs:0,recvLoading:130,payFreight:2600,payPoint:150,payUpstairs:0,payLoading:100,remark:'注意防潮',status:'已签收'},
+];
+
+const statusClass = {'已完成':'c-state-green','已签收':'c-state-blue','已发车':'c-state-yellow','已装车':'c-state-yellow'};
+let selectedIds = new Set();
+
+// ============ 渲染表格 ============
+function renderTable() {
+  const tbody = document.getElementById('waybillBody');
+  tbody.innerHTML = waybills.map(w => `
+    <tr data-id="${w.id}">
+      <td><input type="checkbox" class="fn-checkbox row-check" data-id="${w.id}" onchange="toggleRow(this)" ${selectedIds.has(w.id)?'checked':''}></td>
+      <td><a onclick="alert('查看运单详情: ${w.id}')">${w.id}</a></td>
+      <td>${w.time}</td>
+      <td>${w.batch}</td>
+      <td>${w.route}</td>
+      <td>${w.customer}</td>
+      <td>${w.plate}</td>
+      <td>${w.driver}</td>
+      <td>${w.tons}</td>
+      <td>${w.recvFreight.toFixed(2)}</td>
+      <td>${w.recvPoint.toFixed(2)}</td>
+      <td>${w.payFreight.toFixed(2)}</td>
+      <td style="max-width:80px;overflow:hidden;text-overflow:ellipsis" title="${w.remark}">${w.remark||'-'}</td>
+      <td><span class="c-state ${statusClass[w.status]||'c-state-yellow'}">${w.status}</span></td>
+    </tr>
+  `).join('');
+  document.getElementById('totalCount').textContent = waybills.length;
+  updateBatchTip();
+}
+
+// ============ 选择逻辑 ============
+function toggleAll(el) {
+  selectedIds.clear();
+  if (el.checked) waybills.forEach(w => selectedIds.add(w.id));
+  document.querySelectorAll('.row-check').forEach(cb => cb.checked = el.checked);
+  updateBatchTip();
+}
+function toggleRow(el) {
+  const id = el.dataset.id;
+  if (el.checked) selectedIds.add(id); else selectedIds.delete(id);
+  document.getElementById('checkAll').checked = selectedIds.size === waybills.length;
+  updateBatchTip();
+}
+function updateBatchTip() {
+  const tip = document.getElementById('batchTip');
+  document.getElementById('selectedCount').textContent = selectedIds.size;
+  if (selectedIds.size > 0) tip.classList.add('show'); else tip.classList.remove('show');
+}
+function clearSelection() {
+  selectedIds.clear();
+  document.getElementById('checkAll').checked = false;
+  document.querySelectorAll('.row-check').forEach(cb => cb.checked = false);
+  updateBatchTip();
+}
+
+// ============ 折叠分组 ============
+function toggleGroup(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+}
+
+// ============ 批量修改弹窗 ============
+function openBatchModify() {
+  if (selectedIds.size === 0) {
+    showToast('请先勾选需要修改的运单', 'warn');
+    return;
+  }
+  document.getElementById('modalSelectedCount').textContent = selectedIds.size;
+  // 清空表单
+  document.querySelectorAll('#batchModal .fn-input, #batchModal .fn-textarea').forEach(el => el.value = '');
+  // 展开所有分组
+  document.querySelectorAll('#batchModal .form-group').forEach(g => g.classList.remove('collapsed'));
+  document.getElementById('batchModal').classList.add('show');
+}
+function closeBatchModal() {
+  document.getElementById('batchModal').classList.remove('show');
+}
+
+// ============ 收集填写字段 ============
+function collectFields() {
+  const fields = {};
+  const map = {
+    f_recvFreight:{label:'应收运费'},f_recvPointFee:{label:'应收点位费'},f_recvUpstairsFee:{label:'应收上楼费'},f_recvLoadingFee:{label:'应收装卸费'},
+    f_recvTollFee:{label:'应收过路费'},f_recvInsuranceFee:{label:'应收保险费'},f_recvStorageFee:{label:'应收仓储费'},
+    f_payFreight:{label:'应付运费'},f_payPointFee:{label:'应付点位费'},f_payUpstairsFee:{label:'应付上楼费'},f_payLoadingFee:{label:'应付装卸费'},
+    f_payTollFee:{label:'应付过路费'},f_payInsuranceFee:{label:'应付保险费'},f_payStorageFee:{label:'应付仓储费'},
+    f_waybillRemark:{label:'运单备注'},f_remark:{label:'备注'},
+    f_custom1:{label:'自定义字段1'},f_custom2:{label:'自定义字段2'},f_custom3:{label:'自定义字段3'},
+    f_custom4:{label:'自定义字段4'},f_custom5:{label:'自定义字段5'},f_custom6:{label:'自定义字段6'},
+  };
+  for (const [id, meta] of Object.entries(map)) {
+    const el = document.getElementById(id);
+    if (el && el.value.trim() !== '') fields[id] = {...meta, value: el.value.trim()};
+  }
+  return fields;
+}
+
+// ============ 提交修改 ============
+function submitBatchModify() {
+  const fields = collectFields();
+  if (Object.keys(fields).length === 0) {
+    showToast('请至少填写一个字段', 'warn');
+    return;
+  }
+  // 关闭修改弹窗，打开进度弹窗
+  closeBatchModal();
+  showProgressDialog();
+}
+
+function showProgressDialog() {
+  const selected = waybills.filter(w => selectedIds.has(w.id));
+  const total = selected.length;
+  document.getElementById('pTotal').textContent = total;
+  document.getElementById('pSuccess').textContent = 0;
+  document.getElementById('pApproval').textContent = 0;
+  document.getElementById('pFail').textContent = 0;
+  document.getElementById('pPending').textContent = total;
+  document.getElementById('pBar').style.width = '0%';
+
+  // 初始渲染 - 全部待处理
+  const tbody = document.getElementById('progressBody');
+  tbody.innerHTML = selected.map((w, i) => `
+    <tr id="prow_${i}">
+      <td>${i + 1}</td>
+      <td>${w.batch}</td>
+      <td class="route-text" title="${w.routeFull}">${w.routeFull}</td>
+      <td>${w.plate}</td>
+      <td id="pstatus_${i}"><span class="tag-pending">等待处理</span></td>
+    </tr>
+  `).join('');
+
+  document.getElementById('progressModal').classList.add('show');
+
+  // 模拟逐条处理
+  let processed = 0;
+  // 模拟结果：大部分成功，个别提交审批，个别失败
+  const results = selected.map((w, i) => {
+    const r = Math.random();
+    if (r < 0.65) return 'success';
+    if (r < 0.85) return 'approval';
+    return 'fail';
+  });
+
+  function processNext() {
+    if (processed >= total) return;
+    const idx = processed;
+    const result = results[idx];
+    const statusTd = document.getElementById('pstatus_' + idx);
+
+    if (result === 'success') {
+      statusTd.innerHTML = '<span class="tag-success">操作成功</span>';
+    } else if (result === 'approval') {
+      statusTd.innerHTML = '<span class="tag-approval">操作成功，已提交审批</span>';
+    } else {
+      statusTd.innerHTML = '<span class="tag-fail">操作失败：该运单已被其他操作锁定</span>';
+    }
+
+    processed++;
+    // 更新统计
+    const sc = results.slice(0, processed).filter(r => r === 'success').length;
+    const ac = results.slice(0, processed).filter(r => r === 'approval').length;
+    const fc = results.slice(0, processed).filter(r => r === 'fail').length;
+    document.getElementById('pSuccess').textContent = sc;
+    document.getElementById('pApproval').textContent = ac;
+    document.getElementById('pFail').textContent = fc;
+    document.getElementById('pPending').textContent = total - processed;
+    document.getElementById('pBar').style.width = Math.round(processed / total * 100) + '%';
+
+    if (processed < total) {
+      setTimeout(processNext, 300 + Math.random() * 400);
+    } else {
+      showToast(`批量修改完成：成功${sc}条，审批${ac}条，失败${fc}条`);
+    }
+  }
+
+  setTimeout(processNext, 500);
+}
+
+function closeProgressModal() {
+  document.getElementById('progressModal').classList.remove('show');
+  clearSelection();
+  renderTable();
+}
+
+// ============ Toast ============
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  if (type === 'warn') {
+    t.style.background = '#ff9800';
+    t.style.boxShadow = '0 4px 12px rgba(255,152,0,.3)';
+  } else {
+    t.style.background = '#35cd04';
+    t.style.boxShadow = '0 4px 12px rgba(53,205,4,.3)';
+  }
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ============ 初始化 ============
+renderTable();
+</script>
+</body>
+</html>

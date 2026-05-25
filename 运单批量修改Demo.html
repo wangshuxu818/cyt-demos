@@ -268,6 +268,86 @@ body{font-family:"Microsoft YaHei",tahoma,arial,"Hiragino Sans GB",sans-serif;fo
         已选择 <strong id="modalSelectedCount">0</strong> 条运单，以下填写的内容将覆盖选中运单的对应字段（留空的字段不修改）
       </div>
 
+      <!-- 基础信息 -->
+      <div class="form-group" id="grpBasic">
+        <div class="form-group-header" onclick="toggleGroup('grpBasic')">
+          基础信息
+          <span class="form-group-arrow">▼</span>
+        </div>
+        <div class="form-group-body">
+          <div class="form-row">
+            <div class="form-item">
+              <div class="form-label">发站</div>
+              <div class="form-field"><select class="fn-select" id="f_fromStation"><option value="">请选择</option><option>北京</option><option>天津</option><option>南京</option><option>济南</option><option>郑州</option><option>青岛</option></select></div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">到站</div>
+              <div class="form-field"><select class="fn-select" id="f_toStation"><option value="">请选择</option><option>北京</option><option>天津</option><option>南京</option><option>济南</option><option>郑州</option><option>青岛</option></select></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-item" style="flex:1">
+              <div class="form-label">客户回单地址</div>
+              <div class="form-field"><input type="text" class="fn-input" id="f_receiptAddr" placeholder="请输入客户回单地址"></div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">经办人</div>
+              <div class="form-field"><select class="fn-select" id="f_handler"><option value="">请选择</option><option>张建国</option><option>王志强</option><option>李卫东</option></select></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-item" style="flex:1">
+              <div class="form-label">运单备注</div>
+              <div class="form-field"><textarea class="fn-textarea" id="f_waybillRemark" placeholder="请输入运单备注" style="height:48px"></textarea></div>
+            </div>
+            <div class="form-item" style="flex:1">
+              <div class="form-label">备注</div>
+              <div class="form-field"><textarea class="fn-textarea" id="f_remark" placeholder="请输入备注" style="height:48px"></textarea></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-item" style="flex:1">
+              <div class="form-label">承运备注</div>
+              <div class="form-field"><textarea class="fn-textarea" id="f_carrierRemark" placeholder="请输入承运备注" style="height:48px"></textarea></div>
+            </div>
+          </div>
+          <!-- 自定义字段 -->
+          <div style="border-top:1px dashed #d3d3d3;margin:6px 0;padding-top:8px">
+            <div style="font-size:11px;color:#999;margin-bottom:6px">以下为运单自定义字段</div>
+          </div>
+          <div class="form-row">
+            <div class="form-item">
+              <div class="form-label">自定义字段1</div>
+              <div class="form-field"><input type="text" class="fn-input" id="f_custom1" placeholder="请输入"></div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">自定义字段2</div>
+              <div class="form-field"><input type="text" class="fn-input" id="f_custom2" placeholder="请输入"></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-item">
+              <div class="form-label">自定义字段3</div>
+              <div class="form-field"><input type="text" class="fn-input" id="f_custom3" placeholder="请输入"></div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">自定义字段4</div>
+              <div class="form-field"><input type="text" class="fn-input" id="f_custom4" placeholder="请输入"></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-item">
+              <div class="form-label">自定义字段5</div>
+              <div class="form-field"><input type="text" class="fn-input" id="f_custom5" placeholder="请输入"></div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">自定义字段6</div>
+              <div class="form-field"><input type="text" class="fn-input" id="f_custom6" placeholder="请输入"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- 应收费用（含自定义应收费用） -->
       <div class="form-group" id="grpReceivable">
         <div class="form-group-header" onclick="toggleGroup('grpReceivable')">
@@ -366,68 +446,6 @@ body{font-family:"Microsoft YaHei",tahoma,arial,"Hiragino Sans GB",sans-serif;fo
               <div class="form-field"><input type="number" class="fn-input" id="f_payStorageFee" placeholder="请输入" step="0.01"></div>
             </div>
             <div class="form-item"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 备注信息 -->
-      <div class="form-group" id="grpRemark">
-        <div class="form-group-header" onclick="toggleGroup('grpRemark')">
-          备注信息
-          <span class="form-group-arrow">▼</span>
-        </div>
-        <div class="form-group-body">
-          <div class="form-row">
-            <div class="form-item" style="flex:1">
-              <div class="form-label">运单备注</div>
-              <div class="form-field"><textarea class="fn-textarea" id="f_waybillRemark" placeholder="请输入运单备注"></textarea></div>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-item" style="flex:1">
-              <div class="form-label">备注</div>
-              <div class="form-field"><textarea class="fn-textarea" id="f_remark" placeholder="请输入备注"></textarea></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 自定义字段 -->
-      <div class="form-group collapsed" id="grpCustom">
-        <div class="form-group-header" onclick="toggleGroup('grpCustom')">
-          自定义字段
-          <span class="form-group-arrow">▼</span>
-        </div>
-        <div class="form-group-body">
-          <div class="form-row">
-            <div class="form-item">
-              <div class="form-label">自定义字段1</div>
-              <div class="form-field"><input type="text" class="fn-input" id="f_custom1" placeholder="请输入"></div>
-            </div>
-            <div class="form-item">
-              <div class="form-label">自定义字段2</div>
-              <div class="form-field"><input type="text" class="fn-input" id="f_custom2" placeholder="请输入"></div>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-item">
-              <div class="form-label">自定义字段3</div>
-              <div class="form-field"><input type="text" class="fn-input" id="f_custom3" placeholder="请输入"></div>
-            </div>
-            <div class="form-item">
-              <div class="form-label">自定义字段4</div>
-              <div class="form-field"><input type="text" class="fn-input" id="f_custom4" placeholder="请输入"></div>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-item">
-              <div class="form-label">自定义字段5</div>
-              <div class="form-field"><input type="text" class="fn-input" id="f_custom5" placeholder="请输入"></div>
-            </div>
-            <div class="form-item">
-              <div class="form-label">自定义字段6</div>
-              <div class="form-field"><input type="text" class="fn-input" id="f_custom6" placeholder="请输入"></div>
-            </div>
           </div>
         </div>
       </div>
@@ -556,9 +574,14 @@ function openBatchModify() {
     showToast('请先勾选需要修改的运单', 'warn');
     return;
   }
+  if (selectedIds.size > 100) {
+    showToast('单次最多修改100条运单，请减少选择', 'warn');
+    return;
+  }
   document.getElementById('modalSelectedCount').textContent = selectedIds.size;
   // 清空表单
   document.querySelectorAll('#batchModal .fn-input, #batchModal .fn-textarea').forEach(el => el.value = '');
+  document.querySelectorAll('#batchModal .fn-select').forEach(el => el.selectedIndex = 0);
   // 展开所有分组
   document.querySelectorAll('#batchModal .form-group').forEach(g => g.classList.remove('collapsed'));
   document.getElementById('batchModal').classList.add('show');
@@ -571,13 +594,14 @@ function closeBatchModal() {
 function collectFields() {
   const fields = {};
   const map = {
+    f_fromStation:{label:'发站'},f_toStation:{label:'到站'},f_receiptAddr:{label:'客户回单地址'},f_handler:{label:'经办人'},
+    f_waybillRemark:{label:'运单备注'},f_remark:{label:'备注'},f_carrierRemark:{label:'承运备注'},
+    f_custom1:{label:'自定义字段1'},f_custom2:{label:'自定义字段2'},f_custom3:{label:'自定义字段3'},
+    f_custom4:{label:'自定义字段4'},f_custom5:{label:'自定义字段5'},f_custom6:{label:'自定义字段6'},
     f_recvFreight:{label:'应收运费'},f_recvPointFee:{label:'应收点位费'},f_recvUpstairsFee:{label:'应收上楼费'},f_recvLoadingFee:{label:'应收装卸费'},
     f_recvTollFee:{label:'应收过路费'},f_recvInsuranceFee:{label:'应收保险费'},f_recvStorageFee:{label:'应收仓储费'},
     f_payFreight:{label:'应付运费'},f_payPointFee:{label:'应付点位费'},f_payUpstairsFee:{label:'应付上楼费'},f_payLoadingFee:{label:'应付装卸费'},
     f_payTollFee:{label:'应付过路费'},f_payInsuranceFee:{label:'应付保险费'},f_payStorageFee:{label:'应付仓储费'},
-    f_waybillRemark:{label:'运单备注'},f_remark:{label:'备注'},
-    f_custom1:{label:'自定义字段1'},f_custom2:{label:'自定义字段2'},f_custom3:{label:'自定义字段3'},
-    f_custom4:{label:'自定义字段4'},f_custom5:{label:'自定义字段5'},f_custom6:{label:'自定义字段6'},
   };
   for (const [id, meta] of Object.entries(map)) {
     const el = document.getElementById(id);
@@ -624,12 +648,13 @@ function showProgressDialog() {
 
   // 模拟逐条处理
   let processed = 0;
-  // 模拟结果：大部分成功，个别提交审批，个别失败
+  // 模拟结果：大部分成功，个别提交审批，个别失败（含不同原因）
+  const failReasons = ['其他人正在修改该运单', '该运单当前状态禁止修改', '该运单已被其他操作锁定'];
   const results = selected.map((w, i) => {
     const r = Math.random();
-    if (r < 0.65) return 'success';
-    if (r < 0.85) return 'approval';
-    return 'fail';
+    if (r < 0.60) return 'success';
+    if (r < 0.80) return 'approval';
+    return 'fail-' + failReasons[Math.floor(Math.random() * failReasons.length)];
   });
 
   function processNext() {
@@ -643,14 +668,15 @@ function showProgressDialog() {
     } else if (result === 'approval') {
       statusTd.innerHTML = '<span class="tag-approval">操作成功，已提交审批</span>';
     } else {
-      statusTd.innerHTML = '<span class="tag-fail">操作失败：该运单已被其他操作锁定</span>';
+      const reason = result.replace('fail-', '');
+      statusTd.innerHTML = '<span class="tag-fail">操作失败：' + reason + '</span>';
     }
 
     processed++;
     // 更新统计
     const sc = results.slice(0, processed).filter(r => r === 'success').length;
     const ac = results.slice(0, processed).filter(r => r === 'approval').length;
-    const fc = results.slice(0, processed).filter(r => r === 'fail').length;
+    const fc = results.slice(0, processed).filter(r => r.startsWith('fail')).length;
     document.getElementById('pSuccess').textContent = sc;
     document.getElementById('pApproval').textContent = ac;
     document.getElementById('pFail').textContent = fc;

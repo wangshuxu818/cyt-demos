@@ -42,6 +42,17 @@ body{font-family:"Microsoft YaHei",tahoma,arial,"Hiragino Sans GB",sans-serif;fo
 .fn-textarea{height:60px;padding:5px;resize:vertical}
 .fn-input:focus,.fn-select:focus,.fn-textarea:focus{background:#e2f7ff;border-color:#0097cf}
 
+/* 可搜索下拉 */
+.search-select{position:relative;display:inline-block;width:100%}
+.search-select input{width:100%;padding-right:20px}
+.search-select .ss-arrow{position:absolute;right:6px;top:50%;transform:translateY(-50%);color:#999;font-size:10px;pointer-events:none}
+.search-select .ss-dropdown{display:none;position:absolute;top:26px;left:0;right:0;background:#fff;border:1px solid #b9ccd7;border-top:none;max-height:160px;overflow-y:auto;z-index:10}
+.search-select .ss-dropdown.show{display:block}
+.search-select .ss-option{padding:4px 8px;font-size:12px;cursor:pointer;white-space:nowrap}
+.search-select .ss-option:hover{background:#e2f7ff;color:#0097cf}
+.search-select .ss-option.empty{color:#999;cursor:default}
+.search-select .ss-option.empty:hover{background:transparent;color:#999}
+
 /* 筛选栏 */
 .filter-bar{background:#ecf0f4;padding:8px 10px;margin-bottom:4px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 
@@ -278,11 +289,23 @@ body{font-family:"Microsoft YaHei",tahoma,arial,"Hiragino Sans GB",sans-serif;fo
           <div class="form-row">
             <div class="form-item">
               <div class="form-label">发站</div>
-              <div class="form-field"><select class="fn-select" id="f_fromStation"><option value="">请选择</option><option>北京</option><option>天津</option><option>南京</option><option>济南</option><option>郑州</option><option>青岛</option></select></div>
+              <div class="form-field">
+                <div class="search-select" id="ss_fromStation">
+                  <input type="text" class="fn-input" placeholder="输入搜索发站" autocomplete="off">
+                  <span class="ss-arrow">▼</span>
+                  <div class="ss-dropdown"></div>
+                </div>
+              </div>
             </div>
             <div class="form-item">
               <div class="form-label">到站</div>
-              <div class="form-field"><select class="fn-select" id="f_toStation"><option value="">请选择</option><option>北京</option><option>天津</option><option>南京</option><option>济南</option><option>郑州</option><option>青岛</option></select></div>
+              <div class="form-field">
+                <div class="search-select" id="ss_toStation">
+                  <input type="text" class="fn-input" placeholder="输入搜索到站" autocomplete="off">
+                  <span class="ss-arrow">▼</span>
+                  <div class="ss-dropdown"></div>
+                </div>
+              </div>
             </div>
           </div>
           <div class="form-row">
@@ -292,7 +315,13 @@ body{font-family:"Microsoft YaHei",tahoma,arial,"Hiragino Sans GB",sans-serif;fo
             </div>
             <div class="form-item">
               <div class="form-label">经办人</div>
-              <div class="form-field"><select class="fn-select" id="f_handler"><option value="">请选择</option><option>张建国</option><option>王志强</option><option>李卫东</option></select></div>
+              <div class="form-field">
+                <div class="search-select" id="ss_handler">
+                  <input type="text" class="fn-input" placeholder="输入搜索经办人" autocomplete="off">
+                  <span class="ss-arrow">▼</span>
+                  <div class="ss-dropdown"></div>
+                </div>
+              </div>
             </div>
           </div>
           <div class="form-row">
@@ -580,8 +609,9 @@ function openBatchModify() {
   }
   document.getElementById('modalSelectedCount').textContent = selectedIds.size;
   // 清空表单
-  document.querySelectorAll('#batchModal .fn-input, #batchModal .fn-textarea').forEach(el => el.value = '');
+  document.querySelectorAll('#batchModal .fn-input:not(.search-select .fn-input), #batchModal .fn-textarea').forEach(el => el.value = '');
   document.querySelectorAll('#batchModal .fn-select').forEach(el => el.selectedIndex = 0);
+  document.querySelectorAll('#batchModal .search-select input').forEach(el => el.value = '');
   // 展开所有分组
   document.querySelectorAll('#batchModal .form-group').forEach(g => g.classList.remove('collapsed'));
   document.getElementById('batchModal').classList.add('show');
@@ -594,7 +624,7 @@ function closeBatchModal() {
 function collectFields() {
   const fields = {};
   const map = {
-    f_fromStation:{label:'发站'},f_toStation:{label:'到站'},f_receiptAddr:{label:'客户回单地址'},f_handler:{label:'经办人'},
+    f_fromStation:{label:'发站',ssId:'ss_fromStation'},f_toStation:{label:'到站',ssId:'ss_toStation'},f_receiptAddr:{label:'客户回单地址'},f_handler:{label:'经办人',ssId:'ss_handler'},
     f_waybillRemark:{label:'运单备注'},f_remark:{label:'备注'},f_carrierRemark:{label:'承运备注'},
     f_custom1:{label:'自定义字段1'},f_custom2:{label:'自定义字段2'},f_custom3:{label:'自定义字段3'},
     f_custom4:{label:'自定义字段4'},f_custom5:{label:'自定义字段5'},f_custom6:{label:'自定义字段6'},
@@ -604,8 +634,9 @@ function collectFields() {
     f_payTollFee:{label:'应付过路费'},f_payInsuranceFee:{label:'应付保险费'},f_payStorageFee:{label:'应付仓储费'},
   };
   for (const [id, meta] of Object.entries(map)) {
-    const el = document.getElementById(id);
-    if (el && el.value.trim() !== '') fields[id] = {...meta, value: el.value.trim()};
+    // 可搜索下拉取 input 的值
+    const el = meta.ssId ? document.getElementById(meta.ssId).querySelector('input') : document.getElementById(id);
+    if (el && el.value.trim() !== '') fields[id] = {label: meta.label, value: el.value.trim()};
   }
   return fields;
 }
@@ -714,7 +745,46 @@ function showToast(msg, type) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
+// ============ 可搜索下拉 ============
+const ssData = {
+  ss_fromStation: ['北京','天津','南京','济南','郑州','青岛','上海','广州','深圳','成都','武汉','西安'],
+  ss_toStation: ['北京','天津','南京','济南','郑州','青岛','上海','广州','深圳','成都','武汉','西安'],
+  ss_handler: ['张建国','王志强','李卫东','杨磊敏','赵明远','刘海涛','陈国华','周大伟','吴建平','郭霞敏'],
+};
+
+function initSearchSelect(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const input = container.querySelector('input');
+  const dropdown = container.querySelector('.ss-dropdown');
+  const data = ssData[containerId] || [];
+
+  function renderOptions(keyword) {
+    const k = (keyword || '').trim().toLowerCase();
+    const filtered = k ? data.filter(d => d.toLowerCase().includes(k)) : data;
+    if (filtered.length === 0) {
+      dropdown.innerHTML = '<div class="ss-option empty">无匹配结果</div>';
+    } else {
+      dropdown.innerHTML = filtered.map(d => `<div class="ss-option" data-value="${d}">${d}</div>`).join('');
+    }
+    dropdown.classList.add('show');
+  }
+
+  input.addEventListener('focus', () => renderOptions(input.value));
+  input.addEventListener('input', () => renderOptions(input.value));
+  dropdown.addEventListener('click', (e) => {
+    const opt = e.target.closest('.ss-option');
+    if (!opt || opt.classList.contains('empty')) return;
+    input.value = opt.dataset.value;
+    dropdown.classList.remove('show');
+  });
+  document.addEventListener('click', (e) => {
+    if (!container.contains(e.target)) dropdown.classList.remove('show');
+  });
+}
+
 // ============ 初始化 ============
+Object.keys(ssData).forEach(id => initSearchSelect(id));
 renderTable();
 </script>
 </body>

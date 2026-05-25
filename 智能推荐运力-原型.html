@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>智能推荐运力</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+    background: #F5F6FA;
+    min-height: 100vh;
+    color: #1A1A1A;
+  }
+
+  /* 顶部导航栏 */
+  .nav-bar {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+    height: 44px; background: #fff;
+    border-bottom: 0.5px solid #EEEEEE;
+    font-size: 17px; font-weight: 600; color: #1A1A1A;
+  }
+  .nav-bar .back { position: absolute; left: 12px; font-size: 22px; color: #333; cursor: pointer; }
+
+  /* 页面主体 */
+  .page { padding: 16px; }
+
+  /* 输入区卡片 */
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .card-title {
+    font-size: 15px; font-weight: 600; color: #1A1A1A;
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .card-title .icon { font-size: 18px; }
+
+  /* 文本输入框 */
+  .input-area {
+    width: 100%;
+    min-height: 120px;
+    padding: 12px;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1A1A1A;
+    background: #FAFAFA;
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-area::placeholder { color: #BDBDBD; }
+  .input-area:focus { border-color: #2F6BFF; background: #fff; }
+
+  /* 提示标签 */
+  .hints {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-top: 12px;
+  }
+  .hint-tag {
+    font-size: 12px;
+    color: #666;
+    background: #F0F2F5;
+    padding: 4px 10px;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .hint-tag:active { background: #E0E6F7; color: #2F6BFF; }
+
+  /* 推荐按钮 */
+  .btn-recommend {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    width: 100%;
+    height: 48px;
+    margin-top: 20px;
+    background: linear-gradient(135deg, #2F6BFF 0%, #5B8FFF 100%);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 24px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    box-shadow: 0 4px 12px rgba(47,107,255,0.3);
+  }
+  .btn-recommend:active { opacity: 0.85; transform: scale(0.98); }
+  .btn-recommend:disabled {
+    background: #C5C5C5;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+  .btn-recommend .arrow { font-size: 18px; }
+
+  /* 加载动画 */
+  .loading-spinner {
+    display: none;
+    width: 20px; height: 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* 结果区 */
+  .result-section {
+    display: none;
+    margin-top: 16px;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-label {
+    font-size: 13px; color: #999;
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  /* 推荐车辆卡片 */
+  .vehicle-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    border: 1.5px solid #E8ECF5;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .vehicle-card:last-child { margin-bottom: 0; }
+  .vehicle-card.top::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #2F6BFF, #5B8FFF);
+  }
+
+  .vehicle-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .vehicle-left {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .rank-num {
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+    background: #F0F2F5; color: #999;
+  }
+  .vehicle-card:nth-child(1) .rank-num { background: #2F6BFF; color: #fff; }
+  .vehicle-card:nth-child(2) .rank-num { background: #5B8FFF; color: #fff; }
+  .vehicle-card:nth-child(3) .rank-num { background: #8BABFF; color: #fff; }
+
+  .vehicle-type {
+    font-size: 16px; font-weight: 700; color: #1A1A1A;
+  }
+
+  /* 评分 */
+  .score-wrap {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .score-ring {
+    position: relative;
+    width: 44px; height: 44px;
+  }
+  .score-ring svg {
+    transform: rotate(-90deg);
+  }
+  .score-ring .bg { stroke: #F0F2F5; }
+  .score-ring .fg { transition: stroke-dashoffset 1s ease; }
+  .score-ring .score-text {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #1A1A1A;
+  }
+  .score-label {
+    font-size: 11px; color: #999;
+  }
+
+  .vehicle-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 16px;
+  }
+  .info-item {
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .info-label { font-size: 12px; color: #999; }
+  .info-value { font-size: 14px; color: #333; font-weight: 500; }
+
+  /* 推荐理由标签 */
+  .reason-tags {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-top: 12px;
+  }
+  .reason-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    background: #F0F5FF;
+    color: #4A7BFF;
+  }
+  .reason-tag.green { background: #EEFBF3; color: #2BAD5E; }
+  .reason-tag.orange { background: #FFF7EC; color: #E6930A; }
+
+  /* 上一趟任务信息 */
+  .last-trip {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: #F8F9FC;
+    border-radius: 8px;
+  }
+  .last-trip-title {
+    font-size: 11px; color: #999; margin-bottom: 6px;
+  }
+  .last-trip-row {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px;
+  }
+  .last-trip-from {
+    font-weight: 600; color: #1A1A1A;
+  }
+  .last-trip-arrow {
+    flex: 0 0 auto;
+    color: #C5CDE0;
+    font-size: 14px;
+  }
+  .last-trip-to {
+    font-weight: 600; color: #1A1A1A;
+  }
+  .last-trip-meta {
+    display: flex; gap: 12px; margin-top: 6px;
+    font-size: 12px; color: #777;
+  }
+  .last-trip-meta span { display: flex; align-items: center; gap: 3px; }
+
+  /* 生成运单按钮 */
+  .vehicle-actions {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 0.5px solid #F0F0F0;
+  }
+  .btn-create-order {
+    width: 100%;
+    height: 38px;
+    border-radius: 19px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: linear-gradient(135deg, #2F6BFF 0%, #5B8FFF 100%);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(47,107,255,0.25);
+  }
+  .btn-create-order:active { opacity: 0.85; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    background: rgba(0,0,0,0.75);
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    z-index: 999;
+    opacity: 0;
+    transition: all 0.25s ease;
+    pointer-events: none;
+    text-align: center;
+    max-width: 260px;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  .toast .toast-icon {
+    font-size: 28px;
+    margin-bottom: 6px;
+  }
+  .toast .toast-text {
+    line-height: 1.5;
+  }
+
+  /* 解析信息展示 */
+  .parsed-info {
+    display: none;
+    margin-top: 12px;
+    padding: 12px;
+    background: #F8F9FC;
+    border-radius: 8px;
+  }
+  .parsed-info .parsed-title {
+    font-size: 12px; color: #999; margin-bottom: 8px;
+  }
+  .parsed-tags {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .parsed-tag {
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #fff;
+    color: #555;
+    border: 1px solid #E8ECF5;
+  }
+  .parsed-tag span { color: #2F6BFF; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="nav-bar">
+  <span class="back">&larr;</span>
+  智能推荐运力
+</div>
+
+<div class="page">
+
+  <!-- 输入区 -->
+  <div class="card">
+    <div class="card-title">
+      <span class="icon">&#128666;</span> 描述运输需求
+    </div>
+    <textarea class="input-area" id="transportInput"
+      placeholder="请输入运输信息，如：&#10;明天有一批钢材从上海宝山发到南京江宁，大概20吨，需要平板车"></textarea>
+    <div class="hints">
+      <span class="hint-tag" onclick="appendHint('钢材')">钢材</span>
+      <span class="hint-tag" onclick="appendHint('20吨')">20吨</span>
+      <span class="hint-tag" onclick="appendHint('平板车')">平板车</span>
+      <span class="hint-tag" onclick="appendHint('上海→南京')">上海→南京</span>
+    </div>
+
+    <!-- AI解析的信息 -->
+    <div class="parsed-info" id="parsedInfo">
+      <div class="parsed-title">AI 识别到以下信息</div>
+      <div class="parsed-tags" id="parsedTags"></div>
+    </div>
+
+    <button class="btn-recommend" id="btnRecommend" onclick="recommend()">
+      <div class="loading-spinner" id="spinner"></div>
+      <span id="btnText">推荐运力</span>
+      <span class="arrow" id="btnArrow">&#10132;</span>
+    </button>
+  </div>
+
+  <!-- 结果区 -->
+  <div class="result-section" id="resultSection">
+    <div class="result-label">为您匹配到 <b style="color:#2F6BFF">3</b> 条推荐运力</div>
+
+    <div id="vehicleList"></div>
+  </div>
+
+</div>
+
+<script>
+const input = document.getElementById('transportInput');
+const btn = document.getElementById('btnRecommend');
+const btnText = document.getElementById('btnText');
+const btnArrow = document.getElementById('btnArrow');
+const spinner = document.getElementById('spinner');
+const resultSection = document.getElementById('resultSection');
+const parsedInfo = document.getElementById('parsedInfo');
+const parsedTags = document.getElementById('parsedTags');
+
+// 模拟推荐数据
+const mockVehicles = [
+  {
+    score: 96,
+    type: '13米平板车',
+    load: '32吨',
+    size: '13m × 2.4m',
+    plate: '苏A·D8625',
+    driver: '张师傅',
+    phone: '138****6291',
+    lastTrip: { from: '南京江宁', to: '合肥包河', goods: '建材', dist: '180km' },
+    reasons: [
+      { text: '车型匹配', cls: '' },
+      { text: '载重充裕', cls: 'green' },
+      { text: '常跑该路线', cls: 'green' },
+    ]
+  },
+  {
+    score: 88,
+    type: '17.5米平板车',
+    load: '40吨',
+    size: '17.5m × 3m',
+    plate: '沪B·K3721',
+    driver: '李师傅',
+    phone: '159****8847',
+    lastTrip: { from: '苏州昆山', to: '上海宝山', goods: '机械配件', dist: '120km' },
+    reasons: [
+      { text: '车型匹配', cls: '' },
+      { text: '载重充裕', cls: 'green' },
+      { text: '车身较长', cls: 'orange' },
+    ]
+  },
+  {
+    score: 72,
+    type: '9.6米高栏车',
+    load: '18吨',
+    size: '9.6m × 2.3m',
+    plate: '苏A·F5093',
+    driver: '王师傅',
+    phone: '186****3350',
+    lastTrip: { from: '无锡锡山', to: '上海浦东', goods: '电子产品', dist: '150km' },
+    reasons: [
+      { text: '车型不同', cls: 'orange' },
+      { text: '载重偏紧', cls: 'orange' },
+      { text: '价格较低', cls: 'green' },
+    ]
+  }
+];
+
+function appendHint(text) {
+  if (input.value && !input.value.endsWith('，') && !input.value.endsWith(' ')) {
+    input.value += '，';
+  }
+  input.value += text;
+  input.focus();
+}
+
+function parseInput(text) {
+  const tags = [];
+  const fromMatch = text.match(/从(.+?)(发|到|送|运)/);
+  if (fromMatch) tags.push({ label: '出发', value: fromMatch[1] });
+  const toMatch = text.match(/(发|到|送|运)到?(.{2,8}?)(?:，|,|大概|约|左右|$)/);
+  if (toMatch) tags.push({ label: '到达', value: toMatch[2].replace(/^[到发]/, '') });
+  const goodsMatch = text.match(/批(.+?)(从|发|，|,|大概|$)/);
+  if (goodsMatch) tags.push({ label: '货物', value: goodsMatch[1] });
+  const weightMatch = text.match(/(\d+)吨/);
+  if (weightMatch) tags.push({ label: '重量', weight: weightMatch[1] + '吨' });
+  const vehicleMatch = text.match(/(平板车|高栏车|厢式车|冷藏车|罐车|爬梯车|低平板|飞翼车)/);
+  if (vehicleMatch) tags.push({ label: '车型', value: vehicleMatch[1] });
+  const timeMatch = text.match(/(今天|明天|后天|周一|周二|周三|周四|周五|周六|周日|\d+号|\d+日)/);
+  if (timeMatch) tags.push({ label: '时间', value: timeMatch[1] });
+  return tags;
+}
+
+function buildScoreRing(score) {
+  const r = 18;
+  const c = 2 * Math.PI * r;
+  const offset = c - (score / 100) * c;
+  let color = '#2F6BFF';
+  if (score >= 90) color = '#2F6BFF';
+  else if (score >= 75) color = '#5B8FFF';
+  else color = '#E6930A';
+  return `
+    <div class="score-ring">
+      <svg width="44" height="44" viewBox="0 0 44 44">
+        <circle class="bg" cx="22" cy="22" r="${r}" fill="none" stroke-width="4"/>
+        <circle class="fg" cx="22" cy="22" r="${r}" fill="none" stroke="${color}" stroke-width="4"
+          stroke-linecap="round"
+          stroke-dasharray="${c}"
+          stroke-dashoffset="${offset}"/>
+      </svg>
+      <span class="score-text" style="color:${color}">${score}</span>
+    </div>
+    <span class="score-label">综合评分</span>
+  `;
+}
+
+function buildVehicleCard(v, index) {
+  const isTop = index === 0;
+  return `
+    <div class="vehicle-card ${isTop ? 'top' : ''}">
+      <div class="vehicle-header">
+        <div class="vehicle-left">
+          <div class="rank-num">${index + 1}</div>
+          <div class="vehicle-type">${v.type}</div>
+        </div>
+        <div class="score-wrap">
+          ${buildScoreRing(v.score)}
+        </div>
+      </div>
+
+      <div class="vehicle-info">
+        <div class="info-item">
+          <span class="info-label">载重能力</span>
+          <span class="info-value">${v.load}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">车厢尺寸</span>
+          <span class="info-value">${v.size}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">车牌号</span>
+          <span class="info-value">${v.plate}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">司机</span>
+          <span class="info-value">${v.driver} ${v.phone}</span>
+        </div>
+      </div>
+
+      <div class="reason-tags">
+        ${v.reasons.map(r => `<span class="reason-tag ${r.cls}">${r.text}</span>`).join('')}
+      </div>
+
+      <div class="last-trip">
+        <div class="last-trip-title">上一趟任务</div>
+        <div class="last-trip-row">
+          <span class="last-trip-from">${v.lastTrip.from}</span>
+          <span class="last-trip-arrow">&#10132;</span>
+          <span class="last-trip-to">${v.lastTrip.to}</span>
+        </div>
+        <div class="last-trip-meta">
+          <span>&#128230; ${v.lastTrip.goods}</span>
+          <span>&#128207; ${v.lastTrip.dist}</span>
+        </div>
+      </div>
+
+      <div class="vehicle-actions">
+        <button class="btn-create-order" onclick="createOrder()">生成运单</button>
+      </div>
+    </div>
+  `;
+}
+
+async function recommend() {
+  const text = input.value.trim();
+  if (!text) {
+    input.style.borderColor = '#FF4D4F';
+    input.setAttribute('placeholder', '请先输入运输需求信息');
+    setTimeout(() => {
+      input.style.borderColor = '#E0E0E0';
+      input.setAttribute('placeholder', '请输入运输信息，如：\n明天有一批钢材从上海宝山发到南京江宁，大概20吨，需要平板车');
+    }, 2000);
+    return;
+  }
+
+  // 解析输入
+  const tags = parseInput(text);
+  if (tags.length > 0) {
+    parsedTags.innerHTML = tags.map(t =>
+      `<span class="parsed-tag">${t.label}：<span>${t.value || t.weight}</span></span>`
+    ).join('');
+    parsedInfo.style.display = 'block';
+  }
+
+  // 按钮loading
+  btn.disabled = true;
+  btnText.textContent = '智能匹配中...';
+  btnArrow.style.display = 'none';
+  spinner.style.display = 'block';
+
+  // 模拟AI匹配
+  await new Promise(r => setTimeout(r, 1800));
+
+  // 渲染推荐列表
+  document.getElementById('vehicleList').innerHTML = mockVehicles.map((v, i) => buildVehicleCard(v, i)).join('');
+
+  // 显示结果
+  resultSection.style.display = 'block';
+
+  // 恢复按钮
+  btn.disabled = false;
+  btnText.textContent = '重新推荐';
+  btnArrow.style.display = 'inline';
+  spinner.style.display = 'none';
+}
+
+function createOrder() {
+  showToast();
+}
+
+function showToast() {
+  let toast = document.getElementById('globalToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'globalToast';
+    toast.className = 'toast';
+    toast.innerHTML = '<div class="toast-icon">&#10003;</div><div class="toast-text">运单创建成功<br/>可在运单列表查看</div>';
+    document.body.appendChild(toast);
+  }
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+</script>
+</body>
+</html>

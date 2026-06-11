@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>节点字段流程配置 - 财运通</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft YaHei",tahoma,arial,sans-serif;font-size:12px;color:#333;background:#ecf0f4;min-width:1280px}
+.topbar{position:fixed;top:0;left:0;right:0;height:44px;background:linear-gradient(180deg,#0a3d6b,#01224f);z-index:100;display:flex;align-items:center;padding:0 16px}
+.topbar-logo{color:#fff;font-size:18px;font-weight:700}
+.topbar-right{margin-left:auto;color:rgba(255,255,255,.8);font-size:12px}
+.sidebar{position:fixed;top:44px;left:0;bottom:0;width:180px;background:#fff;border-right:1px solid #d3d3d3;overflow-y:auto;z-index:90}
+.sidebar-group-title{height:30px;padding:0 10px;font-size:12px;color:#0a3d6b;font-weight:700;display:flex;align-items:center;background:#f0f5fa;border-top:1px solid #d3d3d3;border-bottom:1px solid #e4eef6;user-select:none}
+.sidebar-item{height:34px;padding:0 14px;font-size:13px;color:#333;display:flex;align-items:center;gap:8px;cursor:pointer}
+.sidebar-item:hover{background:#e4eef6;color:#0097cf}
+.sidebar-item.active{background:#a9dafb;color:#0097cf;font-weight:700}
+.main{margin-left:180px;margin-top:44px;padding:10px;min-height:calc(100vh - 44px)}
+.demo-nav{background:#fff;border:1px solid #d3d3d3;padding:8px 12px;margin-bottom:10px;display:flex;gap:8px;align-items:center}
+.demo-nav-title{font-weight:700;color:#01224f;margin-right:10px}
+.demo-nav .fn-btn{font-size:12px}
+.card{background:#fff;border:1px solid #d3d3d3;border-radius:2px;margin-bottom:10px}
+.card-header{height:36px;padding:0 12px;display:flex;align-items:center;border-bottom:1px solid #d3d3d3;background:#f0f6fa;font-size:13px;font-weight:700;color:#01224f}
+.card-body{padding:12px}
+.fn-btn{height:28px;padding:0 10px;border-radius:2px;font-size:12px;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:4px;line-height:1}
+.fn-btn--primary{background:linear-gradient(270deg,#0cace7,#23c2ff);color:#fff}
+.fn-btn--primary:hover{opacity:.85}
+.fn-btn--default{background:linear-gradient(-180deg,#fff,#f7f7f7 96%);border:1px solid #b9ccd7;color:#0097cf}
+.fn-btn--default:hover{border-color:#378cbe;background:#378cbe;color:#fff}
+.fn-btn--danger{background:linear-gradient(-180deg,#fff,#f7f7f7 96%);border:1px solid #b9ccd7;color:#f12222}
+.fn-btn--danger:hover{border-color:#f12222;background:#f12222;color:#fff}
+.fn-btn--small{height:22px;padding:0 8px;font-size:11px}
+.action-bar{background:#fff;border:1px solid #d3d3d3;border-bottom:none;padding:6px 10px;display:flex;gap:6px;align-items:center}
+.action-bar .right-tools{margin-left:auto;display:flex;gap:6px;align-items:center}
+.fn-table-wrap{border:1px solid #d3d3d3;background:#fff;overflow:auto}
+.fn-table{width:100%;border-collapse:collapse;font-size:12px}
+.fn-table th{background:linear-gradient(180deg,#fdfdfd,#ebebeb);font-weight:400;font-size:12px;color:#333;border-right:1px solid #d3d3d3;border-bottom:1px solid #d3d3d3;padding:0 8px;height:30px;text-align:center;white-space:nowrap}
+.fn-table td{padding:0 8px;height:30px;text-align:center;border-right:1px solid #ccc;border-bottom:1px solid #eee;white-space:nowrap}
+.fn-table tr:hover td{background:#fffde3}
+.fn-table a{color:#0097cf;cursor:pointer;text-decoration:none;margin:0 4px}
+.fn-table a:hover{text-decoration:underline}
+.fn-table .col-action a.danger{color:#f12222}
+.fn-page{display:flex;gap:4px;padding:8px 10px;background:#fff;border-top:1px solid #eee;justify-content:flex-end;align-items:center}
+.fn-page-btn{height:24px;min-width:24px;padding:0 7px;border:1px solid #b9ccd7;background:linear-gradient(-180deg,#fff,#f7f7f7 96%);color:#0097cf;border-radius:2px;cursor:pointer;font-size:12px}
+.fn-page-btn.active{background:#0097cf;color:#fff;border-color:#0097cf}
+.fn-page-info{color:#999;font-size:12px;margin-right:8px}
+.fn-input,.fn-select{height:24px;border:1px solid rgba(34,36,38,.2);border-radius:2px;padding:0 5px;font-size:12px;background:#fff;outline:none}
+.fn-input{width:160px}
+.fn-input:focus,.fn-select:focus{background:#e2f7ff;border-color:#0097cf}
+.fn-input:hover,.fn-select:hover{border-color:#0097cf}
+.fn-select{min-width:140px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.fn-dialog{background:#fff;min-width:520px;box-shadow:0 4px 20px rgba(0,0,0,.2);max-height:85vh;overflow:hidden;display:flex;flex-direction:column}
+.fn-dialog-header{background:#eaeaea;height:36px;display:flex;align-items:center;padding:0 14px;font-size:14px;font-weight:700;border-bottom:1px solid #d3d3d3}
+.fn-dialog-close{margin-left:auto;cursor:pointer;color:#666;font-size:18px}
+.fn-dialog-body{padding:20px;overflow-y:auto;flex:1}
+.fn-dialog-footer{background:#eaeaea;padding:6px 10px;display:flex;justify-content:flex-end;gap:6px;border-top:1px solid #d3d3d3}
+.form-row{display:flex;gap:0;margin-bottom:12px;align-items:center}
+.form-label{color:#333;font-size:12px;width:90px;min-width:90px;text-align:right;padding-right:8px}
+.form-label .required{color:#f12222;margin-right:2px}
+.form-control{flex:1}
+.fn-tabs{display:flex;border-bottom:2px solid #378cbe;margin-bottom:12px}
+.fn-tab{height:36px;padding:0 18px;font-size:14px;display:flex;align-items:center;cursor:pointer;border:1px solid #ccc;border-bottom:none;margin-right:4px;color:#666;background:#f5f5f5;border-radius:2px 2px 0 0}
+.fn-tab.active{border-color:#378cbe;background:#fff;color:#0097cf;font-weight:700}
+.tag{display:inline-block;padding:1px 8px;border-radius:2px;font-size:11px;line-height:18px}
+.tag-blue{background:#e2f7ff;color:#0097cf;border:1px solid #b3e0f5}
+.tag-green{background:#e6f7e6;color:#14aa65;border:1px solid #c2efb2}
+.tag-yellow{background:#fff7e0;color:#e35d00;border:1px solid #fee1b3}
+.tag-purple{background:#f0e8ff;color:#532fe6;border:1px solid #d3c9ea}
+.tag-gray{background:#f0f0f0;color:#666;border:1px solid #ddd}
+.breadcrumb{font-size:12px;color:#999;margin-bottom:6px}
+.breadcrumb a{color:#0097cf;cursor:pointer}
+.page-section{display:none}
+.page-section.active{display:block}
+/* 步骤条 */
+.step-bar{display:flex;align-items:center;padding:18px 0;justify-content:center;gap:0}
+.step-item{display:flex;align-items:center;gap:8px}
+.step-num{width:26px;height:26px;border-radius:50%;background:#dfe2e7;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.step-item.active .step-num{background:#0097cf}
+.step-item.done .step-num{background:#14aa65}
+.step-text{font-size:13px;color:#999}
+.step-item.active .step-text{color:#0097cf;font-weight:700}
+.step-item.done .step-text{color:#14aa65}
+.step-line{width:80px;height:2px;background:#dfe2e7;margin:0 14px}
+.step-line.done{background:#14aa65}
+/* 字段配置矩阵 */
+.field-config-card{border:1px solid #d3d3d3;background:#fff;margin-bottom:12px}
+.field-config-header{height:34px;padding:0 12px;background:#f0f6fa;border-bottom:1px solid #d3d3d3;display:flex;align-items:center;font-weight:700;color:#01224f;gap:8px}
+.field-config-header .op-tag{padding:1px 8px;border-radius:2px;font-size:11px;font-weight:400}
+.field-table{width:100%;border-collapse:collapse}
+.field-table th{background:#fafbfc;font-weight:400;color:#666;border-bottom:1px solid #eee;padding:6px 10px;text-align:left;font-size:12px}
+.field-table th.center,.field-table td.center{text-align:center;width:80px}
+.field-table td{padding:6px 10px;border-bottom:1px solid #f3f3f3;font-size:12px}
+.field-table tr:hover td{background:#fffde3}
+.field-name{display:flex;align-items:center;gap:6px}
+.field-name .lock{color:#999;font-size:11px}
+.fn-switch{display:inline-block;width:34px;height:18px;background:#ccc;border-radius:9px;position:relative;cursor:pointer;vertical-align:middle;transition:background .2s}
+.fn-switch::after{content:'';position:absolute;width:14px;height:14px;background:#fff;border-radius:50%;top:2px;left:2px;transition:left .2s}
+.fn-switch.on{background:#0097cf}
+.fn-switch.on::after{left:18px}
+.fn-switch.disabled{background:#0097cf;opacity:.5;cursor:not-allowed}
+.fn-switch.disabled::after{left:18px}
+/* 节点分组 */
+.node-group{border:1px solid #e4eef6;margin-bottom:12px;border-radius:2px}
+.node-group-header{padding:8px 12px;background:#f7fbfe;border-bottom:1px solid #e4eef6;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#0a3d6b}
+.node-group-body{padding:0}
+.tip-box{background:#fff8e6;border:1px solid #ffe7a3;border-radius:2px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:#8a5d00;display:flex;align-items:center;gap:6px}
+.checkbox-line{display:flex;gap:14px;align-items:center}
+.fn-checkbox{display:inline-flex;align-items:center;gap:4px;font-size:12px;cursor:pointer}
+.fn-checkbox input{width:14px;height:14px;accent-color:#0097cf;cursor:pointer}
+.radio-group{display:flex;gap:14px}
+.radio-item{display:inline-flex;align-items:center;gap:4px;font-size:12px;cursor:pointer}
+.radio-item input{width:14px;height:14px;accent-color:#0097cf}
+.required-star{color:#f12222;margin-right:2px}
+/* ========== 方案B 双栏字段配置布局 ========== */
+.config-layout{display:flex;gap:10px;align-items:stretch;margin-bottom:12px}
+.node-flow-panel{width:360px;flex-shrink:0;background:#fff;border:1px solid #d3d3d3;display:flex;flex-direction:column}
+.field-config-panel{flex:1;background:#fff;border:1px solid #d3d3d3;display:flex;flex-direction:column;min-width:0}
+.panel-header{height:34px;padding:0 12px;background:#f0f6fa;border-bottom:1px solid #d3d3d3;display:flex;align-items:center;font-size:13px;font-weight:700;color:#01224f;gap:8px}
+.panel-body{padding:14px;overflow-y:auto}
+.flow-step-box{border:1px solid #d3d3d3;border-radius:4px;padding:10px 10px 14px;margin-bottom:10px;background:#fff;position:relative}
+.flow-step-box.disabled{background:#fafafa;border-style:dashed}
+.flow-step-title{font-size:12px;color:#0a3d6b;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.flow-step-title .seq{display:inline-flex;width:18px;height:18px;border-radius:50%;background:#0097cf;color:#fff;align-items:center;justify-content:center;font-size:11px}
+.flow-op-row{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;padding:4px 0}
+.flow-op{min-width:60px;height:60px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:#0097cf;border:2px solid #b3e0f5;background:#e2f7ff;transition:all .2s;position:relative}
+.flow-op.active{background:linear-gradient(270deg,#0cace7,#23c2ff);color:#fff;border-color:#0097cf;box-shadow:0 0 0 3px rgba(0,151,207,.2)}
+.flow-op:hover{border-color:#0097cf}
+.flow-op.add{border-style:dashed;background:#fff;color:#999;border-color:#ccc;font-size:20px;font-weight:700}
+.flow-op.add:hover{color:#0097cf;border-color:#0097cf}
+.flow-op .op-rm{position:absolute;top:-6px;right:-6px;width:16px;height:16px;border-radius:50%;background:#f12222;color:#fff;font-size:11px;display:none;align-items:center;justify-content:center;cursor:pointer}
+.flow-op:hover .op-rm{display:flex}
+.flow-op.locked{background:#f0f0f0;color:#999;border-color:#ddd;cursor:default}
+.flow-op.locked:hover{border-color:#ddd}
+.flow-arrow{color:#0097cf;font-size:20px;margin:0;text-align:center;line-height:1}
+.field-cfg-wrap{flex:1;overflow-y:auto;max-height:560px}
+.field-cfg-table{width:100%;border-collapse:collapse;font-size:12px}
+.field-cfg-table th{background:#fafbfc;font-weight:400;color:#666;border-bottom:1px solid #d3d3d3;padding:8px 12px;text-align:left;position:sticky;top:0;z-index:1}
+.field-cfg-table th.center,.field-cfg-table td.center{text-align:center;width:80px}
+.field-cfg-table td{padding:7px 12px;border-bottom:1px solid #f3f3f3}
+.field-cfg-table tr.batch-row{background:#fffbe6}
+.field-cfg-table tr.batch-row td{font-weight:700;color:#e35d00;border-bottom:2px solid #ffe7a3}
+.field-cfg-table tr:hover td{background:#fffde3}
+.field-cfg-table tr.batch-row:hover td{background:#fff5b8}
+.field-cfg-table input[type=checkbox]{width:14px;height:14px;accent-color:#0097cf;cursor:pointer}
+.field-cfg-table tr.locked td{color:#666;background:#fafafa}
+.field-cfg-table .lock-tag{font-size:10px;color:#e35d00;background:#fff7e0;border:1px solid #fee1b3;padding:1px 5px;border-radius:2px;margin-left:6px}
+/* 隐藏字段表第5列（说明列） */
+.field-cfg-table th:nth-child(5),.field-cfg-table td:nth-child(5){display:none}
+.memo-card{background:#fafbfc;border:1px solid #ececec;margin-top:12px;padding:12px 14px;border-radius:2px}
+.memo-title{font-size:12px;font-weight:400;color:#999;margin-bottom:6px}
+.memo-text{font-size:12px;color:#666;line-height:1.7;white-space:pre-line}
+.address-type-tag{display:inline-block;padding:1px 6px;border-radius:2px;font-size:11px;margin-left:4px}
+.at-load{background:#e6f7e6;color:#14aa65;border:1px solid #c2efb2}
+.at-unload{background:#fff7e0;color:#e35d00;border:1px solid #fee1b3}
+.at-park{background:#f0f0f0;color:#666;border:1px solid #ddd}
+.at-charge{background:#f0e8ff;color:#532fe6;border:1px solid #d3c9ea}
+</style>
+</head>
+<body>
+<!-- Topbar -->
+<div class="topbar">
+  <div class="topbar-logo">财运通 - G7易流</div>
+  <div class="topbar-right">演示账号 | 2026-06-11</div>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-group-title">公司管理</div>
+  <div class="sidebar-item" onclick="showPage('page-address')" id="nav-address">常用地址</div>
+  <div class="sidebar-item active" onclick="showPage('page-flow-list')" id="nav-flow-list">业务流程管理</div>
+  <div class="sidebar-item">权限管理</div>
+  <div class="sidebar-group-title">运单管理</div>
+  <div class="sidebar-item">运单列表</div>
+  <div class="sidebar-item">接单中心</div>
+</div>
+
+<!-- 顶部 Demo 切换栏 -->
+<div class="main">
+<div class="demo-nav">
+  <span class="demo-nav-title">原型导航：</span>
+  <button class="fn-btn fn-btn--default" onclick="showPage('page-address')">① 地址类型维护</button>
+  <button class="fn-btn fn-btn--default" onclick="showPage('page-flow-list')">② 流程管理列表</button>
+  <button class="fn-btn fn-btn--default" onclick="showPage('page-flow-step1')">③ 新建流程-步骤1（条件）</button>
+  <button class="fn-btn fn-btn--default" onclick="showPage('page-flow-step2')">④ 新建流程-步骤2（字段配置）</button>
+  <span style="margin-left:auto;color:#999">一期范围 | 26-07</span>
+</div>
+
+<!-- 页面占位，后续追加各场景内容 -->
+<div id="page-container">
+
+<!-- ============= 场景 A：常用地址（含地址类型字段） ============= -->
+<div class="page-section" id="page-address">
+  <div class="breadcrumb">公司管理 / 常用地址</div>
+  <div class="card">
+    <div class="card-body">
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+        <span><span style="color:#666;margin-right:4px">地址名：</span><input class="fn-input" placeholder="请输入"></span>
+        <span><span style="color:#666;margin-right:4px">地址类型：</span>
+          <select class="fn-select">
+            <option>全部</option><option>装货地</option><option>卸货地</option><option>停车场</option><option>充电站</option>
+          </select>
+        </span>
+        <span><span style="color:#666;margin-right:4px">所属组织：</span><input class="fn-input" placeholder="请选择"></span>
+        <button class="fn-btn fn-btn--primary">查询</button>
+        <button class="fn-btn fn-btn--default">重置</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-bar">
+    <button class="fn-btn fn-btn--primary" onclick="openModal('modal-address-edit')">+ 新增</button>
+    <button class="fn-btn fn-btn--default">批量导入</button>
+    <button class="fn-btn fn-btn--default">导出</button>
+    <button class="fn-btn fn-btn--default">删除</button>
+    <div class="right-tools">
+      <span style="color:#999">共 128 条</span>
+    </div>
+  </div>
+  <div class="fn-table-wrap">
+    <table class="fn-table">
+      <thead><tr>
+        <th style="width:30px"><input type="checkbox"></th>
+        <th>地址名</th><th>地址简称</th><th>详细地址</th>
+        <th style="background:#fff8e6">地址类型 <span style="color:#e35d00">★新</span></th>
+        <th>半径(米)</th><th>经纬度</th><th>所属组织</th><th>修改时间</th><th style="width:140px">操作</th>
+      </tr></thead>
+      <tbody>
+        <tr><td><input type="checkbox"></td><td>北京顺义华联仓</td><td>顺义华联</td><td>北京市顺义区空港工业区A6号</td>
+          <td><span class="address-type-tag at-load">装货地</span></td><td>200</td><td>116.65,40.13</td><td>北京分公司</td><td>2026-06-08 10:23</td>
+          <td><a>编辑</a><a>地图</a><a class="danger">删除</a></td></tr>
+        <tr><td><input type="checkbox"></td><td>上海宝山宝钢厂区</td><td>宝钢厂</td><td>上海市宝山区富锦路885号</td>
+          <td><span class="address-type-tag at-unload">卸货地</span></td><td>500</td><td>121.49,31.39</td><td>华东大区</td><td>2026-06-07 18:02</td>
+          <td><a>编辑</a><a>地图</a><a class="danger">删除</a></td></tr>
+        <tr><td><input type="checkbox"></td><td>京沪高速苏州服务区</td><td>苏州服务区</td><td>苏州市相城区京沪高速K1102</td>
+          <td><span class="address-type-tag at-park">停车场</span></td><td>300</td><td>120.62,31.36</td><td>华东大区</td><td>2026-06-05 14:11</td>
+          <td><a>编辑</a><a>地图</a><a class="danger">删除</a></td></tr>
+        <tr><td><input type="checkbox"></td><td>国家电网杭州充电站</td><td>杭电充电站</td><td>杭州市萧山区机场快速路充电站</td>
+          <td><span class="address-type-tag at-charge">充电站</span></td><td>150</td><td>120.20,30.23</td><td>华东大区</td><td>2026-06-04 09:38</td>
+          <td><a>编辑</a><a>地图</a><a class="danger">删除</a></td></tr>
+        <tr><td><input type="checkbox"></td><td>天津港北疆港区</td><td>天津港北疆</td><td>天津市滨海新区北疆港区</td>
+          <td><span class="address-type-tag at-load">装货地</span></td><td>500</td><td>117.71,39.04</td><td>华北大区</td><td>2026-06-03 16:55</td>
+          <td><a>编辑</a><a>地图</a><a class="danger">删除</a></td></tr>
+      </tbody>
+    </table>
+    <div class="fn-page">
+      <span class="fn-page-info">共 128 条 · 每页 10 条</span>
+      <button class="fn-page-btn">上一页</button>
+      <button class="fn-page-btn active">1</button>
+      <button class="fn-page-btn">2</button><button class="fn-page-btn">3</button>
+      <button class="fn-page-btn">下一页</button>
+    </div>
+  </div>
+
+  <div class="tip-box" style="margin-top:10px">
+    💡 一期改动：列表新增「地址类型」列；新增/编辑弹窗新增「地址类型」必填项；发货人/收货人地址表单同步增加该字段。地址类型用于业务流程匹配字段显隐与必填规则。
+  </div>
+</div>
+
+<!-- 地址新增/编辑弹窗 -->
+<div class="modal-overlay" id="modal-address-edit">
+  <div class="fn-dialog" style="min-width:560px">
+    <div class="fn-dialog-header">新增常用地址 <span class="fn-dialog-close" onclick="closeModal('modal-address-edit')">×</span></div>
+    <div class="fn-dialog-body">
+      <div class="form-row"><div class="form-label"><span class="required-star">*</span>地址名</div><div class="form-control"><input class="fn-input" style="width:300px" placeholder="请输入地址名"></div></div>
+      <div class="form-row"><div class="form-label">地址简称</div><div class="form-control"><input class="fn-input" style="width:300px"></div></div>
+      <div class="form-row"><div class="form-label" style="background:#fff8e6;border-radius:2px;padding:4px 8px"><span class="required-star">*</span>地址类型</div>
+        <div class="form-control">
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="addrtype" checked> <span class="address-type-tag at-load">装货地</span></label>
+            <label class="radio-item"><input type="radio" name="addrtype"> <span class="address-type-tag at-unload">卸货地</span></label>
+            <label class="radio-item"><input type="radio" name="addrtype"> <span class="address-type-tag at-park">停车场</span></label>
+            <label class="radio-item"><input type="radio" name="addrtype"> <span class="address-type-tag at-charge">充电站</span></label>
+          </div>
+          <div style="color:#999;font-size:11px;margin-top:4px">★ 新增字段：决定该地址在业务流程中读取哪一组字段配置</div>
+        </div>
+      </div>
+      <div class="form-row"><div class="form-label"><span class="required-star">*</span>详细地址</div><div class="form-control"><input class="fn-input" style="width:380px" placeholder="详细地址（含定位）"></div></div>
+      <div class="form-row"><div class="form-label">半径(米)</div><div class="form-control"><input class="fn-input" value="200"></div></div>
+      <div class="form-row"><div class="form-label">所属组织</div><div class="form-control"><input class="fn-input" style="width:300px" placeholder="请选择"></div></div>
+      <div class="form-row"><div class="form-label">备注</div><div class="form-control"><textarea class="fn-input" style="width:380px;height:50px;padding:5px"></textarea></div></div>
+    </div>
+    <div class="fn-dialog-footer">
+      <button class="fn-btn fn-btn--default" onclick="closeModal('modal-address-edit')">取消</button>
+      <button class="fn-btn fn-btn--primary" onclick="closeModal('modal-address-edit')">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============= 场景 B：业务流程管理列表 ============= -->
+<div class="page-section active" id="page-flow-list">
+  <div class="breadcrumb">公司管理 / 业务流程管理</div>
+  <div class="card">
+    <div class="card-body">
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+        <span><span style="color:#666;margin-right:4px">流程名称：</span><input class="fn-input" placeholder="请输入"></span>
+        <span><span style="color:#666;margin-right:4px">使用组织：</span><input class="fn-input" placeholder="请选择"></span>
+        <span><span style="color:#666;margin-right:4px">司机类型：</span>
+          <select class="fn-select"><option>全部</option><option>自有</option><option>外调</option><option>加盟</option></select>
+        </span>
+        <span><span style="color:#666;margin-right:4px">车辆合作关系：</span>
+          <select class="fn-select"><option>全部</option><option>自有</option><option>外调</option><option>加盟</option></select>
+        </span>
+        <span><span style="color:#666;margin-right:4px">任务类型：</span>
+          <select class="fn-select"><option>全部</option><option>空驶任务</option><option>重驶任务</option></select>
+        </span>
+        <span><span style="color:#666;margin-right:4px">创建时间：</span><input class="fn-input" placeholder="开始日期"> ~ <input class="fn-input" placeholder="结束日期"></span>
+        <button class="fn-btn fn-btn--primary">查询</button>
+        <button class="fn-btn fn-btn--default">重置</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-bar">
+    <button class="fn-btn fn-btn--primary" onclick="showPage('page-flow-step1')">+ 新增流程</button>
+    <button class="fn-btn fn-btn--default">删除</button>
+    <div class="right-tools"><span style="color:#999">共 6 条 · 按修改时间倒序</span></div>
+  </div>
+  <div class="fn-table-wrap">
+    <table class="fn-table">
+      <thead><tr>
+        <th style="width:30px"><input type="checkbox"></th>
+        <th>流程名称</th><th>使用组织</th><th>司机类型</th><th>车辆合作关系</th><th>任务类型</th>
+        <th>所属组织</th><th>修改时间 ↓</th><th>修改人</th><th>创建时间</th>
+        <th style="width:160px">操作</th>
+      </tr></thead>
+      <tbody>
+        <tr><td><input type="checkbox"></td>
+          <td><a onclick="showPage('page-flow-step1')">华东自营装卸标准流程</a></td>
+          <td>华东大区</td>
+          <td><span class="tag tag-blue">自有</span></td>
+          <td><span class="tag tag-blue">自有</span></td>
+          <td><span class="tag tag-green">重驶</span></td>
+          <td>华东大区</td>
+          <td>2026-06-10 16:42</td><td>张潇</td><td>2026-05-28 10:00</td>
+          <td class="col-action"><a>编辑</a><a>复制</a><a class="danger">删除</a></td></tr>
+        <tr><td><input type="checkbox"></td>
+          <td><a>外协车辆-空驶简化流程</a></td>
+          <td>全集团</td>
+          <td><span class="tag tag-yellow">外调</span> <span class="tag tag-purple">加盟</span></td>
+          <td><span class="tag tag-yellow">外调</span></td>
+          <td><span class="tag tag-gray">空驶</span></td>
+          <td>北京总部</td>
+          <td>2026-06-09 11:08</td><td>韩丽娜</td><td>2026-05-20 14:30</td>
+          <td class="col-action"><a>编辑</a><a>复制</a><a class="danger">删除</a></td></tr>
+        <tr><td><input type="checkbox"></td>
+          <td><a>加盟车-危化运输完整流程</a></td>
+          <td>本级及下级</td>
+          <td><span class="tag tag-purple">加盟</span></td>
+          <td><span class="tag tag-purple">加盟</span></td>
+          <td><span class="tag tag-green">重驶</span></td>
+          <td>华北大区</td>
+          <td>2026-06-08 09:55</td><td>杜浩</td><td>2026-05-15 09:00</td>
+          <td class="col-action"><a>编辑</a><a>复制</a><a class="danger">删除</a></td></tr>
+        <tr><td><input type="checkbox"></td>
+          <td><a>自有车-空驶回程流程</a></td>
+          <td>全集团</td>
+          <td><span class="tag tag-blue">自有</span></td>
+          <td><span class="tag tag-blue">自有</span></td>
+          <td><span class="tag tag-gray">空驶</span></td>
+          <td>北京总部</td>
+          <td>2026-06-05 17:20</td><td>叶一帆</td><td>2026-05-10 16:00</td>
+          <td class="col-action"><a>编辑</a><a>复制</a><a class="danger">删除</a></td></tr>
+        <tr><td><input type="checkbox"></td>
+          <td><a>大宗煤炭重驶标准流程</a></td>
+          <td>本级组织</td>
+          <td><span class="tag tag-blue">自有</span> <span class="tag tag-yellow">外调</span></td>
+          <td><span class="tag tag-blue">自有</span> <span class="tag tag-yellow">外调</span></td>
+          <td><span class="tag tag-green">重驶</span></td>
+          <td>山西分公司</td>
+          <td>2026-06-02 14:33</td><td>程德林</td><td>2026-04-28 11:20</td>
+          <td class="col-action"><a>编辑</a><a>复制</a><a class="danger">删除</a></td></tr>
+        <tr><td><input type="checkbox"></td>
+          <td><a>系统默认流程（兜底）</a></td>
+          <td>全集团</td><td>全部</td><td>全部</td><td>全部</td>
+          <td>北京总部</td>
+          <td>2026-04-15 10:00</td><td>系统</td><td>2026-04-15 10:00</td>
+          <td class="col-action"><a>编辑</a><a>复制</a></td></tr>
+      </tbody>
+    </table>
+    <div class="fn-page">
+      <span class="fn-page-info">共 6 条</span>
+      <button class="fn-page-btn">上一页</button>
+      <button class="fn-page-btn active">1</button>
+      <button class="fn-page-btn">下一页</button>
+    </div>
+  </div>
+
+  <div class="tip-box" style="margin-top:10px">
+    💡 流程匹配优先级：当一个运单匹配到多个流程时，按「修改时间最新」的流程生效；若未匹配到任何自定义流程，走「系统默认流程」。
+  </div>
+</div>
+
+<!-- ============= 场景 C-1：新建流程-步骤1（条件配置） ============= -->
+<div class="page-section" id="page-flow-step1">
+  <div class="breadcrumb"><a onclick="showPage('page-flow-list')">业务流程管理</a> / 新建流程</div>
+
+  <div class="card">
+    <div class="step-bar">
+      <div class="step-item active"><div class="step-num">1</div><div class="step-text">条件配置</div></div>
+      <div class="step-line"></div>
+      <div class="step-item"><div class="step-num">2</div><div class="step-text">流程字段配置</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">基本信息</div>
+    <div class="card-body" style="padding:20px 30px">
+      <div class="form-row"><div class="form-label"><span class="required-star">*</span>流程名称</div>
+        <div class="form-control"><input class="fn-input" style="width:380px" value="华东自营装卸标准流程"></div></div>
+      <div class="form-row"><div class="form-label">备注说明</div>
+        <div class="form-control"><textarea class="fn-input" style="width:560px;height:50px;padding:5px" placeholder="可选填，用于说明流程用途"></textarea></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">生效条件 <span style="font-weight:400;color:#999;margin-left:8px">运单同时满足以下所有条件时，匹配该流程</span></div>
+    <div class="card-body" style="padding:20px 30px">
+      <div class="form-row" style="align-items:flex-start;margin-bottom:20px">
+        <div class="form-label" style="padding-top:4px"><span class="required-star">*</span>使用组织</div>
+        <div class="form-control">
+          <div class="radio-group" style="flex-wrap:wrap;gap:18px">
+            <label class="radio-item"><input type="radio" name="org"> 本级组织</label>
+            <label class="radio-item"><input type="radio" name="org"> 本级及下级</label>
+            <label class="radio-item"><input type="radio" name="org"> 本级及下级自营组织</label>
+            <label class="radio-item"><input type="radio" name="org"> 本级及下级加盟组织</label>
+            <label class="radio-item"><input type="radio" name="org" checked> 全集团</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row" style="align-items:flex-start;margin-bottom:20px">
+        <div class="form-label" style="padding-top:4px"><span class="required-star">*</span>司机类型</div>
+        <div class="form-control">
+          <div class="checkbox-line" style="gap:24px">
+            <label class="fn-checkbox"><input type="checkbox" checked> 自有</label>
+            <label class="fn-checkbox"><input type="checkbox"> 外调</label>
+            <label class="fn-checkbox"><input type="checkbox"> 加盟</label>
+            <span style="color:#999;margin-left:14px">多选；按运单中司机的类型比对</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row" style="align-items:flex-start;margin-bottom:20px">
+        <div class="form-label" style="padding-top:4px"><span class="required-star">*</span>车辆合作关系</div>
+        <div class="form-control">
+          <div class="checkbox-line" style="gap:24px">
+            <label class="fn-checkbox"><input type="checkbox" checked> 自有</label>
+            <label class="fn-checkbox"><input type="checkbox"> 外调</label>
+            <label class="fn-checkbox"><input type="checkbox"> 加盟</label>
+            <span style="color:#999;margin-left:14px">多选；按运单中车辆的合作关系比对</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row" style="align-items:flex-start;margin-bottom:0">
+        <div class="form-label" style="padding-top:4px"><span class="required-star">*</span>任务类型</div>
+        <div class="form-control">
+          <div class="checkbox-line" style="gap:24px">
+            <label class="fn-checkbox"><input type="checkbox"> 空驶任务</label>
+            <label class="fn-checkbox"><input type="checkbox" checked> 重驶任务</label>
+            <span style="color:#999;margin-left:14px">多选；按运单的任务类型比对（空/重驶）</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    💡 同一集团内流程名称不可重复；当同一运单匹配到多条流程时，取「修改时间」最新的流程生效。
+  </div>
+
+  <div style="text-align:center;padding:20px 0">
+    <button class="fn-btn fn-btn--default" onclick="showPage('page-flow-list')" style="margin-right:10px">取消</button>
+    <button class="fn-btn fn-btn--primary" onclick="showPage('page-flow-step2')" style="height:32px;padding:0 24px">下一步：配置字段 →</button>
+  </div>
+</div>
+
+<!-- ============= 场景 C-2：新建流程-步骤2（字段配置） ============= -->
+<div class="page-section" id="page-flow-step2">
+  <div class="breadcrumb"><a onclick="showPage('page-flow-list')">业务流程管理</a> / 新建流程 / 字段配置</div>
+
+  <div class="card">
+    <div class="step-bar">
+      <div class="step-item done"><div class="step-num">✓</div><div class="step-text">条件配置</div></div>
+      <div class="step-line done"></div>
+      <div class="step-item active"><div class="step-num">2</div><div class="step-text">流程字段配置</div></div>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    💡 按「地址类型」配置各节点操作所需字段。司机操作运单时，系统根据当前地址的类型读取对应字段配置，决定字段的显示和必填规则。
+    地址类型未匹配到的，按「系统默认设置」执行。
+  </div>
+
+  <!-- 地址类型 Tab -->
+  <div id="flow-step2">
+    <div class="fn-tabs">
+      <div class="fn-tab active" onclick="switchAddrTab(this,'pane-load')"><span class="address-type-tag at-load" style="margin-left:0">装货地</span></div>
+      <div class="fn-tab" onclick="switchAddrTab(this,'pane-unload')"><span class="address-type-tag at-unload" style="margin-left:0">卸货地</span></div>
+      <div class="fn-tab" onclick="switchAddrTab(this,'pane-park')"><span class="address-type-tag at-park" style="margin-left:0">停车场</span></div>
+      <div class="fn-tab" onclick="switchAddrTab(this,'pane-charge')"><span class="address-type-tag at-charge" style="margin-left:0">充电站</span></div>
+    </div>
+
+    <!-- ========== 装货地 ========== -->
+    <div class="addr-pane" id="pane-load" style="display:block">
+
+      <div class="config-layout">
+        <!-- 左侧：节点流程图 -->
+        <div class="node-flow-panel">
+          <div class="panel-header">
+            <span>📍 节点流程</span>
+            <span style="font-weight:400;color:#999;font-size:11px;margin-left:auto">点击操作圆点切换右侧字段</span>
+          </div>
+          <div class="panel-body">
+
+            <!-- 装货节点（当前 Tab：装货地） -->
+            <div class="flow-step-box" style="border-color:#0097cf;background:#f7fbfe">
+              <div class="flow-step-title"><span class="seq">·</span>装货节点 <span class="address-type-tag at-load" style="margin-left:6px">装货地</span></div>
+              <div class="flow-op-row">
+                <div class="flow-op" onclick="switchOp(this,'load-arrive')">到达</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-op active" onclick="switchOp(this,'load-depart')">发车</div>
+              </div>
+              <div style="text-align:center;color:#999;font-size:11px;margin-top:6px">装货地支持「到达 + 发车」字段配置</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 右侧：字段配置 -->
+        <div class="field-config-panel">
+          <div class="panel-header">
+            <span>📋 字段配置</span>
+            <span class="tag tag-blue" style="margin-left:8px">当前：装货地 - 发车</span>
+            <span style="margin-left:auto;color:#999;font-weight:400;font-size:11px">共 22 个字段（不含自定义）</span>
+          </div>
+          <div class="field-cfg-wrap">
+            <table class="field-cfg-table">
+              <thead><tr>
+                <th style="width:40px"></th>
+                <th>字段名</th>
+                <th class="center">显示</th>
+                <th class="center">必填</th>
+                <th>说明</th>
+              </tr></thead>
+              <tbody id="tbody-load">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 备注 -->
+      <div class="memo-card">
+        <div class="memo-title">备注说明</div>
+        <div class="memo-text">1. 始发节点，无到达操作；
+2. 终点节点，无发车操作。</div>
+      </div>
+
+    </div><!-- /pane-load -->
+
+    <!-- 后续 Tab 占位 -->
+    <div class="addr-pane" id="pane-unload" style="display:none">
+
+      <div class="config-layout">
+        <div class="node-flow-panel">
+          <div class="panel-header">
+            <span>📍 节点流程</span>
+            <span style="font-weight:400;color:#999;font-size:11px;margin-left:auto">点击操作圆点切换右侧字段</span>
+          </div>
+          <div class="panel-body">
+
+            <!-- 卸货节点（当前 Tab：卸货地） -->
+            <div class="flow-step-box" style="border-color:#0097cf;background:#f7fbfe">
+              <div class="flow-step-title"><span class="seq">·</span>卸货节点 <span class="address-type-tag at-unload" style="margin-left:6px">卸货地</span></div>
+              <div class="flow-op-row">
+                <div class="flow-op active" onclick="switchOp(this,'unload-arrive')">到达</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-op" onclick="switchOp(this,'unload-discharge')">卸车</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-op" onclick="switchOp(this,'unload-depart')">发车</div>
+              </div>
+              <div style="text-align:center;color:#999;font-size:11px;margin-top:6px">卸货地支持「到达 + 卸车 + 发车」字段配置</div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="field-config-panel">
+          <div class="panel-header">
+            <span>📋 字段配置</span>
+            <span class="tag tag-blue" style="margin-left:8px">当前：卸货地 - 到达</span>
+            <span style="margin-left:auto;color:#999;font-weight:400;font-size:11px">共 16 个字段</span>
+          </div>
+          <div class="field-cfg-wrap">
+            <table class="field-cfg-table">
+              <thead><tr>
+                <th style="width:40px"></th><th>字段名</th>
+                <th class="center">显示</th><th class="center">必填</th><th>说明</th>
+              </tr></thead>
+              <tbody id="tbody-unload">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="memo-card">
+        <div class="memo-title">备注说明</div>
+        <div class="memo-text">1. 始发节点，无到达操作；
+2. 终点节点，无发车操作。</div>
+      </div>
+
+    </div>
+    <div class="addr-pane" id="pane-park" style="display:none">
+
+      <div class="config-layout">
+        <div class="node-flow-panel">
+          <div class="panel-header"><span>📍 节点流程</span></div>
+          <div class="panel-body">
+            <div class="flow-step-box" style="border-color:#0097cf;background:#f7fbfe">
+              <div class="flow-step-title"><span class="seq">·</span><span class="address-type-tag at-park" style="margin-left:0">停车场</span></div>
+              <div class="flow-op-row">
+                <div class="flow-op active" onclick="switchOp(this,'park-arrive')">到达</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-op" onclick="switchOp(this,'park-depart')">发车</div>
+              </div>
+              <div style="text-align:center;color:#999;font-size:11px;margin-top:6px">支持「到达 + 发车」字段配置</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-config-panel">
+          <div class="panel-header">
+            <span>📋 字段配置</span>
+            <span class="tag tag-blue" style="margin-left:8px">当前：停车场 - 到达</span>
+          </div>
+          <div class="field-cfg-wrap">
+            <table class="field-cfg-table">
+              <thead><tr><th style="width:40px"></th><th>字段名</th><th class="center">显示</th><th class="center">必填</th><th>说明</th></tr></thead>
+              <tbody id="tbody-park">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="memo-card">
+        <div class="memo-title">备注说明</div>
+        <div class="memo-text">1. 始发节点，无到达操作；
+2. 终点节点，无发车操作。</div>
+      </div>
+
+    </div>
+
+    <div class="addr-pane" id="pane-charge" style="display:none">
+
+      <div class="config-layout">
+        <div class="node-flow-panel">
+          <div class="panel-header"><span>📍 节点流程</span></div>
+          <div class="panel-body">
+            <div class="flow-step-box" style="border-color:#0097cf;background:#f7fbfe">
+              <div class="flow-step-title"><span class="seq">·</span><span class="address-type-tag at-charge" style="margin-left:0">充电站</span></div>
+              <div class="flow-op-row">
+                <div class="flow-op active" onclick="switchOp(this,'charge-arrive')">到达</div>
+                <span class="flow-arrow">→</span>
+                <div class="flow-op" onclick="switchOp(this,'charge-depart')">发车</div>
+              </div>
+              <div style="text-align:center;color:#999;font-size:11px;margin-top:6px">支持「到达 + 发车」字段配置</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-config-panel">
+          <div class="panel-header">
+            <span>📋 字段配置</span>
+            <span class="tag tag-blue" style="margin-left:8px">当前：充电站 - 到达</span>
+          </div>
+          <div class="field-cfg-wrap">
+            <table class="field-cfg-table">
+              <thead><tr><th style="width:40px"></th><th>字段名</th><th class="center">显示</th><th class="center">必填</th><th>说明</th></tr></thead>
+              <tbody id="tbody-charge">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="memo-card">
+        <div class="memo-title">备注说明</div>
+        <div class="memo-text">1. 始发节点，无到达操作；
+2. 终点节点，无发车操作。</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:20px 0">
+    <button class="fn-btn fn-btn--default" onclick="showPage('page-flow-step1')" style="margin-right:10px">← 上一步</button>
+    <button class="fn-btn fn-btn--default" onclick="showPage('page-flow-list')" style="margin-right:10px">取消</button>
+    <button class="fn-btn fn-btn--primary" onclick="showPage('page-flow-list')" style="height:32px;padding:0 24px">保存流程</button>
+  </div>
+</div>
+
+</div>
+
+</div>
+
+<script>
+// ============ 字段配置数据：[字段名, 显示, 必填, 系统强制?] ============
+var FIELD_DATA={
+  // 装货地
+  'load-arrive':[
+    ['到达时间',1,1,1],['到达地址',1,1,1],
+    ['到达公里数',1,1,0],['到达总油耗',0,0,0],['到达油耗照片',0,0,0],
+    ['卸货等待时长',1,0,0],['到达备注',1,0,0]
+  ],
+  'load-depart':[
+    ['发车时间',1,1,1],
+    ['提货客户',1,1,0],['发货地址',1,1,0],['装车单号',1,0,0],
+    ['发车公里数',1,1,0],['发车总油耗',1,0,0],['发车油耗照片',0,0,0],
+    ['装车毛重',1,1,0],['装车皮重',1,1,0],['装车净重',1,1,0],['装车照片',1,1,0],
+    ['装车等待时长',1,0,0],['提货单照片',1,0,0],['装货回单',1,1,0],
+    ['委托单号',0,0,0],['发车备注',1,0,0],['装货过磅时间',1,0,0],
+    ['货物名称',1,0,0],['件数',0,0,0],['货物体积',0,0,0],
+    ['货物重量',0,0,0],['套数',0,0,0]
+  ],
+  // 卸货地
+  'unload-arrive':[
+    ['到达时间',1,1,1],['到达地址',1,1,1],
+    ['卸货客户',1,1,0],['卸车单号',1,0,0],
+    ['到达公里数',1,1,0],['到达总油耗',0,0,0],['到达油耗照片',0,0,0],
+    ['卸货等待时长',1,0,0],['单程油耗',1,0,0],
+    ['卸车毛重',1,1,0],['卸车皮重',1,1,0],['卸车净重',1,1,0],
+    ['到达备注',1,0,0],['卸货过磅时间',1,0,0]
+  ],
+  'unload-discharge':[
+    ['卸车开始时间',1,1,0],['卸车完成时间',1,1,0],['卸车时间',1,1,0],
+    ['卸车单号',1,0,0],['单程油耗',0,0,0],['到达公里数',0,0,0],
+    ['卸货等待时长',1,0,0],
+    ['卸车毛重',1,1,0],['卸车皮重',1,1,0],['卸车净重',1,1,0],
+    ['卸车备注',1,0,0],['卸车照片',1,1,0],['卸货回单',1,1,0],
+    ['卸货过磅时间',1,0,0]
+  ],
+  'unload-depart':[
+    ['发车时间',1,1,1],
+    ['发车公里数',1,0,0],['发车总油耗',0,0,0],['发车备注',1,0,0]
+  ],
+  // 停车场
+  'park-arrive':[
+    ['到达时间',1,1,1],['到达地址',1,1,1],
+    ['到达公里数',1,0,0],['到达备注',1,0,0]
+  ],
+  'park-depart':[
+    ['发车时间',1,1,1],
+    ['发车公里数',1,0,0],['发车备注',1,0,0]
+  ],
+  // 充电站
+  'charge-arrive':[
+    ['到达时间',1,1,1],['到达地址',1,1,1],
+    ['到达公里数',1,1,0],
+    ['自定义字段1（建议命名：充电前电量）',1,1,0],
+    ['到达油耗照片（充电桩照片）',1,0,0],
+    ['到达备注',1,0,0]
+  ],
+  'charge-depart':[
+    ['发车时间',1,1,1],
+    ['发车公里数',1,1,0],
+    ['自定义字段2（建议命名：充电后电量）',1,1,0],
+    ['自定义字段3（建议命名：充电费用）',1,0,0],
+    ['发车备注',1,0,0]
+  ]
+};
+var ADDR_NAME={'pane-load':'装货地','pane-unload':'卸货地','pane-park':'停车场','pane-charge':'充电站'};
+var OP_NAME={arrive:'到达',depart:'发车',discharge:'卸车'};
+var TBODY_ID={'pane-load':'tbody-load','pane-unload':'tbody-unload','pane-park':'tbody-park','pane-charge':'tbody-charge'};
+
+function renderFields(paneId,opKey){
+  var tbody=document.getElementById(TBODY_ID[paneId]);
+  if(!tbody)return;
+  var data=FIELD_DATA[opKey]||[];
+  var html='<tr class="batch-row"><td></td><td>全部（批量设置）</td>'+
+    '<td class="center"><input type="checkbox" onclick="batchSet(this,0)"></td>'+
+    '<td class="center"><input type="checkbox" onclick="batchSet(this,1)"></td>'+
+    '<td></td></tr>';
+  data.forEach(function(item){
+    var name=item[0],show=item[1],req=item[2],locked=item[3];
+    if(locked){
+      html+='<tr class="locked"><td></td><td>'+name+' <span class="lock-tag">系统强制</span></td>'+
+        '<td class="center"><input type="checkbox" checked disabled></td>'+
+        '<td class="center"><input type="checkbox" checked disabled></td><td></td></tr>';
+    }else{
+      var reqDisabled=show?'':' disabled';
+      html+='<tr><td></td><td>'+name+'</td>'+
+        '<td class="center"><input type="checkbox"'+(show?' checked':'')+' onclick="onShowToggle(this)"></td>'+
+        '<td class="center"><input type="checkbox"'+(req?' checked':'')+reqDisabled+'></td><td></td></tr>';
+    }
+  });
+  // 自定义字段展开行
+  html+='<tr><td colspan="5" style="text-align:center;color:#0097cf;cursor:pointer;background:#fafbfc;padding:10px">▼ 展开自定义字段 1-6</td></tr>';
+  tbody.innerHTML=html;
+  // 更新右侧表头标签 + 字段数量
+  var pane=document.getElementById(paneId);
+  var label=pane.querySelector('.field-config-panel .panel-header .tag');
+  if(label){
+    var op=opKey.split('-')[1];
+    label.textContent='当前：'+ADDR_NAME[paneId]+' - '+OP_NAME[op];
+  }
+  var countEl=pane.querySelector('.field-config-panel .panel-header span:last-child');
+  if(countEl&&countEl.style.marginLeft==='auto'){
+    countEl.textContent='共 '+data.length+' 个字段';
+  }
+}
+function onShowToggle(cb){
+  // 显示开关切换 → 联动同行的"必填"开关
+  var row=cb.closest('tr');
+  var reqCb=row.querySelectorAll('td.center input[type=checkbox]')[1];
+  if(!reqCb)return;
+  if(!cb.checked){
+    reqCb.checked=false;
+    reqCb.disabled=true;
+  }else{
+    reqCb.disabled=false;
+  }
+}
+
+function showPage(id){
+  document.querySelectorAll('.page-section').forEach(p=>p.classList.remove('active'));
+  var el=document.getElementById(id);
+  if(el)el.classList.add('active');
+  var navMap={'page-address':'nav-address','page-flow-list':'nav-flow-list','page-flow-step1':'nav-flow-list','page-flow-step2':'nav-flow-list'};
+  document.querySelectorAll('.sidebar-item').forEach(it=>it.classList.remove('active'));
+  if(navMap[id]&&document.getElementById(navMap[id]))document.getElementById(navMap[id]).classList.add('active');
+}
+function switchAddrTab(tabEl,tabId){
+  document.querySelectorAll('#flow-step2 .fn-tab').forEach(t=>t.classList.remove('active'));
+  tabEl.classList.add('active');
+  document.querySelectorAll('#flow-step2 .addr-pane').forEach(p=>p.style.display='none');
+  document.getElementById(tabId).style.display='block';
+}
+function openModal(id){document.getElementById(id).classList.add('show')}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+function switchOp(el,key){
+  var pane=el.closest('.addr-pane');
+  if(!pane)return;
+  pane.querySelectorAll('.flow-op').forEach(function(o){o.classList.remove('active')});
+  el.classList.add('active');
+  renderFields(pane.id,key);
+}
+function batchSet(checkbox,colIdx){
+  var table=checkbox.closest('table');
+  if(!table)return;
+  var rows=table.querySelectorAll('tbody tr:not(.batch-row):not(.locked)');
+  rows.forEach(function(r){
+    var cells=r.querySelectorAll('td.center');
+    if(cells[colIdx]){
+      var cb=cells[colIdx].querySelector('input[type=checkbox]');
+      if(cb&&!cb.disabled)cb.checked=checkbox.checked;
+    }
+  });
+}
+
+// 页面加载后，给每个 pane 渲染默认操作的字段
+document.addEventListener('DOMContentLoaded',function(){
+  renderFields('pane-load','load-depart');
+  renderFields('pane-unload','unload-arrive');
+  renderFields('pane-park','park-arrive');
+  renderFields('pane-charge','charge-arrive');
+});
+</script>
+</body>
+</html>

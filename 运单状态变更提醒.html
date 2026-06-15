@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>公众号提醒配置 - 财运通</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft YaHei",tahoma,arial,sans-serif;font-size:12px;color:#333;background:#ecf0f4;min-width:1280px}
+.topbar{position:fixed;top:0;left:0;right:0;height:44px;background:linear-gradient(180deg,#0a3d6b,#01224f);z-index:100;display:flex;align-items:center;padding:0 16px}
+.topbar-logo{color:#fff;font-size:18px;font-weight:700}
+.topbar-right{margin-left:auto;color:rgba(255,255,255,.8);font-size:12px}
+.sidebar{position:fixed;top:44px;left:0;bottom:0;width:180px;background:#fff;border-right:1px solid #d3d3d3;overflow-y:auto;z-index:90}
+.sidebar-group-title{height:30px;padding:0 10px;font-size:12px;color:#0a3d6b;font-weight:700;display:flex;align-items:center;gap:4px;cursor:pointer;background:#f0f5fa;border-top:1px solid #d3d3d3;border-bottom:1px solid #e4eef6;user-select:none}
+.sidebar-item{height:34px;padding:0 14px;font-size:13px;color:#333;display:flex;align-items:center;gap:8px;cursor:pointer}
+.sidebar-item:hover{background:#e4eef6;color:#0097cf}
+.sidebar-item.active{background:#a9dafb;color:#0097cf}
+.sidebar-sub{padding-left:10px}
+.main{margin-left:180px;margin-top:44px;padding:10px;background:#ecf0f4;min-height:calc(100vh - 44px)}
+.card{background:#fff;border:1px solid #d3d3d3;border-radius:2px;margin-bottom:10px}
+.card-body{padding:12px}
+.fn-btn{height:28px;padding:0 10px;border-radius:2px;font-size:12px;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:4px}
+.fn-btn--primary{background:linear-gradient(270deg,#0cace7,#23c2ff);color:#fff}
+.fn-btn--primary:hover{opacity:.85}
+.fn-btn--default{background:linear-gradient(-180deg,#fff,#f7f7f7 96%);border:1px solid #b9ccd7;color:#333}
+.fn-btn--default:hover{border-color:#378cbe;color:#0097cf}
+.action-bar{background:#fff;border:1px solid #d3d3d3;border-bottom:none;padding:6px 10px;display:flex;gap:6px;align-items:center}
+.action-bar .spacer{flex:1}
+.action-bar .right-tools{margin-left:auto;display:flex;gap:6px;align-items:center}
+.fn-table-wrap{border:1px solid #d3d3d3;background:#fff;overflow:auto}
+.fn-table{width:100%;border-collapse:collapse}
+.fn-table th{background:linear-gradient(180deg,#fdfdfd,#ebebeb);font-weight:400;font-size:12px;color:#333;border-right:1px solid #d3d3d3;border-bottom:1px solid #d3d3d3;padding:0 4px;height:30px;text-align:center}
+.fn-table td{padding:0 4px;height:30px;text-align:center;border-right:1px solid #ccc;border-bottom:1px solid #eee}
+.fn-table tr:hover td{background:#fffde3}
+.fn-table a{color:#0097cf;cursor:pointer;text-decoration:none}
+.fn-table a:hover{text-decoration:underline}
+.fn-page{display:flex;gap:4px;padding:8px 10px;background:#fff;border-top:1px solid #eee;justify-content:flex-end}
+.fn-page-btn{height:24px;min-width:24px;padding:0 6px;border:1px solid #b9ccd7;background:linear-gradient(-180deg,#fff,#f7f7f7 96%);color:#0097cf;border-radius:2px;cursor:pointer;font-size:12px}
+.fn-page-btn.active{background:#0097cf;color:#fff;border-color:#0097cf}
+.fn-page-info{color:#999;font-size:12px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.fn-dialog{background:#fff;min-width:700px;max-width:860px;box-shadow:0 4px 20px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto}
+.fn-dialog-header{background:#eaeaea;height:36px;display:flex;align-items:center;padding:0 14px;font-size:14px;font-weight:700;border-bottom:1px solid #d3d3d3}
+.fn-dialog-close{margin-left:auto;cursor:pointer;color:#666;font-size:18px}
+.fn-dialog-body{padding:16px 20px}
+.fn-dialog-footer{background:#eaeaea;padding:6px 10px;display:flex;justify-content:flex-end;gap:6px;border-top:1px solid #d3d3d3}
+.fn-input,.fn-select{height:24px;border:1px solid rgba(34,36,38,.2);border-radius:2px;padding:0 5px;font-size:12px;background:#fff;outline:none;min-width:180px}
+.fn-input:focus{background:#e2f7ff;border-color:#0097cf}
+.fn-select:focus{background:#e2f7ff;border-color:#0097cf}
+.hidden{display:none !important}
+
+/* 模块区块样式 */
+.section{border:1px solid #d3e8f5;margin-bottom:14px;border-radius:2px;position:relative}
+.section-header{display:flex;align-items:center;gap:6px;padding:8px 12px;background:#f6fbff;border-bottom:1px solid #d3e8f5}
+.section-header::before{content:'';width:3px;height:14px;background:#0097cf;border-radius:1px}
+.section-header .section-icon{color:#0097cf;font-size:13px}
+.section-header .section-title{color:#0097cf;font-size:13px;font-weight:500}
+.section-body{padding:14px 16px}
+
+.form-row{display:flex;gap:12px;margin-bottom:12px;align-items:center}
+.form-row:last-child{margin-bottom:0}
+.form-label{color:#333;font-size:12px;min-width:90px;text-align:right}
+.form-label .required{color:#f5222d;margin-right:2px}
+
+.checkbox-group{display:flex;gap:8px;flex-wrap:wrap}
+.checkbox-item{display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:2px 8px;border:1px solid #d3d3d3;border-radius:2px;background:#fff}
+.checkbox-item input{width:14px;height:14px;cursor:pointer;accent-color:#0097cf}
+.checkbox-item:hover{border-color:#0097cf}
+.checkbox-item.checked{border-color:#0097cf;background:#e2f7ff}
+
+.tag-btn{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border:1px solid #d3d3d3;border-radius:2px;background:#fff;cursor:pointer;font-size:12px;color:#333}
+.tag-btn:hover{border-color:#0097cf;color:#0097cf}
+.tag-btn.active{border-color:#0097cf;background:#e2f7ff;color:#0097cf}
+.tag-btn .tag-icon{font-size:14px}
+
+.tree-select{height:28px;border:1px solid rgba(34,36,38,.2);border-radius:2px;padding:0 8px;font-size:12px;background:#fff;outline:none;min-width:300px;display:flex;align-items:center;color:#999;cursor:pointer}
+.tree-select:hover{border-color:#0097cf}
+.tree-select.has-value{color:#333}
+
+.multi-select{min-width:240px;min-height:28px;border:1px solid rgba(34,36,38,.2);border-radius:2px;padding:3px 6px;font-size:12px;background:#fff;cursor:pointer;display:flex;flex-wrap:wrap;gap:4px;align-items:center;position:relative}
+.multi-select:hover{border-color:#0097cf}
+.multi-select .placeholder{color:#999}
+.multi-select .selected-tag{display:inline-flex;align-items:center;gap:2px;padding:1px 6px;background:#e2f7ff;border:1px solid #b3e0f5;border-radius:2px;color:#0097cf;font-size:11px}
+.multi-select .selected-tag .remove{cursor:pointer;font-size:14px;line-height:1}
+.multi-dropdown{display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #d3d3d3;border-top:none;box-shadow:0 4px 8px rgba(0,0,0,.1);z-index:10;max-height:200px;overflow-y:auto}
+.multi-dropdown.show{display:block}
+.multi-dropdown-item{padding:6px 10px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.multi-dropdown-item:hover{background:#e4eef6}
+.multi-dropdown-item input{width:14px;height:14px;accent-color:#0097cf;cursor:pointer}
+.multi-wrap{position:relative;display:inline-block}
+
+.org-textarea{width:100%;min-height:60px;border:1px solid rgba(34,36,38,.2);border-radius:2px;padding:6px 8px;font-size:12px;background:#fff;resize:none;outline:none;color:#333}
+.org-textarea:focus{border-color:#0097cf;background:#e2f7ff}
+
+.hint-text{color:#999;font-size:11px;margin-top:4px}
+
+.tag{display:inline-block;padding:1px 6px;border-radius:2px;font-size:11px}
+.tag-blue{background:#e2f7ff;color:#0097cf;border:1px solid #b3e0f5}
+.tag-green{background:#e6f7e6;color:#14aa65;border:1px solid #c2efb2}
+.c-state{display:inline-flex;align-items:center;gap:4px}
+.c-state::before{content:'';width:10px;height:10px;border-radius:5px;border:2px solid}
+.c-state-green{color:#14aa65}
+.c-state-green::before{background:#35cd04;border-color:#c2efb2}
+.breadcrumb{font-size:12px;color:#999;margin-bottom:6px}
+</style>
+</head>
+<body>
+<!-- Topbar -->
+<div class="topbar">
+  <div class="topbar-logo">财运通 - G7易流</div>
+  <div class="topbar-right">演示账号 | 2026-06-15</div>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-group-title">系统管理</div>
+  <div class="sidebar-item">组织管理</div>
+  <div class="sidebar-item">用户管理</div>
+  <div class="sidebar-item">权限管理</div>
+  <div class="sidebar-item active">公众号提醒</div>
+  <div class="sidebar-item">系统设置</div>
+  <div class="sidebar-group-title">财务管理</div>
+  <div class="sidebar-item">费用管理</div>
+  <div class="sidebar-item">对账结算</div>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <div class="breadcrumb">系统管理 / 公众号提醒配置</div>
+
+  <!-- Action Bar -->
+  <div class="action-bar">
+    <button class="fn-btn fn-btn--primary" onclick="showModal()">+ 新增提醒</button>
+    <div class="spacer"></div>
+    <div class="right-tools">
+      <input type="text" class="fn-input" placeholder="请输入关键词" style="width:160px;">
+      <button class="fn-btn fn-btn--default">搜索</button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="fn-table-wrap">
+    <table class="fn-table">
+      <thead>
+        <tr>
+          <th>提醒类型</th>
+          <th>提醒组织</th>
+          <th>车辆合作关系</th>
+          <th>触发场景</th>
+          <th>提醒方式</th>
+          <th>提醒对象</th>
+          <th>状态</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="tag tag-blue">网货运单认证提醒</span></td>
+          <td>华东大区、华南大区</td>
+          <td>-</td>
+          <td>当日待处理加急网货异常运单</td>
+          <td>定时提醒（每日 09:00）</td>
+          <td>调度组（12人）</td>
+          <td><span class="c-state c-state-green">启用</span></td>
+          <td><a>编辑</a> <a>删除</a></td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-green">运单状态变更提醒</span></td>
+          <td>全部组织</td>
+          <td>自有、外调</td>
+          <td>运单发车、运单到达、运单卸车</td>
+          <td>实时提醒</td>
+          <td>按车辆调度员</td>
+          <td><span class="c-state c-state-green">启用</span></td>
+          <td><a>编辑</a> <a>删除</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="fn-page">
+    <span class="fn-page-info">共 2 条记录</span>
+    <button class="fn-page-btn">上一页</button>
+    <button class="fn-page-btn active">1</button>
+    <button class="fn-page-btn">下一页</button>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="fn-dialog">
+    <div class="fn-dialog-header">
+      <span>公众号提醒</span>
+      <span class="fn-dialog-close" onclick="hideModal()">&times;</span>
+    </div>
+    <div class="fn-dialog-body">
+
+      <!-- 模块1：提醒类型 -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-icon">☺</span>
+          <span class="section-title">提醒类型</span>
+        </div>
+        <div class="section-body">
+          <div class="form-row">
+            <select class="fn-select" id="reminderType" onchange="onTypeChange()" style="min-width:200px;">
+              <option value="">请选择</option>
+              <option value="net">网货运单认证提醒</option>
+              <option value="waybill" selected>运单状态变更提醒</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 模块2：提醒项 -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-icon">☺</span>
+          <span class="section-title">提醒项</span>
+        </div>
+        <div class="section-body">
+          <!-- 提醒组织 -->
+          <div class="form-row" style="align-items:flex-start;">
+            <textarea class="org-textarea" placeholder="下拉选择启用组织" readonly style="height:50px;">华东大区、华南大区</textarea>
+          </div>
+
+          <!-- 车辆合作关系 -->
+          <div class="form-row" style="align-items:flex-start;" id="cooperationRow">
+            <span class="form-label">车辆合作关系：</span>
+            <div class="multi-wrap" id="cooperationWrap">
+              <div class="multi-select" onclick="toggleDropdown('cooperationDropdown')" style="min-width:300px;">
+                <span class="selected-tag">自有<span class="remove">×</span></span>
+                <span class="selected-tag">外调<span class="remove">×</span></span>
+              </div>
+              <div class="multi-dropdown" id="cooperationDropdown">
+                <label class="multi-dropdown-item"><input type="checkbox" checked> 自有</label>
+                <label class="multi-dropdown-item"><input type="checkbox" checked> 外调</label>
+                <label class="multi-dropdown-item"><input type="checkbox"> 加盟</label>
+              </div>
+            </div>
+          </div>
+          <div class="form-row" id="cooperationHint">
+            <span class="form-label"></span>
+            <span class="hint-text">数据来源：公司管理-系统设置-基础设置-车辆设置-合作关系</span>
+          </div>
+
+          <!-- 以上组织发生的 -->
+          <div class="form-row" style="margin-top:8px;">
+            <span style="color:#333;font-size:12px;">以上组织发生的：</span>
+          </div>
+
+          <!-- 触发场景 -->
+          <div class="form-row" id="waybillSceneWrap">
+            <div class="multi-wrap">
+              <div class="multi-select" onclick="toggleDropdown('waybillDropdown')" style="min-width:300px;">
+                <span class="selected-tag">运单靠台<span class="remove">×</span></span>
+                <span class="selected-tag">运单发车<span class="remove">×</span></span>
+                <span class="selected-tag">运单到达<span class="remove">×</span></span>
+              </div>
+              <div class="multi-dropdown" id="waybillDropdown">
+                <label class="multi-dropdown-item"><input type="checkbox" checked> 运单靠台</label>
+                <label class="multi-dropdown-item"><input type="checkbox" checked> 运单发车</label>
+                <label class="multi-dropdown-item"><input type="checkbox" checked> 运单到达</label>
+                <label class="multi-dropdown-item"><input type="checkbox"> 运单卸车</label>
+              </div>
+            </div>
+          </div>
+          <div class="hidden" id="netSceneWrap">
+            <div class="form-row">
+              <div class="multi-wrap">
+                <div class="multi-select" onclick="toggleDropdown('netDropdown')" style="min-width:300px;">
+                  <span class="selected-tag">当日待处理加急网货异常运单<span class="remove">×</span></span>
+                </div>
+                <div class="multi-dropdown" id="netDropdown">
+                  <label class="multi-dropdown-item"><input type="checkbox" checked> 当日待处理加急网货异常运单</label>
+                  <label class="multi-dropdown-item"><input type="checkbox"> 本月待处理网货异常运单</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 模块3：提醒方式 -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-icon">☺</span>
+          <span class="section-title">提醒方式</span>
+        </div>
+        <div class="section-body">
+          <div class="form-row">
+            <select class="fn-select" id="remindWay" style="min-width:140px;">
+              <option value="realtime" selected>实时提醒</option>
+            </select>
+          </div>
+          <!-- 执行时间（定时提醒时展示） -->
+          <div class="hidden" id="timingConfig">
+            <div class="form-row" style="margin-top:8px;">
+              <button class="fn-btn fn-btn--primary">新增提醒周期</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 模块4：提醒对象 -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-icon">☺</span>
+          <span class="section-title">提醒对象</span>
+        </div>
+        <div class="section-body">
+          <div class="form-row">
+            <span class="tag-btn" onclick="switchTarget('group',this)">
+              <span class="tag-icon">👥</span> 用户组
+            </span>
+            <span class="tag-btn" onclick="switchTarget('user',this)">
+              <span class="tag-icon">👤</span> 员工
+            </span>
+            <span class="tag-btn active" onclick="switchTarget('dispatcher',this)">
+              <span class="tag-icon">🚛</span> 按车辆调度员
+            </span>
+          </div>
+          <!-- 选择框：按用户组/员工时展示，按车辆调度员时隐藏 -->
+          <div class="form-row hidden" id="targetSelectRow">
+            <input type="text" class="fn-input" style="width:100%;min-width:400px;height:28px;" placeholder="请选择用户组或员工" readonly>
+          </div>
+          <!-- 按车辆调度员时的说明 -->
+          <div class="form-row" id="dispatcherHint">
+            <span class="hint-text">通知将发送给运单中车辆信息对应的调度员，不受数据权限限制</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="fn-dialog-footer">
+      <button class="fn-btn fn-btn--primary">确定</button>
+      <button class="fn-btn fn-btn--default" onclick="hideModal()">取消</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function showModal() {
+  document.getElementById('modal').classList.add('show');
+}
+function hideModal() {
+  document.getElementById('modal').classList.remove('show');
+}
+function onTypeChange() {
+  const type = document.getElementById('reminderType').value;
+  const netSceneWrap = document.getElementById('netSceneWrap');
+  const waybillSceneWrap = document.getElementById('waybillSceneWrap');
+  const timingConfig = document.getElementById('timingConfig');
+  const remindWay = document.getElementById('remindWay');
+  const cooperationRow = document.getElementById('cooperationRow');
+  const cooperationHint = document.getElementById('cooperationHint');
+
+  if (type === 'net') {
+    netSceneWrap.classList.remove('hidden');
+    waybillSceneWrap.classList.add('hidden');
+    timingConfig.classList.remove('hidden');
+    cooperationRow.classList.add('hidden');
+    cooperationHint.classList.add('hidden');
+    remindWay.innerHTML = '<option value="timing" selected>\u5b9a\u65f6\u63d0\u9192</option>';
+  } else if (type === 'waybill') {
+    netSceneWrap.classList.add('hidden');
+    waybillSceneWrap.classList.remove('hidden');
+    timingConfig.classList.add('hidden');
+    cooperationRow.classList.remove('hidden');
+    cooperationHint.classList.remove('hidden');
+    remindWay.innerHTML = '<option value="realtime" selected>\u5b9e\u65f6\u63d0\u9192</option>';
+  }
+}
+function toggleDropdown(id) {
+  const dd = document.getElementById(id);
+  const all = document.querySelectorAll('.multi-dropdown');
+  all.forEach(d => { if (d.id !== id) d.classList.remove('show'); });
+  dd.classList.toggle('show');
+}
+function switchTarget(type, el) {
+  // 切换按钮高亮
+  document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+
+  const targetSelectRow = document.getElementById('targetSelectRow');
+  const dispatcherHint = document.getElementById('dispatcherHint');
+
+  if (type === 'dispatcher') {
+    targetSelectRow.classList.add('hidden');
+    dispatcherHint.classList.remove('hidden');
+  } else {
+    targetSelectRow.classList.remove('hidden');
+    dispatcherHint.classList.add('hidden');
+  }
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.multi-wrap')) {
+    document.querySelectorAll('.multi-dropdown').forEach(d => d.classList.remove('show'));
+  }
+});
+showModal();
+</script>
+</body>
+</html>

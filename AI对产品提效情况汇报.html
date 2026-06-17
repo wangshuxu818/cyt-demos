@@ -387,6 +387,7 @@
 
   <!-- 导航 -->
   <div class="nav-bar">
+    <a href="#overview">我做了哪些事</a>
     <a href="#data">核心数据</a>
     <a href="#breakdown">环节拆解</a>
     <a href="#insight">关键洞察</a>
@@ -394,9 +395,81 @@
     <a href="#next">下一步</a>
   </div>
 
+  <!-- 我用 AI 做了哪些事 -->
+  <div class="section" id="overview">
+    <div class="section-title">一、我用 AI 做了哪些事</div>
+    <div class="data-cards">
+      <div class="data-card blue">
+        <div class="num">10</div>
+        <div class="label">SKILL 工具链</div>
+        <div class="sub">需求→验收全链路覆盖</div>
+      </div>
+      <div class="data-card green">
+        <div class="num">15</div>
+        <div class="label">原型产出</div>
+        <div class="sub">可交互原型 + Demo</div>
+      </div>
+      <div class="data-card purple">
+        <div class="num">34</div>
+        <div class="label">文档产出</div>
+        <div class="sub">规划文档 9 份 / 需求文档 25 篇</div>
+      </div>
+      <div class="data-card orange">
+        <div class="num">7</div>
+        <div class="label">知识库</div>
+        <div class="sub">4000+ 行 · 每月自动更新</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top: 4px;">
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid #e4e8ee; border-radius: 6px; overflow: hidden; font-size: 12px;">
+        <div style="padding: 16px; border-right: 1px solid #e4e8ee; background: #f0f8ff;">
+          <div style="font-weight: 700; color: #0097cf; margin-bottom: 8px;">🔧 SKILL 工具链搭建</div>
+          <div style="color: #555; line-height: 1.8;">
+            user-story-generator<br>
+            cytpc-ui-design<br>
+            prd-generator<br>
+            prd-scorer<br>
+            req-acceptance<br>
+            brainstorm 等 10 个
+          </div>
+        </div>
+        <div style="padding: 16px; border-right: 1px solid #e4e8ee; background: #f0fff4;">
+          <div style="font-weight: 700; color: #14aa65; margin-bottom: 8px;">🎨 原型产出</div>
+          <div style="color: #555; line-height: 1.8;">
+            基于真实 CSS 源码<br>
+            高保真可交互 HTML<br>
+            替代 Axure/Figma<br>
+            已发布 GitHub Pages<br>
+            共 15 个
+          </div>
+        </div>
+        <div style="padding: 16px; border-right: 1px solid #e4e8ee; background: #fdf4ff;">
+          <div style="font-weight: 700; color: #532fe6; margin-bottom: 8px;">📄 文档产出</div>
+          <div style="color: #555; line-height: 1.8;">
+            规划文档 9 份<br>
+            &nbsp;&nbsp;智能调度方案<br>
+            &nbsp;&nbsp;AI-Agent 架构等<br>
+            需求文档 25 篇<br>
+            &nbsp;&nbsp;用户故事·价值·PRD
+          </div>
+        </div>
+        <div style="padding: 16px; background: #fffbf0;">
+          <div style="font-weight: 700; color: #e35d00; margin-bottom: 8px;">📚 知识沉淀 + 自动化验收</div>
+          <div style="color: #555; line-height: 1.8;">
+            7 个知识库 4000+ 行<br>
+            每月 1 日自动更新<br>
+            —<br>
+            浏览器自动化验收<br>
+            已跑通 2 个需求
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 核心数据 -->
   <div class="section" id="data">
-    <div class="section-title">一、核心提效数据</div>
+    <div class="section-title">二、核心提效数据</div>
     <div class="data-cards">
       <div class="data-card blue">
         <div class="num">60%</div>
@@ -588,7 +661,7 @@
 
   <!-- 环节拆解 -->
   <div class="section" id="breakdown">
-    <div class="section-title">二、提效环节拆解</div>
+    <div class="section-title">三、提效环节拆解</div>
     <div class="grid-2">
       <div class="insight-card">
         <h4 style="color: #16a34a;">已提效的环节</h4>
@@ -619,7 +692,7 @@
 
   <!-- 关键洞察 -->
   <div class="section" id="insight">
-    <div class="section-title">三、关键洞察</div>
+    <div class="section-title">四、关键洞察</div>
 
     <!-- 洞察1：规模正相关 -->
     <div class="card">
@@ -690,8 +763,13 @@
 
   <!-- 适用边界 -->
   <div class="section" id="boundary">
-    <div class="section-title">四、适用边界</div>
+    <div class="section-title">五、适用边界</div>
     <div class="boundary-grid">
+      <div class="boundary-item">
+        <div class="b-level l3"></div>
+        <div class="b-title">方案探讨</div>
+        <div class="b-desc">AI 提供选项<br><strong style="color: #e35d00;">辅助</strong></div>
+      </div>
       <div class="boundary-item">
         <div class="b-level l1"></div>
         <div class="b-title">大需求</div>
@@ -701,11 +779,6 @@
         <div class="b-level l2"></div>
         <div class="b-title">中需求</div>
         <div class="b-desc">已有能力扩展<br><strong style="color: #0097cf;">推荐</strong></div>
-      </div>
-      <div class="boundary-item">
-        <div class="b-level l3"></div>
-        <div class="b-title">方案探讨</div>
-        <div class="b-desc">AI 提供选项<br><strong style="color: #e35d00;">辅助</strong></div>
       </div>
       <div class="boundary-item">
         <div class="b-level l4"></div>
@@ -722,7 +795,7 @@
 
   <!-- 下一步 -->
   <div class="section" id="next">
-    <div class="section-title">五、下一步提效方向</div>
+    <div class="section-title">六、下一步提效方向</div>
     <div class="roadmap-steps">
       <div class="roadmap-card">
         <div class="rc-header">

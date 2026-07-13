@@ -734,10 +734,10 @@
                         <div class="task-meta">WB20250713005 | 电子产品 | 4节点</div>
                     </div>
                     <div class="task-actions">
-                        <button class="btn btn-primary btn-small">修改</button>
+                        <button class="btn btn-primary btn-small">修改运单</button>
                     </div>
                 </div>
-                
+
                 <div class="task-card incomplete">
                     <div class="task-info">
                         <div class="task-route">广州→杭州</div>
@@ -745,7 +745,7 @@
                     </div>
                     <div class="task-actions">
                         <span class="warning-badge">⚠ 数据缺失</span>
-                        <button class="btn btn-primary btn-small">修改</button>
+                        <button class="btn btn-primary btn-small">修改运单</button>
                     </div>
                 </div>
             </div>
@@ -776,10 +776,10 @@
                     </div>
                     <div class="node-header-right">
                         <span class="status-icon check">✓</span>
-                        <span class="collapse-arrow">▼</span>
+                        <span class="collapse-arrow expanded">▼</span>
                     </div>
                 </div>
-                <div class="node-content">
+                <div class="node-content expanded">
                     <div class="form-grid">
                         <div class="form-item">
                             <label class="form-label">提货客户</label>
@@ -846,10 +846,10 @@
                     </div>
                     <div class="node-header-right">
                         <span class="status-icon warning">!</span>
-                        <span class="collapse-arrow expanded">▼</span>
+                        <span class="collapse-arrow">▼</span>
                     </div>
                 </div>
-                <div class="node-content expanded">
+                <div class="node-content">
                     <div class="waypoint-tip">
                         <span>ℹ️</span>
                         <span>途经点仅支持修改到达/发车公里数</span>
@@ -873,7 +873,7 @@
                     <div class="node-title-wrapper">
                         <div class="node-icon destination-arrival locked">📍</div>
                         <div>
-                            <div class="node-title">终点节点到达</div>
+                            <div class="node-title">终点到达</div>
                             <div class="node-subtitle">终点 · 上海市</div>
                         </div>
                     </div>
@@ -884,7 +884,7 @@
                 <div class="node-content expanded">
                     <div class="locked-tip">
                         <div class="locked-tip-icon">🚫</div>
-                        <div class="locked-tip-text">终点节点到达尚未操作，暂不可修改</div>
+                        <div class="locked-tip-text">终点到达尚未操作，暂不可修改</div>
                     </div>
                 </div>
             </div>
@@ -895,7 +895,7 @@
                     <div class="node-title-wrapper">
                         <div class="node-icon destination-unload locked">📦</div>
                         <div>
-                            <div class="node-title">终点节点卸车</div>
+                            <div class="node-title">终点卸车</div>
                             <div class="node-subtitle">终点 · 上海市</div>
                         </div>
                     </div>
@@ -906,7 +906,7 @@
                 <div class="node-content expanded">
                     <div class="locked-tip">
                         <div class="locked-tip-icon">🚫</div>
-                        <div class="locked-tip-text">终点节点卸车尚未操作，暂不可修改</div>
+                        <div class="locked-tip-text">终点卸车尚未操作，暂不可修改</div>
                     </div>
                 </div>
             </div>
@@ -959,10 +959,10 @@
                     </div>
                     <div class="node-header-right">
                         <span class="status-icon check">✓</span>
-                        <span class="collapse-arrow">▼</span>
+                        <span class="collapse-arrow expanded">▼</span>
                     </div>
                 </div>
-                <div class="node-content">
+                <div class="node-content expanded">
                     <div class="form-grid">
                         <div class="form-item">
                             <label class="form-label">提货客户</label>
@@ -984,22 +984,22 @@
                 </div>
             </div>
             
-            <!-- 终点节点到达 -->
+            <!-- 终点到达 -->
             <div class="node-card completed">
                 <div class="node-header" onclick="toggleNode(this)">
                     <div class="node-title-wrapper">
                         <div class="node-icon destination-arrival completed">📍</div>
                         <div>
-                            <div class="node-title">终点节点到达</div>
+                            <div class="node-title">终点到达</div>
                             <div class="node-subtitle">终点 · 杭州西湖区</div>
                         </div>
                     </div>
                     <div class="node-header-right">
                         <span class="status-icon check">✓</span>
-                        <span class="collapse-arrow">▼</span>
+                        <span class="collapse-arrow expanded">▼</span>
                     </div>
                 </div>
-                <div class="node-content">
+                <div class="node-content expanded">
                     <div class="waypoint-edit-grid">
                         <div class="waypoint-edit-item">
                             <label class="waypoint-edit-label">到达公里数</label>
@@ -1010,7 +1010,7 @@
                             <input type="text" class="waypoint-edit-input" value="1,100 km">
                         </div>
                     </div>
-                    
+
                     <div class="form-grid">
                         <div class="form-item">
                             <label class="form-label">卸货客户</label>
@@ -1032,22 +1032,22 @@
                 </div>
             </div>
             
-            <!-- 终点节点卸车 -->
+            <!-- 终点卸车 -->
             <div class="node-card completed">
                 <div class="node-header" onclick="toggleNode(this)">
                     <div class="node-title-wrapper">
                         <div class="node-icon destination-unload completed">📦</div>
                         <div>
-                            <div class="node-title">终点节点卸车</div>
+                            <div class="node-title">终点卸车</div>
                             <div class="node-subtitle">终点 · 杭州西湖区</div>
                         </div>
                     </div>
                     <div class="node-header-right">
                         <span class="status-icon check">✓</span>
-                        <span class="collapse-arrow">▼</span>
+                        <span class="collapse-arrow expanded">▼</span>
                     </div>
                 </div>
-                <div class="node-content">
+                <div class="node-content expanded">
                     <div class="waypoint-edit-grid">
                         <div class="waypoint-edit-item">
                             <label class="waypoint-edit-label">到达公里数</label>
@@ -1058,7 +1058,7 @@
                             <input type="text" class="waypoint-edit-input" value="1,100 km">
                         </div>
                     </div>
-                    
+
                     <div class="form-grid">
                         <div class="form-item">
                             <label class="form-label">卸车开始时间</label>

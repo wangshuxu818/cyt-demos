@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>运单修改</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #2d2d2d;
+            color: #333;
+            line-height: 1.5;
+            font-size: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        
+        .phone-frame {
+            width: 402px;
+            height: 874px;
+            background: #f5f6fa;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+            border-radius: 40px;
+            position: relative;
+        }
+        
+        .container {
+            width: 402px;
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            padding-bottom: 80px;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* 小程序头部 */
+        .page-header {
+            background: #fff;
+            height: 44px;
+            margin: -12px -12px 12px;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .page-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #333;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            line-height: 1;
+        }
+        
+        /* 运单信息卡片 */
+        .waybill-info {
+            background: #fff;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        
+        .waybill-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .waybill-no {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+        
+        .status-tag {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        .status-tag.incomplete {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        
+        .status-tag.complete {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        /* 路线图预览 */
+        .route-preview {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            padding: 12px 0;
+            position: relative;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .route-point {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            min-width: 60px;
+            flex-shrink: 0;
+        }
+        
+        .route-point-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        
+        .route-point-icon.departure {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .route-point-icon.waypoint {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
+        .route-point-icon.destination-arrival {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .route-point-icon.destination-unload {
+            background: #fce4ec;
+            color: #c2185b;
+        }
+        
+        .route-point-label {
+            font-size: 10px;
+            color: #666;
+            text-align: center;
+            white-space: nowrap;
+            line-height: 1.3;
+        }
+        
+        .route-point.status-missing .route-point-icon {
+            background: #ffebee;
+            color: #d32f2f;
+            animation: pulse 2s infinite;
+        }
+        
+        .route-point.status-done .route-point-icon {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.4); }
+            50% { box-shadow: 0 0 0 6px rgba(244, 67, 54, 0); }
+        }
+        
+        .route-line {
+            flex: 1;
+            height: 2px;
+            background: #e0e0e0;
+            position: relative;
+            min-width: 16px;
+        }
+        
+        .route-line.active {
+            background: #1976d2;
+        }
+        
+        .route-line.missing {
+            background: linear-gradient(90deg, #1976d2 50%, #ff9800 50%);
+        }
+        
+        /* 节点卡片 */
+        .node-card {
+            background: #fff;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        
+        .node-card.missing {
+            border: 2px solid #ffc107;
+        }
+        
+        .node-card.completed {
+            border: 2px solid #4caf50;
+        }
+        
+        .node-card.disabled {
+            opacity: 0.6;
+        }
+        
+        /* 节点头部 */
+        .node-header {
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        
+        .node-header:active {
+            background: #fafafa;
+        }
+        
+        .node-header.locked {
+            cursor: not-allowed;
+        }
+        
+        .node-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .node-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        .node-icon.departure {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .node-icon.waypoint {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
+        .node-icon.destination-arrival {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .node-icon.destination-unload {
+            background: #fce4ec;
+            color: #c2185b;
+        }
+        
+        .node-icon.completed {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .node-icon.locked {
+            background: #f5f5f5;
+            color: #999;
+        }
+        
+        .node-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+        
+        .node-subtitle {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
+        
+        .node-header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-icon {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        
+        .status-icon.check {
+            background: #4caf50;
+            color: #fff;
+        }
+        
+        .status-icon.warning {
+            background: #ff9800;
+            color: #fff;
+        }
+        
+        .status-icon.pending {
+            background: #e0e0e0;
+            color: #999;
+        }
+        
+        .status-icon.locked {
+            background: #f5f5f5;
+            color: #999;
+        }
+        
+        .collapse-arrow {
+            color: #999;
+            font-size: 11px;
+            transition: transform 0.3s;
+        }
+        
+        .collapse-arrow.expanded {
+            transform: rotate(180deg);
+        }
+        
+        /* 节点内容 */
+        .node-content {
+            padding: 0 16px 16px;
+            display: none;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .node-content.expanded {
+            display: block;
+        }
+        
+        /* 未操作提示 */
+        .locked-tip {
+            text-align: center;
+            padding: 28px 16px;
+            color: #999;
+        }
+        
+        .locked-tip-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+            opacity: 0.5;
+        }
+        
+        .locked-tip-text {
+            font-size: 13px;
+        }
+        
+        /* 途经点提示 */
+        .waypoint-tip {
+            background: #f3e5f5;
+            border: 1px solid #ce93d8;
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin: 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #7b1fa2;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        .form-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .form-item.full-width {
+            grid-column: span 2;
+        }
+        
+        .form-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .form-label .required {
+            color: #f44336;
+            margin-left: 2px;
+        }
+        
+        .form-input {
+            padding: 10px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #fff;
+            transition: all 0.2s;
+            -webkit-appearance: none;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #1976d2;
+            box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
+        }
+        
+        .form-input.missing {
+            border-color: #ffc107;
+            background: #fffde7;
+        }
+        
+        .form-input.readonly {
+            background: #f8f9fa;
+            color: #666;
+        }
+        
+        .form-input::placeholder {
+            color: #bbb;
+        }
+        
+        /* 照片上传 */
+        .photo-upload {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .photo-item {
+            width: 72px;
+            height: 72px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #999;
+            font-size: 11px;
+        }
+        
+        .photo-item:active {
+            border-color: #1976d2;
+            color: #1976d2;
+        }
+        
+        .photo-item .icon {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        
+        /* 亏吨提示 */
+        .weight-alert {
+            background: #ffebee;
+            border: 1px solid #ffcdd2;
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .weight-alert-icon {
+            color: #d32f2f;
+            font-size: 18px;
+        }
+        
+        .weight-alert-text {
+            font-size: 13px;
+            color: #c62828;
+            line-height: 1.4;
+        }
+        
+        .weight-alert-value {
+            font-weight: 600;
+            color: #d32f2f;
+        }
+        
+        /* 底部提交 - 固定底部 */
+        .submit-section {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            padding: 12px 16px;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom));
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            z-index: 100;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            flex: 1;
+        }
+        
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #666;
+        }
+        
+        .btn-secondary:active {
+            background: #e0e0e0;
+        }
+        
+        .btn-primary {
+            background: #1976d2;
+            color: #fff;
+        }
+        
+        .btn-primary:active {
+            background: #1565c0;
+        }
+        
+        .btn-primary:disabled {
+            background: #bbdefb;
+        }
+        
+        /* 任务列表 */
+        .task-list {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        
+        .preview-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #333;
+        }
+        
+        .task-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .task-card.incomplete {
+            border: 2px solid #f44336;
+            background: #fff5f5;
+        }
+        
+        .task-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .task-route {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .task-meta {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .task-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-end;
+            margin-left: 10px;
+        }
+        
+        .warning-badge {
+            background: #ff9800;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        
+        .btn-small {
+            padding: 8px 14px;
+            font-size: 12px;
+            flex: none;
+        }
+        
+        /* 标签页 */
+        .tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            background: #fff;
+            padding: 4px;
+            border-radius: 10px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 10px 8px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .tab.active {
+            background: #1976d2;
+            color: #fff;
+        }
+        
+        .tab:active:not(.active) {
+            background: #f5f5f5;
+        }
+        
+        /* 途经点公里数编辑 */
+        .waypoint-edit-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 6px;
+        }
+        
+        .waypoint-edit-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .waypoint-edit-label {
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .waypoint-edit-input {
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            background: #fff;
+            -webkit-appearance: none;
+        }
+        
+        .waypoint-edit-input:disabled {
+            background: #f0f0f0;
+            color: #999;
+        }
+        
+        /* 安全区域适配 */
+        .container {
+            padding-bottom: 80px;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+    <div class="container">
+        <!-- 标签页 -->
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('list')">任务列表</div>
+            <div class="tab" onclick="showTab('edit4nodes')">4节点</div>
+            <div class="tab" onclick="showTab('edit2nodes')">2节点</div>
+        </div>
+        
+        <!-- 任务列表页 -->
+        <div id="tab-list" class="tab-content">
+            <div class="task-list">
+                <div class="preview-title">待处理运单</div>
+                
+                <div class="task-card">
+                    <div class="task-info">
+                        <div class="task-route">北京→天津→济南→上海</div>
+                        <div class="task-meta">WB20250713005 | 电子产品 | 4节点</div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="btn btn-primary btn-small">修改</button>
+                    </div>
+                </div>
+                
+                <div class="task-card incomplete">
+                    <div class="task-info">
+                        <div class="task-route">广州→杭州</div>
+                        <div class="task-meta">WB20250713002 | 机械设备 | 2节点</div>
+                    </div>
+                    <div class="task-actions">
+                        <span class="warning-badge">⚠ 数据缺失</span>
+                        <button class="btn btn-primary btn-small">修改</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 4节点场景 -->
+        <div id="tab-edit4nodes" class="tab-content" style="display:none;">
+            <div class="page-header">
+                <div class="back-btn">‹</div>
+                <div class="page-title">修改运单</div>
+            </div>
+
+            <div class="waybill-info">
+                <div class="waybill-header" style="margin-bottom:0;">
+                    <div class="waybill-no">WB20250713005</div>
+                </div>
+            </div>
+            
+            <!-- 节点1: 始发节点 -->
+            <div class="node-card completed">
+                <div class="node-header" onclick="toggleNode(this)">
+                    <div class="node-title-wrapper">
+                        <div class="node-icon departure completed">🚚</div>
+                        <div>
+                            <div class="node-title">始发节点</div>
+                            <div class="node-subtitle">起点 · 北京朝阳区</div>
+                        </div>
+                    </div>
+                    <div class="node-header-right">
+                        <span class="status-icon check">✓</span>
+                        <span class="collapse-arrow">▼</span>
+                    </div>
+                </div>
+                <div class="node-content">
+                    <div class="form-grid">
+                        <div class="form-item">
+                            <label class="form-label">提货客户</label>
+                            <input type="text" class="form-input" value="北京科技有限公司">
+                        </div>
+                        <div class="form-item">
+                            <label class="form-label">装车单号</label>
+                            <input type="text" class="form-input" value="ZC20250713001">
+                        </div>
+                        <div class="form-item">
+                            <label class="form-label">发车公里数</label>
+                            <input type="text" class="form-input" value="0 km">
+                        </div>
+                        <div class="form-item">
+                            <label class="form-label">装车净重 <span class="required">*</span></label>
+                            <input type="text" class="form-input" value="15,000 kg">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 节点2: 途经点 -->
+            <div class="node-card completed">
+                <div class="node-header" onclick="toggleNode(this)">
+                    <div class="node-title-wrapper">
+                        <div class="node-icon waypoint completed">📍</div>
+                        <div>
+                            <div class="node-title">途经节点 ①</div>
+                            <div class="node-subtitle">途经点 · 天津市</div>
+                        </div>
+                    </div>
+                    <div class="node-header-right">
+                        <span class="status-icon check">✓</span>
+                        <span class="collapse-arrow">▼</span>
+                    </div>
+                </div>
+                <div class="node-content">
+                    <div class="waypoint-tip">
+                        <span>ℹ️</span>
+                        <span>途经点仅支持修改到达/发车公里数</span>
+                    </div>
+                    <div class="waypoint-edit-grid">
+                        <div class="waypoint-edit-item">
+                            <label class="waypoint-edit-label">到达公里数</label>
+                            <input type="text" class="waypoint-edit-input" value="120 km">
+                        </div>
+                        <div class="waypoint-edit-item">
+                            <label class="waypoint-edit-label">发车公里数</label>
+                            <input type="text" class="waypoint-edit-input" value="120 km">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 节点3: 途经点 -->
+            <div class="node-card missing">
+                <div class="node-header" onclick="toggleNode(this)">
+                    <div class="node-title-wrapper">
+                        <div class="node-icon waypoint">📍</div>
+                        <div>
+                            <div class="node-title">途经节点 ②</div>
+                            <div class="node-subtitle">途经点 · 济南市</div>
+                        </div>
+                    </div>
+                    <div class="node-header-right">
+                        <span class="status-icon warning">!</span>
+                        <span class="collapse-arrow expanded">▼</span>
+                    </div>
+                </div>
+                <div class="node-content expanded">
+                    <div class="waypoint-tip">
+                        <span>ℹ️</span>
+                        <span>途经点仅支持修改到达/发车公里数</span>
+                    </div>
+                    <div class="waypoint-edit-grid">
+                        <div class="waypoint-edit-item">
+                            <label class="waypoint-edit-label">到达公里数</label>
+                            <input type="text" class="waypoint-edit-input missing" placeholder="请输入">
+                        </div>
+                        <div class="waypoint-edit-item">
+                            <label class="waypoint-edit-label">发车公里数</label>
+                            <input type="text" class="waypoint-edit-input missing" placeholder="请输入">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 节点4: 终点节点到达 -->
+            <div class="node-card disabled">
+                <div class="node-header locked">
+                    <div class="node-title-wrapper">
+                        <div class="node-icon destination-arrival locked">📍</div>
+                        <div>
+                            <div class="node-title">终点节点到达</div>
+                            <div class="node-subtitle">终点 · 上海市</div>
+                        </div>
+                    </div>
+                    <div class="node-header-right">
+                        <span class="status-icon locked">🔒</span>
+                    </div>
+                </div>
+                <div class="node-content expanded">
+                    <div class="locked-tip">
+                        <div class="locked-tip-icon">🚫</div>
+                        <div class="locked-tip-text">终点节点到达尚未操作，暂不可修改</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 节点5: 终点节点卸车 -->
+            <div class="node-card disabled">
+                <div class="node-header locked">
+                    <div class="node-title-wrapper">
+                        <div class="node-icon destination-unload locked">📦</div>
+                        <div>
+                            <div class="node-title">终点节点卸车</div>
+                            <div class="node-subtitle">终点 · 上海市</div>
+                        </div>
+                    </div>
+                    <div class="node-header-right">
+                        <span class="status-icon locked">🔒</span>
+                    </div>
+                </div>
+                <div class="node-content expanded">
+                    <div class="locked-tip">
+                        <div class="locked-tip-icon">🚫</div>
+                        <div class="locked-tip-text">终点节点卸车尚未操作，暂不可修改</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="submit-section">
+                <button class="btn btn-secondary">取消</button>
+                <button class="btn btn-primary">提交保存</button>
+            </div>
+        </div>
+        
+        <!-- 2节点场景 -->
+        <div id="tab-edit2nodes" class="tab-content" style="display:none;">
+            <div class="page-header">
+                <div class="back-btn">‹</div>
+                <div class="page-title">修改运单</div>
+            </div>
+
+            <div class="waybill-info">
+                <div class="waybill-header">
+                    <div class="waybill-no">WB20250713002</div>
+                </div>
+                
+                <div class="route-preview">
+                    <div class="route-point status-done">
+                        <div class="route-point-icon departure">🚚</div>
+                        <div class="route-point-label">始发<br>广州</div>
+                    </div>
+                    <div class="route-line active"></div>
+                    <div class="route-point status-done">
+                        <div class="route-point-icon destination-arrival">📍</div>
+                        <div class="route-point-label">终点到达<br>杭州</div>
+                    </div>
+                    <div class="route-line active"></div>
+                    <div class="route-point status-done">
+                        <div class="route-point-icon destination-unload">📦</div>
+                        <div class="route-point-label">终点卸车<br>杭州</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 始发节点 -->
+            <div class="node-card completed">
+                <div class="node-header" onclick="toggleNode(this)">
+                    <div class="node-title-wrapper">
+                        <div class="node-icon departure completed">🚚</div>
+                        <div>
+                            <div class="node-title">始发节点</div>
+                            <div class="node-subtitle">起点 · 广州天河区</div>
+                        </div>
+                    </div>
+                    <div class="node-header-right">
+                        <span class="status-icon check">✓</span>
+                        <span class="collapse-arrow">▼</span>
+                    </div>
+                </div>
+                <div class="node-content">
+                    <div class="form-grid">
+                        <div class="form-item">
+                            <label class="form-label">提货客户</label>
+                            <input type="text" class="form-input" value="广州科技有限公司">
+                        </div>
+                        <div class="form-item">
+                            <label class="form-label">装车单号</label>
+                            <input type="text" class="form-input" value="ZC20250713002">
+                        </div>
+                        <div class="form-item">
+                            <label class="form-label">装车净重 <span class="required">*</span></label>
+                            <input type="text" class="form-input" value="8,500 kg">
+                        </div>
+                        <div class="form-item">
+                            <label class="form-label">货物名称</label>
+                            <input type="text" class="form-input" value="机械设备">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 终点节点到达 -->
+            <div class="node-card completed">
+                <div class="node-header" onclick="toggleNode(this)">
+                    <div class="node-title-wrapper">
+                        <div class="node-icon destination-arrival completed">📍</div>
+                        <div>
+                            <div class="node-title">终点节点到达</div>
+                            <div class="node-subtitle">终点 · 杭州西湖区</div>
+                        </div>
+                    </div>
+                    <div class="node-header-right">
+                        <span class="status-icon check">✓</span>
+                        <span class="collapse-arrow">▼</span>
+                    </div>
+                </div>
+                <div class="node-content">
+                    <div class="waypoint-edit-grid">
+                        <div class="waypoint-edit-item">
+                            <label class="waypoint-edit-label">到达公里数</label>
+                            <input type="text" class="waypoint-edit-input" value="1,100 km">
+                        </div>
+                        <div class="waypoint-edit-item">
+                            <label class="waypoint-edit-label">发车公里数</label>
+                            <input type="text" class="waypoint-edit-input" value="1,100 km">
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-item">
+                            <label class="form-label">卸货客户</label>
+                            <input type="text" class="form-input" value="杭州制造有限公司">
+                        </div>
+                        <div class="form-item">
+                            <label class="form-label">卸车单号</label>
+                            <input type="text" class="form-input" value="XC20250713002">
+                        </div>
+                        <div class="form-item">
+                            <label class="form-label">卸车净重 <span class="required">*</span></label>
+                            <input type="text" class="form-input" value="8,480 kg">
+                        </div>
+                        <div class="form-item">
+                            <label class="form-label">到达总油耗</label>
+                            <input type="text" class="form-input" value="280 L">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 终点节点卸车 -->
+            <div class="node-card completed">
+                <div class="node-header" onclick="toggleNode(this)">
+                    <div class="node-title-wrapper">
+                        <div class="node-icon destination-unload completed">📦</div>
+                        <div>
+                            <div class="node-title">终点节点卸车</div>
+                            <div class="node-subtitle">终点 · 杭州西湖区</div>
+                        </div>
+                    </div>
+                    <div class="node-header-right">
+                        <span class="status-icon check">✓</span>
+                        <span class="collapse-arrow">▼</span>
+                    </div>
+                </div>
+                <div class="node-content">
+                    <div class="waypoint-edit-grid">
+                        <div class="waypoint-edit-item">
+                            <label class="waypoint-edit-label">到达公里数</label>
+                            <input type="text" class="waypoint-edit-input" value="1,100 km">
+                        </div>
+                        <div class="waypoint-edit-item">
+                            <label class="waypoint-edit-label">发车公里数</label>
+                            <input type="text" class="waypoint-edit-input" value="1,100 km">
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-item">
+                            <label class="form-label">卸车开始时间</label>
+                            <input type="text" class="form-input" value="2025-07-13 19:00">
+                        </div>
+                        <div class="form-item">
+                            <label class="form-label">卸车完成时间</label>
+                            <input type="text" class="form-input" value="2025-07-13 20:30">
+                        </div>
+                        <div class="form-item">
+                            <label class="form-label">卸车净重 <span class="required">*</span></label>
+                            <input type="text" class="form-input" value="8,480 kg">
+                        </div>
+                        <div class="form-item">
+                            <label class="form-label">卸车毛重</label>
+                            <input type="text" class="form-input" value="14,200 kg">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="submit-section">
+                <button class="btn btn-secondary">取消</button>
+                <button class="btn btn-primary">提交保存</button>
+            </div>
+        </div>
+    </div>
+    </div>
+    
+    <script>
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.style.display = 'none';
+            });
+            document.querySelectorAll('.tab').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.getElementById('tab-' + tabName).style.display = 'block';
+            event.target.classList.add('active');
+        }
+        
+        function toggleNode(header) {
+            const card = header.parentElement;
+            const content = card.querySelector('.node-content');
+            const arrow = header.querySelector('.collapse-arrow');
+            
+            if (card.classList.contains('disabled')) {
+                return;
+            }
+            
+            content.classList.toggle('expanded');
+            if (arrow) {
+                arrow.classList.toggle('expanded');
+            }
+        }
+    </script>
+</body>
+</html>

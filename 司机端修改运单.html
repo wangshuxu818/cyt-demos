@@ -314,7 +314,8 @@
             gap: 10px;
         }
         
-        .status-icon {
+        .status-icon { display: none !important; }
+        .status-icon-hidden {
             width: 22px;
             height: 22px;
             border-radius: 50%;
@@ -563,6 +564,284 @@
             background: #bbdefb;
         }
         
+        /* ========== 接单宝真实样式 ========== */
+        /* 顶栏 */
+        .jdb-topbar {
+            background: #1296db;
+            height: 48px;
+            margin: -12px -12px 0;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #fff;
+            font-size: 17px;
+            font-weight: 500;
+        }
+        .jdb-topbar-back { font-size: 24px; line-height: 1; }
+        .jdb-topbar-title { font-weight: 600; }
+        .jdb-topbar-right { font-size: 15px; opacity: 0.9; letter-spacing: 3px; }
+
+        /* 筛选 */
+        .jdb-filter {
+            background: #1296db;
+            margin: 0 -12px 10px;
+            padding: 0 16px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .jdb-filter-tab {
+            color: rgba(255,255,255,0.85);
+            font-size: 14px;
+            padding: 6px 4px;
+            position: relative;
+        }
+        .jdb-filter-tab.active {
+            color: #fff;
+            font-weight: 600;
+        }
+        .jdb-filter-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 2px;
+            background: #fff;
+            border-radius: 1px;
+        }
+
+        /* 运单卡片 */
+        .jdb-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 12px 14px 10px;
+            margin-bottom: 10px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        .jdb-card-corner {
+            position: absolute;
+            top: 8px;
+            right: -22px;
+            background: #4caf50;
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 24px;
+            transform: rotate(45deg);
+            font-weight: 500;
+        }
+
+        /* 卡片头部 */
+        .jdb-card-head {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+        }
+        .tag-trunk {
+            background: #ff9800;
+            color: #fff;
+            font-size: 10px;
+            padding: 1px 4px;
+            border-radius: 2px;
+        }
+        .jdb-wbno {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .jdb-price {
+            color: #f44336;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        .tag-mini {
+            border: 1px solid #b3c5ff;
+            color: #1976d2;
+            font-size: 10px;
+            padding: 0 4px;
+            border-radius: 3px;
+            line-height: 16px;
+        }
+
+        /* 车牌行 */
+        .jdb-plate-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .jdb-plate {
+            color: #333;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .tag-unsettled {
+            background: #fff3e0;
+            color: #e65100;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* 路线 */
+        .jdb-route {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+        .jdb-route .arrow {
+            color: #999;
+            margin: 0 3px;
+            font-weight: 400;
+        }
+
+        /* 地址行 */
+        .jdb-addr-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 6px 0;
+            position: relative;
+        }
+        .jdb-addr-tag {
+            border-radius: 3px;
+            font-size: 11px;
+            padding: 1px 5px;
+            font-weight: 500;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+        .jdb-addr-tag.send {
+            border: 1px solid #f44336;
+            color: #f44336;
+            background: #fff;
+        }
+        .jdb-addr-tag.arrive {
+            border: 1px solid #4caf50;
+            color: #4caf50;
+            background: #fff;
+        }
+        .jdb-addr-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .jdb-addr-text {
+            font-size: 14px;
+            color: #1a1a1a;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+        .jdb-addr-time {
+            font-size: 12px;
+            color: #999;
+            margin-top: 2px;
+        }
+        .jdb-addr-detail {
+            font-size: 12px;
+            color: #1976d2;
+            margin-top: 2px;
+        }
+        .jdb-nav-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #e3f2fd;
+            color: #1976d2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        .jdb-addr-connector {
+            position: absolute;
+            left: 11px;
+            top: 26px;
+            bottom: -10px;
+            width: 1px;
+            border-left: 1px dashed #ccc;
+        }
+
+        /* 网点名称字段 */
+        .jdb-netname-field {
+            background: #f5f5f5;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #999;
+            margin: 8px 0 10px;
+        }
+
+        /* 操作按钮 */
+        .jdb-actions {
+            display: flex;
+            gap: 8px;
+            padding-top: 10px;
+            border-top: 1px solid #f0f0f0;
+            flex-wrap: wrap;
+        }
+        .jdb-btn {
+            flex: 1;
+            min-width: 0;
+            padding: 8px 6px;
+            border-radius: 20px;
+            font-size: 12px;
+            border: 1px solid #d0d0d0;
+            background: #fff;
+            color: #333;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .jdb-btn.primary {
+            background: linear-gradient(90deg, #36cbff, #1296db);
+            color: #fff;
+            border-color: transparent;
+            font-weight: 500;
+        }
+        .jdb-btn.modify {
+            color: #fa8c16;
+            border-color: #ffd591;
+            background: #fff7e6;
+            font-weight: 500;
+        }
+
+        /* 底部导航 */
+        .jdb-bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: #fff;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            z-index: 100;
+        }
+        .jdb-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            font-size: 10px;
+            color: #999;
+        }
+        .jdb-nav-item.active { color: #1296db; }
+        .jdb-nav-icon { font-size: 18px; }
+
         /* 任务列表 */
         .task-list {
             background: #fff;
@@ -711,6 +990,196 @@
         .container {
             padding-bottom: 80px;
         }
+
+        /* ============ 接单宝真实样式 ============ */
+        .jdb-topbar {
+            height: 44px;
+            background: linear-gradient(180deg, #4ea9f5 0%, #3c98e8 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin: -12px -12px 0;
+            padding: 0 16px;
+            color: #fff;
+        }
+        .jdb-topbar-back { position: absolute; left: 12px; font-size: 22px; color: #fff; line-height: 1; }
+        .jdb-topbar-title { font-size: 17px; font-weight: 600; color: #fff; }
+        .jdb-topbar-right {
+            position: absolute; right: 12px;
+            display: flex; align-items: center; gap: 4px;
+            background: rgba(255,255,255,0.18);
+            border-radius: 20px; padding: 3px 10px;
+            font-size: 12px; color: #fff;
+        }
+
+        .jdb-filter {
+            display: flex; align-items: center;
+            background: linear-gradient(180deg, #3c98e8 0%, #eef4fa 100%);
+            padding: 6px 0 10px;
+            margin: 0 -12px 12px;
+            font-size: 14px;
+        }
+        .jdb-filter-tab {
+            flex: 1; text-align: center; color: rgba(255,255,255,0.9);
+            padding: 4px 0; position: relative;
+        }
+        .jdb-filter-tab.active { color: #fff; font-weight: 600; }
+        .jdb-filter-tab.active::after {
+            content: ''; position: absolute;
+            bottom: -2px; left: 50%; transform: translateX(-50%);
+            width: 20px; height: 2px; background: #fff; border-radius: 1px;
+        }
+
+        .jdb-card {
+            background: #fff; border-radius: 8px;
+            margin-bottom: 12px; overflow: hidden;
+            position: relative;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        .jdb-card-corner {
+            position: absolute; top: 0; right: 0;
+            background: #2ac06e;
+            color: #fff; font-size: 11px;
+            padding: 3px 10px 3px 20px;
+            clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%);
+        }
+        .jdb-card-head {
+            padding: 12px 12px 8px;
+            display: flex; align-items: center; gap: 6px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .tag-trunk {
+            background: #ff9c33; color: #fff;
+            font-size: 11px; padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .jdb-wbno {
+            font-size: 15px; font-weight: 600; color: #1a1a1a;
+        }
+        .jdb-price {
+            color: #ff4d4f; font-size: 14px; font-weight: 600;
+            margin-left: 4px;
+        }
+        .tag-mini {
+            border: 1px solid #4a9eff; color: #4a9eff;
+            font-size: 10px; padding: 1px 4px;
+            border-radius: 3px;
+        }
+
+        .jdb-plate-row {
+            padding: 8px 12px 6px;
+            display: flex; align-items: center;
+            justify-content: space-between;
+        }
+        .jdb-plate { font-size: 13px; color: #333; }
+        .tag-unsettled {
+            background: #fff3e0; color: #e65100;
+            font-size: 11px; padding: 2px 8px;
+            border-radius: 3px;
+        }
+
+        .jdb-route {
+            padding: 0 12px 8px;
+            font-size: 17px; font-weight: 700; color: #1a1a1a;
+        }
+        .jdb-route .arrow { color: #666; font-weight: 400; margin: 0 2px; }
+
+        .jdb-addr-row {
+            padding: 8px 12px;
+            display: flex; align-items: flex-start;
+            gap: 8px;
+            position: relative;
+        }
+        .jdb-addr-tag {
+            width: 22px; height: 22px;
+            border: 1px solid;
+            border-radius: 3px;
+            font-size: 11px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .jdb-addr-tag.send { color: #f44336; border-color: #f44336; }
+        .jdb-addr-tag.arrive { color: #2ac06e; border-color: #2ac06e; }
+        .jdb-addr-info { flex: 1; min-width: 0; }
+        .jdb-addr-text {
+            font-size: 13px; color: #333; line-height: 1.4;
+            word-break: break-all;
+        }
+        .jdb-addr-time {
+            font-size: 12px; color: #999; margin-top: 3px;
+        }
+        .jdb-addr-detail {
+            color: #7c4dff; font-size: 12px; margin-top: 3px;
+            display: inline-flex; align-items: center; gap: 2px;
+        }
+        .jdb-nav-btn {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            background: #e6f4ff;
+            color: #1890ff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; flex-shrink: 0;
+        }
+        .jdb-addr-connector {
+            position: absolute;
+            left: 22px; top: 30px; bottom: -8px;
+            width: 0; border-left: 1px dashed #ccc;
+        }
+
+        .jdb-netname-field {
+            margin: 0 12px 10px;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 8px 10px;
+            font-size: 13px; color: #bbb;
+            display: flex; align-items: center; gap: 6px;
+        }
+
+        .jdb-actions {
+            padding: 8px 12px 12px;
+            display: flex; gap: 8px; flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .jdb-btn {
+            border: none;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .jdb-btn.ghost {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            color: #333;
+        }
+        .jdb-btn.ghost.modify {
+            border-color: #ffb74d;
+            color: #ef6c00;
+        }
+        .jdb-btn.primary {
+            background: linear-gradient(90deg, #4ea9f5, #1890ff);
+            color: #fff;
+            padding: 8px 18px;
+        }
+
+        .jdb-bottom-nav {
+            display: flex; align-items: center;
+            justify-content: space-around;
+            background: #fff;
+            border-top: 1px solid #f0f0f0;
+            margin: 12px -12px -12px;
+            padding: 6px 0 10px;
+            font-size: 11px;
+        }
+        .jdb-nav-item {
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+            color: #999;
+        }
+        .jdb-nav-item.active { color: #1890ff; }
+        .jdb-nav-icon { font-size: 18px; }
     </style>
 </head>
 <body>
@@ -723,31 +1192,116 @@
             <div class="tab" onclick="showTab('edit2nodes')">2节点</div>
         </div>
         
-        <!-- 任务列表页 -->
+        <!-- 任务列表页（接单宝真实样式） -->
         <div id="tab-list" class="tab-content">
-            <div class="task-list">
-                <div class="preview-title">待处理运单</div>
-                
-                <div class="task-card">
-                    <div class="task-info">
-                        <div class="task-route">北京→天津→济南→上海</div>
-                        <div class="task-meta">WB20250713005 | 电子产品 | 4节点</div>
-                    </div>
-                    <div class="task-actions">
-                        <button class="btn btn-primary btn-small">修改运单</button>
-                    </div>
-                </div>
+            <!-- 顶栏 -->
+            <div class="jdb-topbar">
+                <span class="jdb-topbar-back">‹</span>
+                <span class="jdb-topbar-title">接单宝</span>
+                <span class="jdb-topbar-right">••• ⊙</span>
+            </div>
 
-                <div class="task-card incomplete">
-                    <div class="task-info">
-                        <div class="task-route">广州→杭州</div>
-                        <div class="task-meta">WB20250713002 | 机械设备 | 2节点</div>
-                    </div>
-                    <div class="task-actions">
-                        <span class="warning-badge">⚠ 数据缺失</span>
-                        <button class="btn btn-primary btn-small">修改运单</button>
-                    </div>
+            <!-- 状态筛选 -->
+            <div class="jdb-filter">
+                <div class="jdb-filter-tab">未开始</div>
+                <div class="jdb-filter-tab">进行中</div>
+                <div class="jdb-filter-tab active">已完成</div>
+                <div class="jdb-filter-tab">筛选 ▾</div>
+            </div>
+
+            <!-- 卡片1：4节点运单 -->
+            <div class="jdb-card">
+                <div class="jdb-card-corner">已到达</div>
+                <div class="jdb-card-head">
+                    <span class="tag-trunk">干</span>
+                    <span class="jdb-wbno">网点名称WB20250713005</span>
+                    <span class="jdb-price">¥ 191005</span>
+                    <span class="tag-mini">回</span>
+                    <span class="tag-mini">主</span>
                 </div>
+                <div class="jdb-plate-row">
+                    <span class="jdb-plate">晋KJ4753</span>
+                    <span class="tag-unsettled">未结算</span>
+                </div>
+                <div class="jdb-route">北京<span class="arrow">→</span>天津<span class="arrow">→</span>济南<span class="arrow">→</span>上海</div>
+
+                <div class="jdb-addr-row">
+                    <span class="jdb-addr-tag send">发</span>
+                    <div class="jdb-addr-info">
+                        <div class="jdb-addr-text">北京市海淀区金隅智造工场</div>
+                        <div class="jdb-addr-time">2026-05-11 16:32:48</div>
+                    </div>
+                    <div class="jdb-nav-btn">➤</div>
+                    <div class="jdb-addr-connector"></div>
+                </div>
+                <div class="jdb-addr-row">
+                    <span class="jdb-addr-tag arrive">到</span>
+                    <div class="jdb-addr-info">
+                        <div class="jdb-addr-text">上海市浦口区南京洛普股份有限公司（新科三路）</div>
+                        <div class="jdb-addr-time">2026-06-30 09:59:33</div>
+                    </div>
+                    <div class="jdb-nav-btn">➤</div>
+                </div>
+                <div class="jdb-netname-field">🏢 网点名称</div>
+
+                <div class="jdb-actions">
+                    <button class="jdb-btn ghost">添加跟踪</button>
+                    <button class="jdb-btn ghost">费用上报</button>
+                    <button class="jdb-btn ghost modify">修改运单</button>
+                    <button class="jdb-btn primary">上传回单</button>
+                </div>
+            </div>
+
+            <!-- 卡片2：2节点运单 -->
+            <div class="jdb-card">
+                <div class="jdb-card-corner">已到达</div>
+                <div class="jdb-card-head">
+                    <span class="tag-trunk">干</span>
+                    <span class="jdb-wbno">网点名称WB20250713002</span>
+                    <span class="jdb-price">¥ 2</span>
+                    <span class="tag-mini">回</span>
+                    <span class="tag-mini">主</span>
+                </div>
+                <div class="jdb-plate-row">
+                    <span class="jdb-plate">鲁US6260</span>
+                    <span class="tag-unsettled">未结算</span>
+                </div>
+                <div class="jdb-route">广州<span class="arrow">→</span>杭州</div>
+
+                <div class="jdb-addr-row">
+                    <span class="jdb-addr-tag send">发</span>
+                    <div class="jdb-addr-info">
+                        <div class="jdb-addr-text">广州市天河区科技园（公交站）</div>
+                        <div class="jdb-addr-time">2026-05-26 16:19:30</div>
+                        <div class="jdb-addr-detail">详细地址 ▾</div>
+                    </div>
+                    <div class="jdb-nav-btn">➤</div>
+                    <div class="jdb-addr-connector"></div>
+                </div>
+                <div class="jdb-addr-row">
+                    <span class="jdb-addr-tag arrive">到</span>
+                    <div class="jdb-addr-info">
+                        <div class="jdb-addr-text">杭州市西湖区文一路（地铁站）</div>
+                        <div class="jdb-addr-time">2026-05-28 16:19:47</div>
+                    </div>
+                    <div class="jdb-nav-btn">➤</div>
+                </div>
+                <div class="jdb-netname-field">🏢 网点名称</div>
+
+                <div class="jdb-actions">
+                    <button class="jdb-btn ghost">添加跟踪</button>
+                    <button class="jdb-btn ghost">费用上报</button>
+                    <button class="jdb-btn ghost modify">修改运单</button>
+                    <button class="jdb-btn primary">上传回单</button>
+                </div>
+            </div>
+
+            <!-- 底部导航 -->
+            <div class="jdb-bottom-nav">
+                <div class="jdb-nav-item active"><span class="jdb-nav-icon">✓</span><span>任务</span></div>
+                <div class="jdb-nav-item"><span class="jdb-nav-icon">¥</span><span>费用上报</span></div>
+                <div class="jdb-nav-item"><span class="jdb-nav-icon">💬</span><span>消息</span></div>
+                <div class="jdb-nav-item"><span class="jdb-nav-icon">👤</span><span>我的</span></div>
             </div>
         </div>
         

@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI智能运力推荐方案介绍</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    color: #2c3e50;
+    background: #f5f7fa;
+  }
+  .container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 24px 80px;
+  }
+  /* ── Header ── */
+  .doc-header {
+    background: linear-gradient(135deg, #1a6fdb 0%, #0d4fa0 100%);
+    color: #fff;
+    border-radius: 12px;
+    padding: 40px 48px;
+    margin-bottom: 40px;
+  }
+  .doc-header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    margin-bottom: 10px;
+  }
+  .doc-header .meta {
+    font-size: 13px;
+    opacity: .75;
+    letter-spacing: .3px;
+  }
+  /* ── Section ── */
+  .section {
+    background: #fff;
+    border-radius: 10px;
+    padding: 36px 40px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.07);
+  }
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a6fdb;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e8f0fe;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title .num {
+    background: #1a6fdb;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  /* ── Sub-section ── */
+  .sub-section {
+    margin-top: 28px;
+  }
+  .sub-section:first-child { margin-top: 0; }
+  .sub-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 12px;
+    padding-left: 10px;
+    border-left: 3px solid #1a6fdb;
+  }
+  /* ── Table ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin: 12px 0;
+  }
+  th {
+    background: #eef3fb;
+    color: #1a6fdb;
+    font-weight: 600;
+    padding: 10px 14px;
+    text-align: left;
+    border: 1px solid #dce8f8;
+  }
+  td {
+    padding: 9px 14px;
+    border: 1px solid #e8edf3;
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: #f9fbff; }
+  /* ── Tag labels ── */
+  .tag-problem {
+    display: inline-block;
+    background: #fff0f0;
+    color: #c0392b;
+    border: 1px solid #f5c6c6;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .tag-new {
+    display: inline-block;
+    background: #e6f4ea;
+    color: #1e7e34;
+    border: 1px solid #b8dfc1;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 6px;
+    white-space: nowrap;
+  }
+  /* ── Pre / code diagrams ── */
+  pre {
+    background: #f3f6fa;
+    border: 1px solid #dce3ed;
+    border-radius: 8px;
+    padding: 20px 22px;
+    font-family: "SF Mono", "Fira Mono", "Consolas", monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-x: auto;
+    margin: 14px 0;
+    color: #2c3e50;
+    white-space: pre;
+  }
+  /* ── Callout / blockquote ── */
+  .callout {
+    background: #fffbea;
+    border-left: 4px solid #f4a800;
+    border-radius: 0 6px 6px 0;
+    padding: 12px 16px;
+    font-size: 13.5px;
+    color: #7a5c00;
+    margin: 14px 0;
+  }
+  .callout.info {
+    background: #eef5ff;
+    border-color: #1a6fdb;
+    color: #1a4a8a;
+  }
+  /* ── Value highlight ── */
+  .value-box {
+    background: #f0f7ff;
+    border: 1px solid #c2d9f8;
+    border-radius: 6px;
+    padding: 10px 16px;
+    font-size: 14px;
+    margin-top: 12px;
+    color: #1a4a8a;
+  }
+  .value-box::before {
+    content: "✦ 对你的价值：";
+    font-weight: 700;
+    margin-right: 4px;
+  }
+  /* ── Flow step ── */
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .flow-step .step-num {
+    background: #1a6fdb;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    min-width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .flow-step .step-body { flex: 1; }
+  .flow-step .step-body strong { font-weight: 700; }
+  /* ── Pills ── */
+  .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .pill {
+    background: #eef3fb;
+    color: #1a6fdb;
+    border: 1px solid #c2d9f8;
+    border-radius: 16px;
+    padding: 4px 14px;
+    font-size: 13px;
+  }
+  /* ── Confirm list ── */
+  .confirm-item {
+    display: flex;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  .confirm-item:last-child { border-bottom: none; }
+  .confirm-num {
+    background: #f0f7ff;
+    color: #1a6fdb;
+    font-weight: 700;
+    font-size: 13px;
+    min-width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .confirm-body strong { display: block; font-size: 14px; margin-bottom: 2px; }
+  .confirm-body span { font-size: 13px; color: #6b7a8d; }
+  /* ── Divider ── */
+  hr { border: none; border-top: 1px solid #e8ecf1; margin: 24px 0; }
+  p { margin-bottom: 10px; }
+  ul { padding-left: 20px; margin-bottom: 10px; }
+  li { margin-bottom: 4px; }
+  strong { font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ── Header ── -->
+<div class="doc-header">
+  <h1>AI 智能运力推荐方案介绍</h1>
+</div>
+
+<!-- ── 一、问题 ── -->
+<div class="section">
+  <div class="section-title"><span class="num">一</span>你现在面临的问题</div>
+  <table>
+    <thead>
+      <tr><th>问题</th><th>具体表现</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="tag-problem">匹配效率低</span></td>
+        <td>调度员需逐个排查车辆状态、位置、适配性，单票调度平均耗时长，高峰期排队明显</td>
+      </tr>
+      <tr>
+        <td><span class="tag-problem">匹配质量不稳定</span></td>
+        <td>不同调度员经验差异大，同一场景推荐结果不一致；新人上手周期长，调度质量波动大</td>
+      </tr>
+      <tr>
+        <td><span class="tag-problem">车辆利用率未充分优化</span></td>
+        <td>缺乏全局视角的成本／装载率／时效综合评估，空驶率高、装载率低的问题难以系统性改善</td>
+      </tr>
+      <tr>
+        <td><span class="tag-problem">调车成本高</span></td>
+        <td>根据感觉调车，人性问题，导致调车舍近求远，增加调车成本</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ── 二、派车框架思路 ── -->
+<div class="section">
+  <div class="section-title"><span class="num">二</span>派车框架思路</div>
+  <p style="margin-bottom:28px;">调度员输入运单的线路、货物、时间要求后，系统自动完成两步：</p>
+
+  <!-- 架构图 -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
+
+    <!-- 输入框 -->
+    <div style="background:linear-gradient(135deg,#1a6fdb,#0d4fa0);color:#fff;border-radius:10px;padding:18px 32px;text-align:center;width:100%;max-width:620px;">
+      <div style="font-size:13px;opacity:.8;margin-bottom:4px;">调度员输入</div>
+      <div style="font-size:16px;font-weight:700;letter-spacing:.5px;">线路 · 货物类型 · 时效要求</div>
+    </div>
+
+    <!-- 箭头 -->
+    <div style="display:flex;flex-direction:column;align-items:center;margin:4px 0;">
+      <div style="width:2px;height:20px;background:#b0bec5;"></div>
+      <div style="width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:10px solid #b0bec5;"></div>
+    </div>
+
+    <!-- 第一步 -->
+    <div style="border:2px solid #e74c3c;border-radius:10px;width:100%;max-width:620px;overflow:hidden;">
+      <div style="background:#e74c3c;color:#fff;padding:10px 20px;font-weight:700;font-size:14px;">
+        第一步：硬约束过滤 &nbsp;—&nbsp; 淘汰不能派的车
+      </div>
+      <div style="padding:14px 20px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="display:flex;align-items:center;gap:8px;background:#fdf2f2;border-radius:6px;padding:8px 12px;">
+          <span style="color:#e74c3c;font-weight:700;font-size:15px;">✕</span>
+          <div><div style="font-size:13px;font-weight:600;">车辆状态异常</div><div style="font-size:12px;color:#888;">维修中 / 保养中 / 停驶中</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;background:#fdf2f2;border-radius:6px;padding:8px 12px;">
+          <span style="color:#e74c3c;font-weight:700;font-size:15px;">✕</span>
+          <div><div style="font-size:13px;font-weight:600;">任务冲突</div><div style="font-size:12px;color:#888;">未来 12h 内已有任务</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;background:#fdf2f2;border-radius:6px;padding:8px 12px;">
+          <span style="color:#e74c3c;font-weight:700;font-size:15px;">✕</span>
+          <div><div style="font-size:13px;font-weight:600;">使用权限不符</div><div style="font-size:12px;color:#888;">不在当前组织范围内</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;background:#fdf2f2;border-radius:6px;padding:8px 12px;">
+          <span style="color:#e74c3c;font-weight:700;font-size:15px;">✕</span>
+          <div><div style="font-size:13px;font-weight:600;">车货类型不匹配</div><div style="font-size:12px;color:#888;">不适装该货物类型</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;background:#fdf2f2;border-radius:6px;padding:8px 12px;grid-column:1/-1;">
+          <span style="color:#e74c3c;font-weight:700;font-size:15px;">✕</span>
+          <div><div style="font-size:13px;font-weight:600;">客户 / 项目仅推荐模式下非绑定车辆</div><div style="font-size:12px;color:#888;">客户或项目设置了"仅推荐"指定车辆，非绑定车辆直接排除</div></div>
+        </div>
+      </div>
+      <div style="background:#fdf2f2;padding:8px 20px;font-size:13px;color:#c0392b;text-align:center;border-top:1px solid #fad7d7;">
+        不满足任一条件 → 直接排除，不进入打分
+      </div>
+    </div>
+
+    <!-- 中间标注 -->
+    <div style="display:flex;align-items:center;gap:10px;margin:4px 0;">
+      <div style="width:2px;height:14px;background:#b0bec5;"></div>
+      <div style="background:#e8f5e9;border:1px solid #a5d6a7;color:#2e7d32;border-radius:20px;padding:3px 14px;font-size:12px;font-weight:600;">剩余：可派车辆</div>
+      <div style="width:2px;height:14px;background:#b0bec5;"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;margin:0 0 4px;">
+      <div style="width:2px;height:10px;background:#b0bec5;"></div>
+      <div style="width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:10px solid #b0bec5;"></div>
+    </div>
+
+    <!-- 第二步 -->
+    <div style="border:2px solid #1a6fdb;border-radius:10px;width:100%;max-width:620px;overflow:hidden;">
+      <div style="background:#1a6fdb;color:#fff;padding:10px 20px;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:space-between;">
+        <span>第二步：六维度综合打分排序</span>
+        <span style="font-size:11px;font-weight:400;background:rgba(255,255,255,.2);border-radius:4px;padding:2px 8px;letter-spacing:.3px;">权重可配</span>
+      </div>
+      <div style="padding:16px 20px;display:flex;flex-direction:column;gap:8px;">
+        <!-- 每行：维度名 + 进度条 + 百分比 + 可调标记 -->
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:72px;font-size:13px;font-weight:600;color:#2c3e50;flex-shrink:0;">距离</div>
+          <div style="flex:1;height:8px;background:#e8edf3;border-radius:4px;overflow:hidden;">
+            <div style="width:20%;height:100%;background:#1a6fdb;border-radius:4px;"></div>
+          </div>
+          <div style="width:36px;font-size:13px;font-weight:700;color:#1a6fdb;text-align:right;flex-shrink:0;">20%</div>
+          <div style="font-size:11px;color:#27ae60;background:#eafaf1;border:1px solid #a9dfbf;border-radius:3px;padding:1px 6px;flex-shrink:0;">可调</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:72px;font-size:13px;font-weight:600;color:#2c3e50;flex-shrink:0;">时效</div>
+          <div style="flex:1;height:8px;background:#e8edf3;border-radius:4px;overflow:hidden;">
+            <div style="width:20%;height:100%;background:#1a6fdb;border-radius:4px;"></div>
+          </div>
+          <div style="width:36px;font-size:13px;font-weight:700;color:#1a6fdb;text-align:right;flex-shrink:0;">20%</div>
+          <div style="font-size:11px;color:#27ae60;background:#eafaf1;border:1px solid #a9dfbf;border-radius:3px;padding:1px 6px;flex-shrink:0;">可调</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:72px;font-size:13px;font-weight:600;color:#2c3e50;flex-shrink:0;">装载率</div>
+          <div style="flex:1;height:8px;background:#e8edf3;border-radius:4px;overflow:hidden;">
+            <div style="width:20%;height:100%;background:#1a6fdb;border-radius:4px;"></div>
+          </div>
+          <div style="width:36px;font-size:13px;font-weight:700;color:#1a6fdb;text-align:right;flex-shrink:0;">20%</div>
+          <div style="font-size:11px;color:#27ae60;background:#eafaf1;border:1px solid #a9dfbf;border-radius:3px;padding:1px 6px;flex-shrink:0;">可调</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:72px;font-size:13px;font-weight:600;color:#2c3e50;flex-shrink:0;">常跑线路</div>
+          <div style="flex:1;height:8px;background:#e8edf3;border-radius:4px;overflow:hidden;">
+            <div style="width:10%;height:100%;background:#1a6fdb;border-radius:4px;"></div>
+          </div>
+          <div style="width:36px;font-size:13px;font-weight:700;color:#1a6fdb;text-align:right;flex-shrink:0;">10%</div>
+          <div style="font-size:11px;color:#27ae60;background:#eafaf1;border:1px solid #a9dfbf;border-radius:3px;padding:1px 6px;flex-shrink:0;">可调</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:72px;font-size:13px;font-weight:600;color:#2c3e50;flex-shrink:0;">历史准时率</div>
+          <div style="flex:1;height:8px;background:#e8edf3;border-radius:4px;overflow:hidden;">
+            <div style="width:15%;height:100%;background:#1a6fdb;border-radius:4px;"></div>
+          </div>
+          <div style="width:36px;font-size:13px;font-weight:700;color:#1a6fdb;text-align:right;flex-shrink:0;">15%</div>
+          <div style="font-size:11px;color:#27ae60;background:#eafaf1;border:1px solid #a9dfbf;border-radius:3px;padding:1px 6px;flex-shrink:0;">可调</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:72px;font-size:13px;font-weight:600;color:#2c3e50;flex-shrink:0;">工作均衡</div>
+          <div style="flex:1;height:8px;background:#e8edf3;border-radius:4px;overflow:hidden;">
+            <div style="width:15%;height:100%;background:#1a6fdb;border-radius:4px;"></div>
+          </div>
+          <div style="width:36px;font-size:13px;font-weight:700;color:#1a6fdb;text-align:right;flex-shrink:0;">15%</div>
+          <div style="font-size:11px;color:#27ae60;background:#eafaf1;border:1px solid #a9dfbf;border-radius:3px;padding:1px 6px;flex-shrink:0;">可调</div>
+        </div>
+      </div>
+      <div style="background:#eaf2ff;padding:8px 20px;font-size:13px;color:#1a6fdb;text-align:center;border-top:1px solid #c5deff;">
+        以上为系统默认权重，六项合计须等于 100%
+      </div>
+    </div>
+
+    <!-- 箭头 -->
+    <div style="display:flex;flex-direction:column;align-items:center;margin:4px 0;">
+      <div style="width:2px;height:20px;background:#b0bec5;"></div>
+      <div style="width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:10px solid #b0bec5;"></div>
+    </div>
+
+    <!-- 输出框 -->
+    <div style="background:linear-gradient(135deg,#27ae60,#1e8449);color:#fff;border-radius:10px;padding:18px 32px;text-align:center;width:100%;max-width:620px;">
+      <div style="font-size:13px;opacity:.8;margin-bottom:4px;">输出结果</div>
+      <div style="font-size:16px;font-weight:700;letter-spacing:.5px;">Top N 推荐列表 &nbsp;·&nbsp; 调度员点击即可派车</div>
+    </div>
+
+  </div><!-- /架构图 -->
+</div>
+
+<!-- ── 三、方案明细 ── -->
+<div class="section">
+  <div class="section-title"><span class="num">三</span>方案明细</div>  
+
+  <style>
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .feat-card {
+      background: #fff;
+      border: 1.5px solid #e0e7f0;
+      border-radius: 12px;
+      padding: 20px 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 2px 8px rgba(26,111,219,.06);
+      transition: box-shadow .2s;
+    }
+    .feat-card:hover { box-shadow: 0 4px 16px rgba(26,111,219,.13); }
+    .feat-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .feat-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: #1a6fdb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .feat-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a2a40;
+      line-height: 1.3;
+    }
+    .feat-num {
+      font-size: 11px;
+      color: #1a6fdb;
+      font-weight: 600;
+      background: #eaf2ff;
+      border-radius: 3px;
+      padding: 1px 6px;
+      margin-bottom: 2px;
+    }
+    .feat-problem {
+      font-size: 12px;
+      color: #8a99b0;
+      background: #f8f9fb;
+      border-left: 3px solid #e0e7f0;
+      padding: 6px 10px;
+      border-radius: 0 4px 4px 0;
+      line-height: 1.6;
+    }
+    .feat-solution {
+      font-size: 13px;
+      color: #2c3e50;
+      line-height: 1.6;
+    }
+    .feat-value {
+      font-size: 12px;
+      color: #1a6fdb;
+      background: #eaf2ff;
+      border-radius: 6px;
+      padding: 6px 10px;
+      line-height: 1.5;
+      margin-top: auto;
+    }
+    .feat-value strong { color: #1456b0; }
+    .feat-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .feat-tags .tag {
+      font-size: 11px;
+      background: #f0f4f8;
+      color: #4a5568;
+      border-radius: 4px;
+      padding: 2px 7px;
+      border: 1px solid #e0e7f0;
+    }
+    .feat-modes {
+      display: flex;
+      gap: 8px;
+    }
+    .feat-mode {
+      flex: 1;
+      background: #f8f9fb;
+      border: 1px solid #e0e7f0;
+      border-radius: 6px;
+      padding: 7px 10px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .feat-mode .mode-name {
+      font-weight: 700;
+      color: #1a6fdb;
+      margin-bottom: 2px;
+    }
+    .feat-mode .mode-desc { color: #6b7a8d; }
+  </style>
+
+  <div class="feature-grid">
+
+    <!-- 卡片 1 -->
+    <div class="feat-card">
+      <div class="feat-card-header">
+        <div class="feat-icon">🚛</div>
+        <div>
+          <div class="feat-num">3.1</div>
+          <div class="feat-title">给每辆车标记"能拉什么货"</div>
+        </div>
+      </div>
+      <div class="feat-solution">在车辆信息管理页面新增「适装货物」多选字段，标注后系统自动过滤——类型不符的车辆直接不出现在推荐列表中。</div>
+      <div class="feat-tags">
+        <span class="tag">甲醇</span><span class="tag">甲基叔丁基醚（MTBE）</span><span class="tag">碳四</span>
+        <span class="tag">原油</span><span class="tag">乙丁烷</span><span class="tag">液化石油气（碳四）</span>
+        <span class="tag">丙烯</span><span class="tag">……</span>
+      </div>
+      <div class="feat-value"><strong>价值：</strong>彻底消除车货类型误派风险，危化、食品、冷链客户尤其受益。</div>
+    </div>
+
+    <!-- 卡片 2 -->
+    <div class="feat-card">
+      <div class="feat-card-header">
+        <div class="feat-icon">🤝</div>
+        <div>
+          <div class="feat-num">3.2</div>
+          <div class="feat-title">为重要客户指定专属服务车辆</div>
+        </div>
+      </div>
+      <div class="feat-solution">在客户管理页面新增「服务车辆」配置，支持两种模式：</div>
+      <div class="feat-modes">
+        <div class="feat-mode">
+          <div class="mode-name">优先推荐</div>
+          <div class="mode-desc">绑定车辆排名靠前，运力不足时可扩展</div>
+        </div>
+        <div class="feat-mode">
+          <div class="mode-name">仅推荐</div>
+          <div class="mode-desc">只出现绑定车辆，保证专车专用</div>
+        </div>
+      </div>
+      <div class="feat-value"><strong>价值：</strong>协议承诺在系统里落地，不再靠人工记住"这几辆车是给谁的"。</div>
+    </div>
+
+    <!-- 卡片 3 -->
+    <div class="feat-card">
+      <div class="feat-card-header">
+        <div class="feat-icon">⚖️</div>
+        <div>
+          <div class="feat-num">3.3</div>
+          <div class="feat-title">权重自己配——客户自主调整推荐规则</div>
+        </div>
+      </div>
+      <div class="feat-solution">客户可在「运力推荐设置」中自主调整六个评分维度的权重比例，六项之和须等于 100%，系统自动校验，防止极端配置。</div>
+      <div class="feat-value">
+        <strong>价值：</strong>推荐结果符合客户真实的业务优先级，而不是所有人套同一套逻辑。
+      </div>
+    </div>
+
+    <!-- 卡片 4 -->
+    <div class="feat-card">
+      <div class="feat-card-header">
+        <div class="feat-icon">🧴</div>
+        <div>
+          <div class="feat-num">3.4</div>
+          <div class="feat-title">罐车清洗成本纳入推荐计算</div>
+        </div>
+      </div>
+      <div class="feat-solution">系统自动查看上一单介质，对照相容性规则判断是否需要清洗、时长和费用，叠加进推荐评分。专用介质不可切换的车辆直接排除。</div>
+      <div class="feat-value"><strong>价值：</strong>调度员看到的是真实可用时间和真实总费用，不会因忽略清洗而派出延误的单。</div>
+    </div>
+
+    <!-- 卡片 5 -->
+    <div class="feat-card">
+      <div class="feat-card-header">
+        <div class="feat-icon">🔗</div>
+        <div>
+          <div class="feat-num">3.5</div>
+          <div class="feat-title">货物互融库</div>
+        </div>
+      </div>
+      <div class="feat-solution">维护一张"哪些货物可以混装或顺序装载、无需清洗罐"的相容性数据库。系统在推荐罐车时自动查询：上一单介质与本单介质在互融库中标记为相容，则跳过清洗环节直接可用。</div>
+      <div class="feat-value"><strong>价值：</strong>为 3.4 罐车清洗成本计算提供数据基础，避免因缺少相容性规则而误判"需要清洗"，减少不必要的清洗等待，提升罐车复用率。</div>
+    </div>
+
+    <!-- 卡片 6 -->
+    <div class="feat-card">
+      <div class="feat-card-header">
+        <div class="feat-icon">🎯</div>
+        <div>
+          <div class="feat-num">3.6</div>
+          <div class="feat-title">调度员可手动指定车辆</div>
+        </div>
+      </div>
+      <div class="feat-solution">在推荐列表页面支持搜索并指定任意可用车辆，跳过排序直接派车。系统同样记录结果，用于后续准时率等数据积累。</div>
+      <div class="feat-value"><strong>价值：</strong>AI 推荐和人工判断并存，系统是辅助而不是束缚，特殊情况有退路。</div>
+    </div>
+
+    <!-- 卡片 7 -->
+    <div class="feat-card">
+      <div class="feat-card-header">
+        <div class="feat-icon">🚚</div>
+        <div>
+          <div class="feat-num">3.7</div>
+          <div class="feat-title">一次派多辆车（批量派车）</div>
+        </div>
+      </div>
+      <div class="feat-solution">支持一次勾选多辆推荐车辆，系统自动按额定载重比例拆分货量、批量建单并同步推送派车通知。单次上限 20 辆，每辆生成独立运单互不影响。</div>
+      <div class="feat-value"><strong>价值：</strong>大批量场景，从逐票操作变为一次完成，大幅提升高峰期调度效率。</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── 四、完整推荐流程 ── -->
+<div class="section">
+  <div class="section-title"><span class="num">四</span>完整推荐流程</div>
+  <style>
+    .pflow { display:flex; flex-direction:column; align-items:center; gap:0; }
+    .pflow-node {
+      width:100%; max-width:640px;
+      border-radius:10px;
+      overflow:hidden;
+      box-shadow:0 2px 8px rgba(0,0,0,.08);
+    }
+    .pflow-node-head {
+      display:flex; align-items:center; gap:10px;
+      padding:11px 20px;
+      font-weight:700; font-size:14px; color:#fff;
+    }
+    .pflow-node-head .step-badge {
+      background:rgba(255,255,255,.22);
+      border-radius:4px; padding:2px 8px;
+      font-size:11px; font-weight:600; letter-spacing:.3px; white-space:nowrap;
+    }
+    .pflow-node-body {
+      padding:12px 20px 14px;
+      font-size:13.5px;
+      display:flex; flex-direction:column; gap:5px;
+    }
+    .pflow-node-body .pflow-item {
+      display:flex; align-items:baseline; gap:6px;
+    }
+    .pflow-node-body .pflow-item::before {
+      content:'·'; font-size:16px; line-height:1; flex-shrink:0;
+    }
+    .pflow-badge-new {
+      display:inline-block;
+      background:#e6f4ea; color:#1e7e34;
+      border:1px solid #b8dfc1; border-radius:3px;
+      padding:0px 5px; font-size:11px; font-weight:600;
+      margin-left:4px; vertical-align:middle; white-space:nowrap;
+    }
+    /* 颜色主题 */
+    .pflow-input .pflow-node-head  { background:linear-gradient(90deg,#4a90d9,#1a6fdb); }
+    .pflow-input .pflow-node-body  { background:#f0f7ff; color:#1a4a8a; }
+    .pflow-step1 .pflow-node-head  { background:linear-gradient(90deg,#e05555,#c0392b); }
+    .pflow-step1 .pflow-node-body  { background:#fff5f5; color:#4a1010; }
+    .pflow-step2 .pflow-node-head  { background:linear-gradient(90deg,#e07b28,#d35400); }
+    .pflow-step2 .pflow-node-body  { background:#fff8f0; color:#4a2500; }
+    .pflow-step3 .pflow-node-head  { background:linear-gradient(90deg,#8e44ad,#6c3483); }
+    .pflow-step3 .pflow-node-body  { background:#fdf4ff; color:#3d1a4a; }
+    .pflow-step4 .pflow-node-head  { background:linear-gradient(90deg,#16a085,#0e6655); }
+    .pflow-step4 .pflow-node-body  { background:#f0fdf8; color:#0a3d2e; }
+    .pflow-output .pflow-node-head { background:linear-gradient(90deg,#27ae60,#1e8449); }
+    .pflow-output .pflow-node-body { background:#eafaf1; color:#1a4a2a; text-align:center; font-weight:600; font-size:14px; padding:14px 20px; }
+    /* 连接箭头 */
+    .pflow-arrow {
+      display:flex; flex-direction:column; align-items:center;
+      width:100%; max-width:640px; padding:0;
+    }
+    .pflow-arrow-line { width:2px; height:18px; background:#b0bec5; }
+    .pflow-arrow-head { width:0; height:0; border-left:7px solid transparent; border-right:7px solid transparent; border-top:10px solid #b0bec5; }
+  </style>
+
+  <div class="pflow">
+
+    <!-- 输入 -->
+    <div class="pflow-node pflow-input">
+      <div class="pflow-node-head">
+        <span>调度员输入运单需求</span>
+      </div>
+      <div class="pflow-node-body" style="flex-direction:row;gap:24px;justify-content:center;font-weight:600;font-size:14px;">
+        <span>线路</span><span>·</span><span>货物类型</span><span>·</span><span>要求发车时间</span>
+      </div>
+    </div>
+
+    <div class="pflow-arrow"><div class="pflow-arrow-line"></div><div class="pflow-arrow-head"></div></div>
+
+    <!-- 第一步 -->
+    <div class="pflow-node pflow-step1">
+      <div class="pflow-node-head">
+        <span class="step-badge">第一步</span>
+        <span>硬约束过滤 — 淘汰不能派的车</span>
+      </div>
+      <div class="pflow-node-body">
+        <div class="pflow-item">货物类型不在适装范围 → 排除</div>
+        <div class="pflow-item">无 GPS → 排除</div>
+        <div class="pflow-item">未来 12h 有任务冲突 → 排除</div>
+        <div class="pflow-item">维修 / 保养 / 停驶状态 → 排除</div>
+        <div class="pflow-item">无使用权限 → 排除</div>
+        <div class="pflow-item">仅推荐模式下非绑定车辆 → 排除</div>
+      </div>
+    </div>
+
+    <div class="pflow-arrow"><div class="pflow-arrow-line"></div><div class="pflow-arrow-head"></div></div>
+
+    <!-- 第二步 -->
+    <div class="pflow-node pflow-step2">
+      <div class="pflow-node-head">
+        <span class="step-badge">第二步</span>
+        <span>计算每辆车的真实可用时间</span>
+      </div>
+      <div class="pflow-node-body">
+        <div class="pflow-item">有 GPS → 实时位置 + 地图 ETA</div>
+        <div class="pflow-item">无 GPS → 按任务状态推算位置</div>
+        <div class="pflow-item">罐车 → 叠加清洗时长</div>
+      </div>
+    </div>
+
+    <div class="pflow-arrow"><div class="pflow-arrow-line"></div><div class="pflow-arrow-head"></div></div>
+
+    <!-- 第三步 -->
+    <div class="pflow-node pflow-step3">
+      <div class="pflow-node-head">
+        <span class="step-badge">第三步</span>
+        <span>按客户自定义权重六维度打分</span>
+      </div>
+      <div class="pflow-node-body">
+        <div class="pflow-item">读取该客户 / 项目的权重配置，无配置则用系统默认</div>
+        <div class="pflow-item">距离 · 时效 · 装载率 · 常跑线路 · 历史准时率 · 工作均衡 六维度加权求和</div>
+        <div class="pflow-item">成本维度叠加罐车清洗费用</div>
+      </div>
+    </div>
+
+    <div class="pflow-arrow"><div class="pflow-arrow-line"></div><div class="pflow-arrow-head"></div></div>
+
+    <!-- 第四步 -->
+    <div class="pflow-node pflow-step4">
+      <div class="pflow-node-head">
+        <span class="step-badge">第四步</span>
+        <span>排序调整</span>
+      </div>
+      <div class="pflow-node-body">
+        <div class="pflow-item">绑定服务车辆（优先推荐模式）→ 得分加权靠前</div>
+      </div>
+    </div>
+
+    <div class="pflow-arrow"><div class="pflow-arrow-line"></div><div class="pflow-arrow-head"></div></div>
+
+    <!-- 输出 -->
+    <div class="pflow-node pflow-output">
+      <div class="pflow-node-head" style="justify-content:center;">
+        <span>输出推荐列表</span>
+      </div>
+      <div class="pflow-node-body">
+        默认展示前 5 名，含理由说明，调度员点击即可派车
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── 五、协助确认事项 ── -->
+<div class="section">
+  <div class="section-title"><span class="num">五</span>需要确认事项</div>
+  <table>
+    <thead><tr><th style="width:40px">#</th><th>事项</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>适装货物分类枚举</td><td>你们内部用什么货物分类体系？是否有现成标准？</td></tr>
+      <tr><td>2</td><td>介质相容性规则表</td><td>哪些介质之间不可切换？哪些需要化学清洗？</td></tr>
+      <tr><td>3</td><td>清洗费用和时长标准</td><td>各类清洗的实际报价和通常耗时</td></tr>
+      <tr><td>4</td><td>是否存在临时车线情况</td><td>是否有临时新增线路、单次专线等场景？系统需判断如何处理历史数据不足的临时线路推荐</td></tr>
+      <tr><td>5</td><td>建单时的输入字段</td><td>调度员建单时会填写哪些信息？（如线路、货物类型、重量/体积、要求发车时间、客户等）请提供完整字段列表，以便确认推荐算法所需输入是否均可获取</td></tr>
+      <tr><td>6</td><td>使用端</td><td>你们主要用 PC 端还是员工端小程序？两端在派车操作上有差异，确认后可针对性优化推荐入口设计</td></tr>
+    </tbody>
+  </table>
+</div>
+
+</div><!-- /container -->
+</body>
+</html>

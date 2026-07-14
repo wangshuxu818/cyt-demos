@@ -78,6 +78,48 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-size:13px;backg
 .cargo-item{display:flex;align-items:center;padding:8px 12px;cursor:pointer;font-size:12px;color:#333}
 .cargo-item:hover{background:#f5f7fa}
 .cargo-checkbox{width:14px;height:14px;margin-right:8px;cursor:pointer;accent-color:#0cace7}
+/* weight config */
+.weight-preset{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.weight-btn{padding:6px 16px;border:1px solid #d0d7e3;border-radius:4px;cursor:pointer;font-size:12px;color:#555;background:#fff;transition:all .2s}
+.weight-btn:hover{border-color:#0cace7;color:#0cace7}
+.weight-btn.active{border-color:#0cace7;background:#e8f5fe;color:#0cace7;font-weight:600}
+.weight-row{display:flex;align-items:center;margin-bottom:14px;gap:10px}
+.weight-label{width:90px;font-size:12px;color:#555;flex-shrink:0}
+.weight-bar-wrap{flex:1;height:8px;background:#e8edf3;border-radius:4px;overflow:hidden}
+.weight-bar{height:100%;background:linear-gradient(270deg,#0cace7,#23c2ff);border-radius:4px;transition:width .25s}
+.weight-pct{width:40px;text-align:right;font-size:13px;font-weight:600;color:#1a2b45;flex-shrink:0}
+.weight-adj{width:24px;height:24px;border:1px solid #d0d7e3;border-radius:3px;background:#fff;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;color:#555;flex-shrink:0}
+.weight-adj:hover{border-color:#0cace7;color:#0cace7;background:#f0f8ff}
+.weight-total{margin-top:16px;padding:10px 16px;border-radius:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
+.weight-total.ok{background:#e8f8f0;color:#1a9651}
+.weight-total.err{background:#fff0f0;color:#e05a5a}
+/* compat table */
+.compat-table{width:100%;border-collapse:collapse;font-size:12px}
+.compat-table th,.compat-table td{padding:9px 12px;border:1px solid #e8edf3;text-align:left}
+.compat-table th{background:#f5f7fa;color:#666;font-weight:600}
+.compat-badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:600}
+.compat-badge.ok{background:#e8f8f0;color:#1a9651}
+.compat-badge.no{background:#fff0f0;color:#e05a5a}
+/* agent */
+.agent-input-bar{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px}
+.agent-field{display:flex;flex-direction:column;gap:4px}
+.agent-field label{font-size:11px;color:#888}
+.agent-thinking{display:none;align-items:center;gap:12px;padding:14px 18px;background:#f0f8ff;border-radius:6px;margin-bottom:16px;font-size:13px;color:#0cace7;border:1px solid #c8e8fc}
+.thinking-dots span{display:inline-block;width:7px;height:7px;background:#0cace7;border-radius:50%;margin:0 2px;animation:blink 1.2s infinite}
+.thinking-dots span:nth-child(2){animation-delay:.2s}
+.thinking-dots span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+.rec-table{width:100%;border-collapse:collapse;font-size:12px}
+.rec-table th,.rec-table td{padding:9px 12px;border:1px solid #e8edf3;text-align:left}
+.rec-table th{background:#f5f7fa;color:#666;font-weight:600}
+.rec-rank{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+.rec-rank.r1{background:linear-gradient(135deg,#f6c000,#e8a000)}
+.rec-rank.r2{background:#b0b8c1}
+.rec-rank.r3{background:#b87333}
+.rec-rank.rn{background:#dde2e8;color:#666}
+.score-bar{display:inline-block;height:5px;border-radius:3px;background:linear-gradient(270deg,#0cace7,#23c2ff);vertical-align:middle;margin-right:6px}
+.tag-g{display:inline-block;padding:1px 6px;border-radius:3px;font-size:11px;background:#e8f8f0;color:#1a9651;margin-right:3px}
+.tag-b{display:inline-block;padding:1px 6px;border-radius:3px;font-size:11px;background:#e8f0fe;color:#4a7fc1;margin-right:3px}
 </style>
 </head>
 <body>
@@ -86,8 +128,8 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-size:13px;backg
   <nav class="topbar-nav">
     <a href="#" id="navCust" class="active" onclick="switchTab(1);return false">客户管理</a>
     <a href="#" id="navVeh" onclick="switchTab(2);return false">车辆信息管理</a>
-    <a href="#">运单管理</a>
-    <a href="#">运力推荐设置</a>
+    <a href="#" id="navDispatch" onclick="switchTab(5);return false">运单管理</a>
+    <a href="#" id="navSetting" onclick="switchTab(3);return false">运力推荐设置</a>
   </nav>
 </div>
 <div class="app-body">
@@ -100,11 +142,23 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-size:13px;backg
       <div class="sidebar-title">车辆信息管理</div>
       <div class="sidebar-item active">车辆列表</div>
     </div>
+    <div class="sidebar-block" id="sidebarSetting" style="display:none">
+      <div class="sidebar-title">运力推荐设置</div>
+      <div class="sidebar-item active" onclick="switchTab(3)">货物互融库</div>
+      <div class="sidebar-item" onclick="switchTab(4)">推荐权重配置</div>
+    </div>
+    <div class="sidebar-block" id="sidebarDispatch" style="display:none">
+      <div class="sidebar-title">运单管理</div>
+      <div class="sidebar-item active">智能派车</div>
+    </div>
   </div>
   <div class="main">
     <div class="demo-tabs">
       <div class="demo-tab active" onclick="switchTab(1)">客户管理·在服车辆</div>
       <div class="demo-tab" onclick="switchTab(2)">车辆管理·适装货物</div>
+      <div class="demo-tab" onclick="switchTab(3)">设置·货物互融库</div>
+      <div class="demo-tab" onclick="switchTab(4)">设置·推荐权重</div>
+      <div class="demo-tab" onclick="switchTab(5)">运单·智能派车</div>
     </div>
     <div id="content1">
       <div class="page-header">
@@ -122,6 +176,121 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-size:13px;backg
       </div>
       <div class="content-panel">
         <div style="color:#888;font-size:13px;padding:20px 0">车辆列表区域（演示略）</div>
+      </div>
+    </div>
+    <!-- content3: 货物互融库 -->
+    <div id="content3" style="display:none">
+      <div class="page-header">
+        <div class="page-title">货物互融库 <span class="new-badge">NEW</span></div>
+        <button class="fn-btn" onclick="compatAddRow()">+ 添加记录</button>
+      </div>
+      <div class="content-panel" style="padding:0">
+        <table class="compat-table">
+          <thead><tr><th>#</th><th>货物 A</th><th>货物 B</th><th>相容性</th><th>说明</th><th>操作</th></tr></thead>
+          <tbody id="compatTbody">
+            <tr><td>1</td><td>甲醇</td><td>甲基叔丁基醚（MTBE）</td><td><span class="compat-badge ok">✅ 相容</span></td><td>同系石化产品，无需清洗</td><td><span style="color:#0cace7;cursor:pointer;font-size:12px">编辑</span></td></tr>
+            <tr><td>2</td><td>碳四</td><td>液化石油气（碳四）</td><td><span class="compat-badge ok">✅ 相容</span></td><td>同产品族，水洗即可</td><td><span style="color:#0cace7;cursor:pointer;font-size:12px">编辑</span></td></tr>
+            <tr><td>3</td><td>乙丁烷</td><td>丙烯</td><td><span class="compat-badge ok">✅ 相容</span></td><td>同系烃类，无需清洗</td><td><span style="color:#0cace7;cursor:pointer;font-size:12px">编辑</span></td></tr>
+            <tr><td>4</td><td>甲醇</td><td>原油</td><td><span class="compat-badge no">❌ 不相容</span></td><td>化学清洗，约6~12h</td><td><span style="color:#0cace7;cursor:pointer;font-size:12px">编辑</span></td></tr>
+            <tr><td>5</td><td>原油</td><td>液化石油气（碳四）</td><td><span class="compat-badge no">❌ 不相容</span></td><td>需专项清洗，约12~24h</td><td><span style="color:#0cace7;cursor:pointer;font-size:12px">编辑</span></td></tr>
+            <tr><td>6</td><td>丙烯</td><td>甲醇</td><td><span class="compat-badge no">❌ 不相容</span></td><td>化学清洗，约8h</td><td><span style="color:#0cace7;cursor:pointer;font-size:12px">编辑</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:12px;font-size:12px;color:#aaa">注：相容货物对顺序装载无需清洗罐体，推荐算法自动引用此表</div>
+    </div>
+    <!-- content4: 推荐权重配置 -->
+    <div id="content4" style="display:none">
+      <div class="page-header">
+        <div class="page-title">推荐权重配置 <span class="new-badge">NEW</span></div>
+        <button class="fn-btn" onclick="saveWeights()">保存配置</button>
+      </div>
+      <div class="content-panel">
+        <div class="weight-preset">
+          <div class="weight-btn active" data-preset="balanced" onclick="setPreset('balanced')">均衡</div>
+          <div class="weight-btn" data-preset="cost" onclick="setPreset('cost')">成本优先</div>
+          <div class="weight-btn" data-preset="speed" onclick="setPreset('speed')">时效优先</div>
+          <div class="weight-btn" data-preset="custom" onclick="">自定义</div>
+        </div>
+        <div class="weight-row"><div class="weight-label">📍 距离得分</div><div class="weight-bar-wrap"><div class="weight-bar" id="wbar_dist" style="width:20%"></div></div><div class="weight-pct" id="w_dist">20%</div><div class="weight-adj" onclick="adjustWeight('dist',-5)">−</div><div class="weight-adj" onclick="adjustWeight('dist',5)">+</div></div>
+        <div class="weight-row"><div class="weight-label">⏱ 时效得分</div><div class="weight-bar-wrap"><div class="weight-bar" id="wbar_time" style="width:20%"></div></div><div class="weight-pct" id="w_time">20%</div><div class="weight-adj" onclick="adjustWeight('time',-5)">−</div><div class="weight-adj" onclick="adjustWeight('time',5)">+</div></div>
+        <div class="weight-row"><div class="weight-label">📦 装载率</div><div class="weight-bar-wrap"><div class="weight-bar" id="wbar_load" style="width:20%"></div></div><div class="weight-pct" id="w_load">20%</div><div class="weight-adj" onclick="adjustWeight('load',-5)">−</div><div class="weight-adj" onclick="adjustWeight('load',5)">+</div></div>
+        <div class="weight-row"><div class="weight-label">🛣 常跑线路</div><div class="weight-bar-wrap"><div class="weight-bar" id="wbar_route" style="width:10%"></div></div><div class="weight-pct" id="w_route">10%</div><div class="weight-adj" onclick="adjustWeight('route',-5)">−</div><div class="weight-adj" onclick="adjustWeight('route',5)">+</div></div>
+        <div class="weight-row"><div class="weight-label">✅ 历史准时率</div><div class="weight-bar-wrap"><div class="weight-bar" id="wbar_ontime" style="width:15%"></div></div><div class="weight-pct" id="w_ontime">15%</div><div class="weight-adj" onclick="adjustWeight('ontime',-5)">−</div><div class="weight-adj" onclick="adjustWeight('ontime',5)">+</div></div>
+        <div class="weight-row"><div class="weight-label">⚖️ 工作均衡</div><div class="weight-bar-wrap"><div class="weight-bar" id="wbar_balance" style="width:15%"></div></div><div class="weight-pct" id="w_balance">15%</div><div class="weight-adj" onclick="adjustWeight('balance',-5)">−</div><div class="weight-adj" onclick="adjustWeight('balance',5)">+</div></div>
+        <div class="weight-total ok" id="weightTotal">✅ 合计：100%</div>
+      </div>
+    </div>
+    <!-- content5: 智能派车 -->
+    <div id="content5" style="display:none">
+      <div class="page-header">
+        <div class="page-title">智能派车 <span class="new-badge">NEW</span></div>
+      </div>
+      <div class="content-panel" style="margin-bottom:16px">
+        <div style="font-size:12px;color:#888;margin-bottom:12px">输入运单需求，AI 自动完成过滤 + 打分 + 排序</div>
+        <div class="agent-input-bar">
+          <div class="agent-field"><label>起点城市</label><input class="fn-input" style="width:110px" value="上海" id="ai_from"></div>
+          <div class="agent-field"><label>终点城市</label><input class="fn-input" style="width:110px" value="南京" id="ai_to"></div>
+          <div class="agent-field"><label>货物类型</label>
+            <select class="fn-select" style="width:160px" id="ai_cargo">
+              <option>甲醇</option><option>甲基叔丁基醚（MTBE）</option><option>碳四</option>
+              <option>原油</option><option>乙丁烷</option><option>液化石油气（碳四）</option><option>丙烯</option>
+            </select>
+          </div>
+          <div class="agent-field"><label>货重（吨）</label><input class="fn-input" style="width:80px" value="25" id="ai_weight"></div>
+          <div class="agent-field"><label>要求发车</label><input class="fn-input" style="width:130px" value="2026-07-14 09:00" id="ai_time"></div>
+          <button class="fn-btn" style="align-self:flex-end" onclick="startRecommend()">🤖 开始推荐</button>
+        </div>
+      </div>
+      <div class="agent-thinking" id="agentThinking">
+        <span>AI 正在分析运力</span>
+        <span class="thinking-dots"><span></span><span></span><span></span></span>
+        <span style="color:#aaa;font-size:12px">过滤不可用车辆 → 计算ETA → 检查互融库 → 综合打分…</span>
+      </div>
+      <div id="agentResult" style="display:none">
+        <div class="content-panel" style="padding:0">
+          <div style="padding:12px 16px;font-size:12px;color:#888;border-bottom:1px solid #f0f2f5">
+            共过滤出 <b style="color:#1a2b45">5 辆</b>可用车辆，按综合评分排序如下：
+          </div>
+          <table class="rec-table">
+            <thead><tr><th>排名</th><th>车牌号</th><th>车型/司机</th><th>当前位置</th><th>预计到达</th><th>综合评分</th><th>推荐理由</th><th>操作</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><span class="rec-rank r1">1</span></td>
+                <td><b>沪A·88888</b></td><td>罐车 30t / 陈师傅</td>
+                <td>上海浦东（12km）</td><td>08:45 ✅</td>
+                <td><span class="score-bar" style="width:88px"></span><b>88</b></td>
+                <td><span class="tag-g">距离近</span><span class="tag-g">常跑此线</span><span class="tag-g">无需清洗</span></td>
+                <td><button class="fn-btn fn-btn--sm" onclick="dispatchVehicle('沪A·88888')">派车</button></td>
+              </tr>
+              <tr>
+                <td><span class="rec-rank r2">2</span></td>
+                <td>苏B·33210</td><td>罐车 30t / 王师傅</td>
+                <td>苏州吴中（42km）</td><td>09:20 ✅</td>
+                <td><span class="score-bar" style="width:76px"></span><b>76</b></td>
+                <td><span class="tag-g">准时率高</span><span class="tag-b">适合此货</span></td>
+                <td><button class="fn-btn fn-btn--sm fn-btn--default" onclick="dispatchVehicle('苏B·33210')">派车</button></td>
+              </tr>
+              <tr>
+                <td><span class="rec-rank r3">3</span></td>
+                <td>沪C·56789</td><td>罐车 20t / 张师傅</td>
+                <td>上海闵行（28km）</td><td>09:10 ✅</td>
+                <td><span class="score-bar" style="width:68px"></span><b>68</b></td>
+                <td><span class="tag-b">载重稍小</span><span class="tag-g">近期接单少</span></td>
+                <td><button class="fn-btn fn-btn--sm fn-btn--default" onclick="dispatchVehicle('沪C·56789')">派车</button></td>
+              </tr>
+              <tr style="color:#aaa">
+                <td><span class="rec-rank rn">4</span></td>
+                <td>皖A·12099</td><td>罐车 30t / 刘师傅</td>
+                <td>合肥（180km）</td><td>12:30 ⚠️</td>
+                <td><span class="score-bar" style="width:52px;opacity:.5"></span><b>52</b></td>
+                <td><span style="font-size:11px">距离较远，时效偏低</span></td>
+                <td><button class="fn-btn fn-btn--sm fn-btn--default">派车</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:10px;font-size:12px;color:#aaa">提示：可点击"派车"直接创建运单并通知司机，也可手动搜索其他车辆</div>
       </div>
     </div>
   </div>
@@ -227,12 +396,20 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-size:13px;backg
 
 <script>
 function switchTab(n){
-  document.getElementById('content1').style.display=n===1?'block':'none';
-  document.getElementById('content2').style.display=n===2?'block':'none';
-  document.getElementById('sidebarCust').style.display=n===1?'block':'none';
-  document.getElementById('sidebarVeh').style.display=n===2?'block':'none';
-  document.getElementById('navCust').className=n===1?'active':'';
-  document.getElementById('navVeh').className=n===2?'active':'';
+  [1,2,3,4,5].forEach(i=>{var c=document.getElementById('content'+i);if(c)c.style.display=i===n?'block':'none';});
+  ['sidebarCust','sidebarVeh','sidebarSetting','sidebarDispatch'].forEach(id=>{var el=document.getElementById(id);if(el)el.style.display='none';});
+  if(n===1)document.getElementById('sidebarCust').style.display='block';
+  else if(n===2)document.getElementById('sidebarVeh').style.display='block';
+  else if(n===3||n===4){
+    document.getElementById('sidebarSetting').style.display='block';
+    document.querySelectorAll('#sidebarSetting .sidebar-item').forEach((el,i)=>el.classList.toggle('active',i===n-3));
+  }
+  else if(n===5)document.getElementById('sidebarDispatch').style.display='block';
+  ['navCust','navVeh','navDispatch','navSetting'].forEach(id=>{var el=document.getElementById(id);if(el)el.className='';});
+  if(n===1)document.getElementById('navCust').className='active';
+  else if(n===2)document.getElementById('navVeh').className='active';
+  else if(n===3||n===4)document.getElementById('navSetting').className='active';
+  else if(n===5)document.getElementById('navDispatch').className='active';
   document.querySelectorAll('.demo-tab').forEach((t,i)=>t.className='demo-tab'+(i===n-1?' active':''));
 }
 function openPanel(type){
@@ -293,6 +470,61 @@ document.addEventListener('click',function(e){
   var dd=document.getElementById('cargoDropdown');
   if(!dd.contains(e.target)&&!document.getElementById('cargoTrigger').contains(e.target))dd.classList.remove('show');
 });
+/* weight */
+var weights={dist:20,time:20,load:20,route:10,ontime:15,balance:15};
+var presets={balanced:{dist:20,time:20,load:20,route:10,ontime:15,balance:15},cost:{dist:35,time:10,load:25,route:10,ontime:10,balance:10},speed:{dist:10,time:40,load:15,route:10,ontime:20,balance:5}};
+function setPreset(name){
+  if(presets[name]){weights=Object.assign({},presets[name]);updateWeightDisplay();}
+  document.querySelectorAll('.weight-btn').forEach(b=>b.classList.remove('active'));
+  var btn=document.querySelector('[data-preset="'+name+'"]');if(btn)btn.classList.add('active');
+}
+function adjustWeight(dim,delta){
+  var keys=Object.keys(weights);
+  var nv=Math.max(5,Math.min(60,weights[dim]+delta));
+  var diff=nv-weights[dim];if(!diff)return;
+  var others=keys.filter(k=>k!==dim);
+  var tot=others.reduce((s,k)=>s+weights[k],0);
+  others.forEach(k=>{weights[k]=Math.max(5,weights[k]-Math.round(diff*(weights[k]/tot)));});
+  weights[dim]=nv;
+  var sum=Object.values(weights).reduce((a,b)=>a+b,0);
+  if(sum!==100)weights[others[0]]+=100-sum;
+  updateWeightDisplay();
+  document.querySelectorAll('.weight-btn').forEach(b=>b.classList.remove('active'));
+  var cb=document.querySelector('[data-preset="custom"]');if(cb)cb.classList.add('active');
+}
+function updateWeightDisplay(){
+  Object.keys(weights).forEach(k=>{
+    var el=document.getElementById('w_'+k),bar=document.getElementById('wbar_'+k);
+    if(el)el.textContent=weights[k]+'%';if(bar)bar.style.width=weights[k]+'%';
+  });
+  var sum=Object.values(weights).reduce((a,b)=>a+b,0);
+  var tot=document.getElementById('weightTotal');
+  if(tot){tot.className='weight-total '+(sum===100?'ok':'err');tot.innerHTML=(sum===100?'✅':'⚠️')+' 合计：'+sum+'%'+(sum===100?'':' （需等于100%）');}
+}
+function saveWeights(){alert('权重配置已保存！');}
+/* compat */
+function compatAddRow(){
+  var a=prompt('货物 A：');if(!a)return;
+  var b=prompt('货物 B：');if(!b)return;
+  var ok=confirm('是否相容？确定=相容，取消=不相容');
+  var tbody=document.getElementById('compatTbody');
+  var idx=tbody.rows.length+1;
+  var row=document.createElement('tr');
+  row.innerHTML='<td>'+idx+'</td><td>'+a+'</td><td>'+b+'</td><td><span class="compat-badge '+(ok?'ok':'no')+'">'+(ok?'✅ 相容':'❌ 不相容')+'</span></td><td>—</td><td><span style="color:#0cace7;cursor:pointer;font-size:12px">编辑</span></td>';
+  tbody.appendChild(row);
+}
+/* agent */
+function startRecommend(){
+  document.getElementById('agentThinking').style.display='flex';
+  document.getElementById('agentResult').style.display='none';
+  setTimeout(function(){
+    document.getElementById('agentThinking').style.display='none';
+    document.getElementById('agentResult').style.display='block';
+  },2200);
+}
+function dispatchVehicle(plate){
+  alert('已向'+plate+'的司机发送派车通知，运单创建成功！');
+}
 </script>
 </body>
 </html>

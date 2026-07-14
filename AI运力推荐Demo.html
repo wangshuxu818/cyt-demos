@@ -162,6 +162,39 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-size:13px;backg
 .compat-cargo-opt input{margin-right:10px;width:15px;height:15px;accent-color:#0cace7;cursor:pointer;flex-shrink:0}
 .compat-sel-count{font-size:12px;color:#888;margin-bottom:12px}
 .compat-sel-count b{color:#0cace7}
+/* chat dispatch */
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 178px);min-height:400px}
+.chat-messages{flex:1;overflow-y:auto;padding:16px 0;display:flex;flex-direction:column;gap:14px}
+.chat-msg{display:flex;align-items:flex-start;gap:10px}
+.chat-msg.user{flex-direction:row-reverse}
+.chat-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#0cace7,#23c2ff);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chat-bubble{max-width:82%;padding:12px 16px;border-radius:12px;font-size:13px;line-height:1.7}
+.sys-bubble{background:#f5f7fa;color:#1a2b45;border-radius:4px 12px 12px 12px}
+.user-bubble{background:linear-gradient(135deg,#0c5fa3,#0cace7);color:#fff;border-radius:12px 4px 12px 12px;max-width:60%}
+.parse-card{background:#fff;border:1px solid #e8ecf2;border-radius:8px;padding:12px;margin:8px 0}
+.parse-card-hd{font-size:11px;color:#888;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.parse-card-hd::before{content:'';display:inline-block;width:3px;height:11px;background:#0cace7;border-radius:2px}
+.pf-row{display:flex;align-items:center;padding:5px 0;border-bottom:1px solid #f5f7fa}
+.pf-row:last-of-type{border-bottom:none}
+.pf-label{width:68px;font-size:11px;color:#999;flex-shrink:0}
+.pf-val{font-size:13px;color:#1a2b45;font-weight:500}
+.parse-hint{font-size:11px;color:#bbb;margin-top:8px;padding-top:6px;border-top:1px dashed #e8ecf2}
+.rec-section{margin-top:10px}
+.rec-section-hd{font-size:11px;color:#888;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.rec-section-hd::before{content:'';display:inline-block;width:3px;height:11px;background:#52c41a;border-radius:2px}
+.rec-veh-table{width:100%;border-collapse:collapse;font-size:12px}
+.rec-veh-table th{background:#f5f7fa;padding:6px 8px;text-align:left;color:#888;font-weight:500;white-space:nowrap}
+.rec-veh-table td{padding:7px 8px;border-bottom:1px solid #f5f7fa;vertical-align:middle}
+.rec-veh-table tr:last-child td{border-bottom:none}
+.chat-input-bar{display:flex;gap:10px;align-items:flex-end;padding-top:12px;border-top:1px solid #e8ecf2}
+.chat-input{flex:1;border:1px solid #d8dde6;border-radius:6px;padding:8px 12px;font-size:13px;resize:none;line-height:1.5;outline:none;color:#1a2b45;font-family:inherit}
+.chat-input:focus{border-color:#0cace7}
+.thinking-dots-chat{display:inline-flex;gap:4px;align-items:center;margin-left:6px}
+.thinking-dots-chat span{width:6px;height:6px;border-radius:50%;background:#0cace7;animation:blink .9s infinite}
+.thinking-dots-chat span:nth-child(2){animation-delay:.2s}
+.thinking-dots-chat span:nth-child(3){animation-delay:.4s}
+.dispatch-confirm-bar{display:flex;align-items:center;gap:10px;margin-top:8px;padding:9px 12px;background:#f0f8ff;border:1px solid #b8d8f0;border-radius:8px;font-size:13px}
+.dispatch-success-card{background:#f0fff4;border:1px solid #b7eb8f;border-radius:8px;padding:12px;font-size:13px}
 </style>
 </head>
 <body>
@@ -205,7 +238,6 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-size:13px;backg
     <div id="content1">
       <div class="page-header">
         <div class="page-title">客户管理</div>
-        <button class="fn-btn hi" id="custConfigBtn" onclick="custConfigSelected()">配置在服车辆 <span class="new-badge">NEW</span></button>
       </div>
       <div class="list-panel">
         <div class="page-tabs">
@@ -219,8 +251,7 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-size:13px;backg
         </div>
         <div class="toolbar">
           <button class="tb-btn">✚ 新增</button>
-          <button class="tb-btn hi on" id="tbCustConfig" onclick="custConfigSelected()">配置在服车辆 <span class="new-badge" style="font-size:9px;padding:1px 4px">NEW</span></button>
-          <button class="tb-btn">✎ 修改</button><button class="tb-btn">新增合同</button><button class="tb-btn">删除</button><button class="tb-btn">停用</button><button class="tb-btn">启用</button>
+          <button class="tb-btn" onclick="editSelectedCust()">✎ 修改</button><button class="tb-btn">新增合同</button><button class="tb-btn">删除</button><button class="tb-btn">停用</button><button class="tb-btn">启用</button>
           <div class="tb-sep"></div>
           <button class="tb-btn">↑ 导入</button><button class="tb-btn">↓ 导出</button><button class="tb-btn">🖨 打印</button>
         </div>
@@ -247,7 +278,7 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-size:13px;backg
           <button class="tb-btn">🔍 查询</button>
         </div>
         <div class="toolbar">
-          <button class="tb-btn">✚ 新增</button><button class="tb-btn">✎ 修改</button><button class="tb-btn">批量修改</button><button class="tb-btn">运力池</button><button class="tb-btn">车辆认证</button><button class="tb-btn">维修登记</button><button class="tb-btn">保养登记</button><button class="tb-btn">启用</button><button class="tb-btn">停用</button><button class="tb-btn">删除</button>
+          <button class="tb-btn">✚ 新增</button><button class="tb-btn" onclick="editSelectedVeh()">✎ 修改</button><button class="tb-btn">批量修改</button><button class="tb-btn">运力池</button><button class="tb-btn">车辆认证</button><button class="tb-btn">维修登记</button><button class="tb-btn">保养登记</button><button class="tb-btn">启用</button><button class="tb-btn">停用</button><button class="tb-btn">删除</button>
           <div class="tb-sep"></div>
           <button class="tb-btn">↑ 导入</button><button class="tb-btn">↓ 导出</button><button class="tb-btn">🖨 打印</button>
         </div>
@@ -294,72 +325,19 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-size:13px;backg
     <div id="content5" style="display:none">
       <div class="page-header">
         <div class="page-title">智能派车 <span class="new-badge">NEW</span></div>
+        <button class="fn-btn fn-btn--default" onclick="resetChat()">+ 新建对话</button>
       </div>
-      <div class="content-panel" style="margin-bottom:16px">
-        <div style="font-size:12px;color:#888;margin-bottom:12px">输入运单需求，AI 自动完成过滤 + 打分 + 排序</div>
-        <div class="agent-input-bar">
-          <div class="agent-field"><label>起点城市</label><input class="fn-input" style="width:110px" value="上海" id="ai_from"></div>
-          <div class="agent-field"><label>终点城市</label><input class="fn-input" style="width:110px" value="南京" id="ai_to"></div>
-          <div class="agent-field"><label>货物类型</label>
-            <select class="fn-select" style="width:160px" id="ai_cargo">
-              <option>甲醇</option><option>甲基叔丁基醚（MTBE）</option><option>碳四</option>
-              <option>原油</option><option>乙丁烷</option><option>液化石油气（碳四）</option><option>丙烯</option>
-            </select>
+      <div class="chat-wrap">
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-msg sys">
+            <div class="chat-avatar">AI</div>
+            <div class="chat-bubble sys-bubble">您好！请用自然语言描述运输需求，我会自动识别关键信息并推荐合适的车辆。<br><br><span style="color:#999;font-size:12px">示例："帮宁波孚宝安排一辆罐车，下周一从上海到宁波，50吨甲醇"</span></div>
           </div>
-          <div class="agent-field"><label>货重（吨）</label><input class="fn-input" style="width:80px" value="25" id="ai_weight"></div>
-          <div class="agent-field"><label>要求发车</label><input class="fn-input" style="width:130px" value="2026-07-14 09:00" id="ai_time"></div>
-          <button class="fn-btn" style="align-self:flex-end" onclick="startRecommend()">🤖 开始推荐</button>
         </div>
-      </div>
-      <div class="agent-thinking" id="agentThinking">
-        <span>AI 正在分析运力</span>
-        <span class="thinking-dots"><span></span><span></span><span></span></span>
-        <span style="color:#aaa;font-size:12px">过滤不可用车辆 → 计算ETA → 检查互融库 → 综合打分…</span>
-      </div>
-      <div id="agentResult" style="display:none">
-        <div class="content-panel" style="padding:0">
-          <div style="padding:12px 16px;font-size:12px;color:#888;border-bottom:1px solid #f0f2f5">
-            共过滤出 <b style="color:#1a2b45">5 辆</b>可用车辆，按综合评分排序如下：
-          </div>
-          <table class="rec-table">
-            <thead><tr><th>排名</th><th>车牌号</th><th>车型/司机</th><th>当前位置</th><th>预计到达</th><th>综合评分</th><th>推荐理由</th><th>操作</th></tr></thead>
-            <tbody>
-              <tr>
-                <td><span class="rec-rank r1">1</span></td>
-                <td><b>沪A·88888</b></td><td>罐车 30t / 陈师傅</td>
-                <td>上海浦东（12km）</td><td>08:45 ✅</td>
-                <td><span class="score-bar" style="width:88px"></span><b>88</b></td>
-                <td><span class="tag-g">距离近</span><span class="tag-g">常跑此线</span><span class="tag-g">无需清洗</span></td>
-                <td><button class="fn-btn fn-btn--sm" onclick="dispatchVehicle('沪A·88888')">派车</button></td>
-              </tr>
-              <tr>
-                <td><span class="rec-rank r2">2</span></td>
-                <td>苏B·33210</td><td>罐车 30t / 王师傅</td>
-                <td>苏州吴中（42km）</td><td>09:20 ✅</td>
-                <td><span class="score-bar" style="width:76px"></span><b>76</b></td>
-                <td><span class="tag-g">准时率高</span><span class="tag-b">适合此货</span></td>
-                <td><button class="fn-btn fn-btn--sm fn-btn--default" onclick="dispatchVehicle('苏B·33210')">派车</button></td>
-              </tr>
-              <tr>
-                <td><span class="rec-rank r3">3</span></td>
-                <td>沪C·56789</td><td>罐车 20t / 张师傅</td>
-                <td>上海闵行（28km）</td><td>09:10 ✅</td>
-                <td><span class="score-bar" style="width:68px"></span><b>68</b></td>
-                <td><span class="tag-b">载重稍小</span><span class="tag-g">近期接单少</span></td>
-                <td><button class="fn-btn fn-btn--sm fn-btn--default" onclick="dispatchVehicle('沪C·56789')">派车</button></td>
-              </tr>
-              <tr style="color:#aaa">
-                <td><span class="rec-rank rn">4</span></td>
-                <td>皖A·12099</td><td>罐车 30t / 刘师傅</td>
-                <td>合肥（180km）</td><td>12:30 ⚠️</td>
-                <td><span class="score-bar" style="width:52px;opacity:.5"></span><b>52</b></td>
-                <td><span style="font-size:11px">距离较远，时效偏低</span></td>
-                <td><button class="fn-btn fn-btn--sm fn-btn--default">派车</button></td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="chat-input-bar">
+          <textarea class="chat-input" id="chatInput" placeholder="输入运输需求，支持自然语言..." rows="2" onkeydown="chatKeyDown(event)"></textarea>
+          <button class="fn-btn" onclick="sendChatMsg()" style="height:54px;padding:0 20px">发送</button>
         </div>
-        <div style="margin-top:10px;font-size:12px;color:#aaa">提示：可点击"派车"直接创建运单并通知司机，也可手动搜索其他车辆</div>
       </div>
     </div>
   </div>
@@ -371,7 +349,7 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-size:13px;backg
 <!-- custPanel -->
 <div class="side-panel" id="custPanel">
   <div class="panel-header">
-    <h3>配置在服车辆 <span class="new-badge">NEW</span></h3>
+    <h3>编辑客户</h3>
     <button class="panel-close" onclick="closePanel('cust')">×</button>
   </div>
   <div class="panel-body">
@@ -418,7 +396,7 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-size:13px;backg
 <!-- vehPanel -->
 <div class="side-panel" id="vehPanel">
   <div class="panel-header">
-    <h3>编辑车辆信息 <span class="new-badge">NEW</span></h3>
+    <h3>编辑车辆</h3>
     <button class="panel-close" onclick="closePanel('veh')">×</button>
   </div>
   <div class="panel-body">
@@ -654,17 +632,205 @@ function deleteCompatGroup(idx){
 window.addEventListener('DOMContentLoaded',function(){
   renderCompatGroups();updateWeightDisplay();renderCustList();renderVehList();
 });
-/* agent */
-function startRecommend(){
-  document.getElementById('agentThinking').style.display='flex';
-  document.getElementById('agentResult').style.display='none';
-  setTimeout(function(){
-    document.getElementById('agentThinking').style.display='none';
-    document.getElementById('agentResult').style.display='block';
-  },2200);
+/* chat dispatch */
+var chatParsed=null;
+var chatSelectedVehs=[];
+var chatLastRec=[];
+function chatKeyDown(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChatMsg();}}
+function sendChatMsg(){
+  var inp=document.getElementById('chatInput');
+  var text=inp.value.trim();if(!text)return;
+  inp.value='';
+  appendUserBubble(text);
+  setTimeout(function(){handleChatInput(text);},700);
 }
-function dispatchVehicle(plate){
-  alert('已向'+plate+'的司机发送派车通知，运单创建成功！');
+function escH(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function appendUserBubble(text){
+  var msgs=document.getElementById('chatMessages');
+  var d=document.createElement('div');d.className='chat-msg user';
+  d.innerHTML='<div class="chat-bubble user-bubble">'+escH(text)+'</div>';
+  msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
+}
+function appendSysDiv(html){
+  var msgs=document.getElementById('chatMessages');
+  var d=document.createElement('div');d.className='chat-msg sys';
+  d.innerHTML='<div class="chat-avatar">AI</div><div class="chat-bubble sys-bubble">'+html+'</div>';
+  msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;return d;
+}
+function showThinking(){
+  return appendSysDiv('<span style="color:#aaa;font-size:12px">正在解析需求…</span><span class="thinking-dots-chat"><span></span><span></span><span></span></span>');
+}
+function handleChatInput(text){
+  var el=showThinking();
+  setTimeout(function(){el.remove();processChat(text);},800+Math.random()*500);
+}
+function processChat(text){
+  var t=text;
+  // 优先判断：含车牌号 → 直接走指定派车，不再走识别流程
+  var plate=extractPlate(t);
+  if(plate){
+    showManualVehicle(plate,extractDriver(t));return;
+  }
+  if(chatParsed&&(t.includes('改成')||t.includes('改为'))&&(t.includes('时间')||t.includes('发车')||t.includes('号')||t.includes('天')||t.includes('日'))){
+    var nt=extractChatTime(t)||'2026-07-15（明天）';chatParsed.time=nt;
+    appendSysDiv('已将发车时间更新为 <b>'+escH(nt)+'</b>，重新推荐：');appendParsedCard();return;
+  }
+  if(chatParsed&&(t.includes('货物改')||t.includes('货改')||extractCargo(t))){
+    var nc=extractCargo(t)||'碳四';chatParsed.cargo=nc;
+    appendSysDiv('已将货物更新为 <b>'+escH(nc)+'</b>，重新推荐：');appendParsedCard();return;
+  }
+  chatParsed=parseRequest(t);chatSelectedVeh=null;
+  appendSysDiv('已识别运输需求，请确认并选择车辆：');appendParsedCard();
+}
+function parseRequest(t){
+  var cust='宁波孚宝仓储有限公司';
+  for(var i=0;i<custData.length;i++){if(t.includes(custData[i].name)){cust=custData[i].name;break;}}
+  if(t.includes('孚宝'))cust='宁波孚宝仓储有限公司';
+  else if(t.includes('古杰'))cust='南京古杰物流有限公司';
+  return {cust:cust,vtype:t.includes('罐车')?'罐车':t.includes('厢车')?'厢车':t.includes('平板')?'平板车':'罐车',
+    cargo:extractCargo(t)||'甲醇',weight:extractWeight(t)||'50吨',
+    time:extractChatTime(t)||'2026-07-20（周一）',route:extractRoute(t)||'上海 → 宁波'};
+}
+function extractCargo(t){
+  var list=['甲基叔丁基醚（MTBE）','液化石油气（碳四）','甲醇','碳四','原油','乙丁烷','丙烯'];
+  for(var i=0;i<list.length;i++){if(t.includes(list[i]))return list[i];}return null;
+}
+function extractWeight(t){var m=t.match(/(\d+)\s*吨/);return m?m[1]+'吨':null;}
+function extractChatTime(t){
+  if(t.includes('明天'))return '2026-07-15（明天）';
+  if(t.includes('后天'))return '2026-07-16（后天）';
+  if(t.includes('下周一'))return '2026-07-20（周一）';
+  if(t.includes('下周三'))return '2026-07-22（周三）';
+  var m=t.match(/(\d{1,2})月(\d{1,2})[日号]/);
+  return m?'2026-'+String(+m[1]).padStart(2,'0')+'-'+String(+m[2]).padStart(2,'0'):null;
+}
+function extractRoute(t){
+  var cs=['上海','南京','宁波','杭州','苏州','天津','广州','武汉'];
+  var from=null,to=null;
+  for(var i=0;i<cs.length;i++){if(t.includes(cs[i])){if(!from)from=cs[i];else if(cs[i]!==from){to=cs[i];break;}}}
+  return (from&&to)?from+' → '+to:null;
+}
+function extractPlate(t){
+  var m=t.match(/[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤川青藏琼宁宫][A-Z·][0-9A-Z·]{4,6}/);
+  return m?m[0]:null;
+}
+function goToOrderList(){
+  alert('跳转至运单列表（演示环境）');
+}
+function extractDriver(t){
+  var m=t.match(/([^\s，,。]{1,4}师傅)/);
+  if(!m)m=t.match(/司机[：:是]?\s*([^\s，,。]{2,4})/);
+  if(!m){
+    // 逗号/顿号后的2-4字短名（排除车牌特征）
+    var after=t.match(/[，,、]\s*([^\s，,。·A-Z0-9]{2,4})(?:[，,。\s]|$)/);
+    if(after)m=after;
+  }
+  return m?m[1]:null;
+}
+function appendParsedCard(){
+  var p=chatParsed;
+  chatLastRec=[
+    {rank:1,plate:'沪A·88888',type:'罐车 30m³',driver:'陈师傅',score:92,w:88,tags:['距离最近','常跑此线','无需清洗']},
+    {rank:2,plate:'赣C9R919',type:'罐车 17.5m',driver:'（空缺）',score:78,w:74,tags:['适装'+p.cargo,'近期空闲']},
+    {rank:3,plate:'粤E55775',type:'罐车',driver:'（空缺）',score:61,w:58,tags:['时效匹配']},
+  ];
+  var fh='<div class="parse-card"><div class="parse-card-hd">已识别需求</div>';
+  [['客户',p.cust],['需求车型',p.vtype],['货物',p.cargo],['货量',p.weight],['发车时间',p.time],['路线',p.route]].forEach(function(f){
+    fh+='<div class="pf-row"><span class="pf-label">'+f[0]+'</span><span class="pf-val">'+escH(f[1])+'</span></div>';
+  });
+  fh+='<div class="parse-hint">如有识别错误，直接告诉我，例如"发车时间改成明天"、"货物改成碳四"</div></div>';
+  var th='<div class="rec-section"><div class="rec-section-hd">为您推荐 '+chatLastRec.length+' 辆候选车辆，可勾选多辆批量派车</div>';
+  th+='<table class="rec-veh-table"><thead><tr><th style="width:32px"><input type="checkbox" id="recCheckAll" onclick="toggleAllRec(this)" title="全选"></th><th>排名</th><th>车牌</th><th>车型/司机</th><th>综合评分</th><th>推荐理由</th></tr></thead><tbody>';
+  chatLastRec.forEach(function(r,i){
+    var tags=r.tags.map(function(g){return '<span class="tag-g">'+escH(g)+'</span>';}).join(' ');
+    th+='<tr id="recRow_'+i+'" onclick="toggleRecRow('+i+')" style="cursor:pointer">';
+    th+='<td><input type="checkbox" class="rec-cb" data-idx="'+i+'" onclick="event.stopPropagation();toggleRecRow('+i+')"></td>';
+    th+='<td><span class="rec-rank r'+r.rank+'">'+r.rank+'</span></td>';
+    th+='<td><b>'+escH(r.plate)+'</b></td>';
+    th+='<td>'+escH(r.type)+'<br><span style="color:#999;font-size:11px">'+escH(r.driver)+'</span></td>';
+    th+='<td><span class="score-bar" style="width:'+r.w+'px"></span><b>'+r.score+'</b></td>';
+    th+='<td>'+tags+'</td></tr>';
+  });
+  th+='</tbody></table>';
+  th+='<div id="recConfirmBar" style="display:none;margin-top:10px"><div class="dispatch-confirm-bar"><span id="recSelLabel" style="font-size:13px">已选 0 辆</span><button class="fn-btn" style="margin-left:auto" onclick="confirmDispatch()">确认派车 →</button><button class="fn-btn fn-btn--default" style="margin-left:8px" onclick="clearRecSel()">取消选择</button></div></div>';
+  th+='</div><div style="margin-top:8px;font-size:11px;color:#bbb">没有合适的车？可告诉我"指定 沪A·88888，陈师傅"</div>';
+  chatSelectedVehs=[];
+  appendSysDiv(fh+th);
+}
+function toggleRecRow(idx){
+  var cb=document.querySelector('.rec-cb[data-idx="'+idx+'"]');
+  if(!cb)return;
+  cb.checked=!cb.checked;
+  var tr=document.getElementById('recRow_'+idx);
+  if(cb.checked){tr.style.background='#e8f4ff';if(!chatSelectedVehs.find(function(v){return v.idx===idx;}))chatSelectedVehs.push({idx:idx,plate:chatLastRec[idx].plate,driver:chatLastRec[idx].driver});}
+  else{tr.style.background='';chatSelectedVehs=chatSelectedVehs.filter(function(v){return v.idx!==idx;});}
+  updateRecConfirmBar();
+}
+function toggleAllRec(cb){
+  chatSelectedVehs=[];
+  document.querySelectorAll('.rec-cb').forEach(function(el,i){
+    el.checked=cb.checked;
+    var tr=document.getElementById('recRow_'+i);
+    if(tr)tr.style.background=cb.checked?'#e8f4ff':'';
+    if(cb.checked)chatSelectedVehs.push({idx:i,plate:chatLastRec[i].plate,driver:chatLastRec[i].driver});
+  });
+  updateRecConfirmBar();
+}
+function updateRecConfirmBar(){
+  var bar=document.getElementById('recConfirmBar');
+  var label=document.getElementById('recSelLabel');
+  if(!bar||!label)return;
+  if(chatSelectedVehs.length>0){
+    bar.style.display='block';
+    label.innerHTML='已选 <b>'+chatSelectedVehs.length+'</b> 辆：'+chatSelectedVehs.map(function(v){return '<b>'+escH(v.plate)+'</b>';}).join('、');
+  } else {bar.style.display='none';}
+}
+function clearRecSel(){
+  chatSelectedVehs=[];
+  document.querySelectorAll('.rec-cb').forEach(function(el){el.checked=false;});
+  document.querySelectorAll('[id^="recRow_"]').forEach(function(tr){tr.style.background='';});
+  var all=document.getElementById('recCheckAll');if(all)all.checked=false;
+  updateRecConfirmBar();
+}
+function confirmDispatch(){
+  if(chatSelectedVehs.length===0&&!chatSelectedVeh)return;
+  var vehs=chatSelectedVehs.length>0?chatSelectedVehs:(chatSelectedVeh?[chatSelectedVeh]:[]);
+  var bar=document.getElementById('dispatchConfirmBar');if(bar)bar.remove();
+  var p=chatParsed||{cust:'—',route:'—',cargo:'—',weight:'—'};
+  var orders=vehs.map(function(v){return {no:'YD2026'+String(Math.floor(Math.random()*900000+100000)),plate:v.plate,driver:v.driver};});
+  var html='<div class="dispatch-success-card">✅ 运单创建成功！已创建 <b>'+orders.length+'</b> 张运单。<br>';
+  html+='<div style="margin-top:6px;font-size:12px;color:#888">客户：'+escH(p.cust)+' · 路线：'+escH(p.route)+' · '+escH(p.cargo)+' '+escH(p.weight)+'</div>';
+  html+='<div style="margin-top:8px;display:flex;flex-direction:column;gap:4px">';
+  orders.forEach(function(o){
+    html+='<div style="font-size:12px;color:#555">运单 <b style="color:#1a2b45">'+o.no+'</b> → <b>'+escH(o.plate)+'</b>（'+escH(o.driver)+'）</div>';
+  });
+  html+='</div><div style="font-size:11px;color:#aaa;margin-top:6px">所有司机已收到派车通知，请等待接单确认。</div>';
+  html+='<div style="margin-top:12px"><button class="fn-btn fn-btn--sm" onclick="goToOrderList()">查看运单列表 →</button></div>';
+  html+='</div>';
+  appendSysDiv(html);
+  chatSelectedVehs=[];chatSelectedVeh=null;chatParsed=null;
+}
+function showManualVehicle(plate,driver){
+  if(!plate){appendSysDiv('请告诉我车牌号，例如："派车给 京A1234，王五"');return;}
+  var drv=driver||'（待填写）';
+  var no='YD2026'+String(Math.floor(Math.random()*900000+100000));
+  var p=chatParsed||{cust:'—',route:'—',cargo:'—',weight:'—'};
+  var html='<div class="dispatch-success-card">';
+  html+='✅ 运单创建成功！<br>';
+  html+='<div style="margin-top:8px;display:flex;flex-direction:column;gap:4px;font-size:12px;color:#555">';
+  html+='<div>运单号：<b style="color:#1a2b45">'+no+'</b></div>';
+  html+='<div>车辆：<b>'+escH(plate)+'</b> · 司机：<b>'+escH(drv)+'</b></div>';
+  if(p.cust!=='—')html+='<div style="color:#888">客户：'+escH(p.cust)+' · 路线：'+escH(p.route)+' · '+escH(p.cargo)+' '+escH(p.weight)+'</div>';
+  html+='</div>';
+  html+='<div style="font-size:11px;color:#aaa;margin-top:6px">'+escH(drv)+'已收到派车通知，请等待接单确认。</div>';
+  html+='<div style="margin-top:12px"><button class="fn-btn fn-btn--sm" onclick="goToOrderList()">查看运单列表 →</button></div>';
+  html+='</div>';
+  appendSysDiv(html);
+  chatSelectedVeh=null;
+}
+function resetChat(){
+  chatParsed=null;chatSelectedVehs=[];chatSelectedVeh=null;chatLastRec=[];
+  document.getElementById('chatMessages').innerHTML='<div class="chat-msg sys"><div class="chat-avatar">AI</div><div class="chat-bubble sys-bubble">您好！请用自然语言描述运输需求，我会自动识别关键信息并推荐合适的车辆。<br><br><span style="color:#999;font-size:12px">示例："帮宁波孚宝安排一辆罐车，下周一从上海到宁波，50吨甲醇"</span></div></div>';
 }
 /* customer list */
 var custData=[
@@ -689,10 +855,10 @@ function renderCustList(){
 function selectCustRow(tr,name){
   document.querySelectorAll('#custListTbody tr').forEach(r=>r.classList.remove('selected'));
   tr.classList.add('selected');selectedCust=name;
-  ['custConfigBtn','tbCustConfig'].forEach(id=>{var el=document.getElementById(id);if(el)el.classList.add('on');});
 }
-function custConfigSelected(){if(selectedCust)openPanel('cust');}
+function editSelectedCust(){if(selectedCust)openPanel('cust');}
 /* vehicle list */
+var selectedVeh=null;
 var vehData=[
   {plate:'新N27377',status:'已启用',vs:'空闲中',rel:'外调',type:'车头',len:'',driver:'毛海峰',phone:'17393727661',cargo:''},
   {plate:'粤E55775',status:'已启用',vs:'装载中',rel:'外调',type:'车头',len:'',driver:'',phone:'',cargo:''},
@@ -713,8 +879,17 @@ function renderVehList(){
   tb.innerHTML=vehData.map((d,i)=>{
     var vs=d.vs==='装载中'?'<span class="status-busy">'+d.vs+'</span>':'<span class="status-on">'+d.vs+'</span>';
     var cargo=d.cargo?'<span style="color:#0c5fa3">'+d.cargo+'</span>':'—';
-    return '<tr><td style="color:#999;text-align:center">'+(i+1)+'</td><td style="text-align:center"><input type="checkbox" onclick="event.stopPropagation()"></td><td><span class="link">'+d.plate+'</span></td><td><span class="status-on">'+d.status+'</span></td><td>'+vs+'</td><td>'+d.rel+'</td><td>'+d.type+'</td><td>'+d.len+'</td><td>'+d.driver+'</td><td>'+d.phone+'</td><td>'+cargo+' <span class="link" onclick="editVehicle(\''+d.plate+'\',\''+d.type+'\',\''+d.len+'\')">编辑</span></td></tr>';
+    return '<tr onclick="selectVehRow(this,'+i+')"><td style="color:#999;text-align:center">'+(i+1)+'</td><td style="text-align:center"><input type="checkbox" onclick="event.stopPropagation()"></td><td><span class="link">'+d.plate+'</span></td><td><span class="status-on">'+d.status+'</span></td><td>'+vs+'</td><td>'+d.rel+'</td><td>'+d.type+'</td><td>'+d.len+'</td><td>'+d.driver+'</td><td>'+d.phone+'</td><td>'+cargo+'</td></tr>';
   }).join('');
+}
+function selectVehRow(tr,idx){
+  document.querySelectorAll('#vehListTbody tr').forEach(r=>r.classList.remove('selected'));
+  tr.classList.add('selected');selectedVeh=idx;
+}
+function editSelectedVeh(){
+  if(selectedVeh===null)return;
+  var d=vehData[selectedVeh];
+  editVehicle(d.plate,d.type,d.len);
 }
 function editVehicle(plate,type,len){
   var inputs=document.querySelectorAll('#vehPanel .section-body .fn-input[readonly]');

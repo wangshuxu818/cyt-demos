@@ -119,7 +119,22 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-size:13px;backg
 .rec-rank.rn{background:#dde2e8;color:#666}
 .score-bar{display:inline-block;height:5px;border-radius:3px;background:linear-gradient(270deg,#0cace7,#23c2ff);vertical-align:middle;margin-right:6px}
 .tag-g{display:inline-block;padding:1px 6px;border-radius:3px;font-size:11px;background:#e8f8f0;color:#1a9651;margin-right:3px}
-.tag-b{display:inline-block;padding:1px 6px;border-radius:3px;font-size:11px;background:#e8f0fe;color:#4a7fc1;margin-right:3px}
+/* compat group cards */
+.compat-group-card{background:#fff;border:1px solid #e8edf3;border-radius:6px;margin-bottom:12px;overflow:hidden}
+.compat-group-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#fafbfc;border-bottom:1px solid #f0f2f5}
+.compat-group-name{font-size:13px;font-weight:600;color:#1a2b45}
+.compat-group-actions{display:flex;gap:8px}
+.compat-group-body{padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.cargo-tag{display:inline-flex;align-items:center;padding:4px 12px;background:#e8f5fe;border:1px solid #c0ddf5;border-radius:14px;font-size:12px;color:#0c5fa3}
+.compat-hint{font-size:11px;color:#aaa;margin-left:4px}
+/* compat selector in panel */
+.compat-cargo-list{display:flex;flex-direction:column;gap:2px}
+.compat-cargo-opt{display:flex;align-items:center;padding:10px 12px;border-radius:5px;cursor:pointer;font-size:13px;color:#333;transition:background .15s}
+.compat-cargo-opt:hover{background:#f5f7fa}
+.compat-cargo-opt.selected{background:#e8f5fe;color:#0c5fa3}
+.compat-cargo-opt input{margin-right:10px;width:15px;height:15px;accent-color:#0cace7;cursor:pointer;flex-shrink:0}
+.compat-sel-count{font-size:12px;color:#888;margin-bottom:12px}
+.compat-sel-count b{color:#0cace7}
 </style>
 </head>
 <body>
@@ -182,22 +197,10 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-size:13px;backg
     <div id="content3" style="display:none">
       <div class="page-header">
         <div class="page-title">货物互融库 <span class="new-badge">NEW</span></div>
-        <button class="fn-btn" onclick="compatAddRow()">+ 添加记录</button>
+        <button class="fn-btn" onclick="openCompatPanel(-1)">+ 新建互融组</button>
       </div>
-      <div class="content-panel" style="padding:0">
-        <table class="compat-table">
-          <thead><tr><th>#</th><th>货物 A</th><th>货物 B</th><th>相容性</th><th>说明</th><th>操作</th></tr></thead>
-          <tbody id="compatTbody">
-            <tr><td>1</td><td>甲醇</td><td>甲基叔丁基醚（MTBE）</td><td><span class="compat-badge ok">✅ 相容</span></td><td>同系石化产品，无需清洗</td><td><span style="color:#0cace7;cursor:pointer;font-size:12px">编辑</span></td></tr>
-            <tr><td>2</td><td>碳四</td><td>液化石油气（碳四）</td><td><span class="compat-badge ok">✅ 相容</span></td><td>同产品族，水洗即可</td><td><span style="color:#0cace7;cursor:pointer;font-size:12px">编辑</span></td></tr>
-            <tr><td>3</td><td>乙丁烷</td><td>丙烯</td><td><span class="compat-badge ok">✅ 相容</span></td><td>同系烃类，无需清洗</td><td><span style="color:#0cace7;cursor:pointer;font-size:12px">编辑</span></td></tr>
-            <tr><td>4</td><td>甲醇</td><td>原油</td><td><span class="compat-badge no">❌ 不相容</span></td><td>化学清洗，约6~12h</td><td><span style="color:#0cace7;cursor:pointer;font-size:12px">编辑</span></td></tr>
-            <tr><td>5</td><td>原油</td><td>液化石油气（碳四）</td><td><span class="compat-badge no">❌ 不相容</span></td><td>需专项清洗，约12~24h</td><td><span style="color:#0cace7;cursor:pointer;font-size:12px">编辑</span></td></tr>
-            <tr><td>6</td><td>丙烯</td><td>甲醇</td><td><span class="compat-badge no">❌ 不相容</span></td><td>化学清洗，约8h</td><td><span style="color:#0cace7;cursor:pointer;font-size:12px">编辑</span></td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div style="margin-top:12px;font-size:12px;color:#aaa">注：相容货物对顺序装载无需清洗罐体，推荐算法自动引用此表</div>
+      <div style="font-size:12px;color:#888;margin-bottom:14px">同一互融组内的货物，罐车顺序装载时无需清洗罐体，AI推荐将自动引用此配置</div>
+      <div id="compatGroupList"></div>
     </div>
     <!-- content4: 推荐权重配置 -->
     <div id="content4" style="display:none">
@@ -394,6 +397,34 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-size:13px;backg
   </div>
 </div>
 
+<!-- compatEditPanel -->
+<div class="side-panel" id="compatEditPanel">
+  <div class="panel-header">
+    <h3 id="compatPanelTitle">新建互融组</h3>
+    <button class="panel-close" onclick="closeCompatPanel()">×</button>
+  </div>
+  <div class="panel-body">
+    <div style="padding:16px 20px">
+      <div style="font-size:12px;color:#888;margin-bottom:6px">勾选需要纳入同一互融组的货物（至少选2种）</div>
+      <div style="font-size:12px;color:#888;margin-bottom:14px">组内货物之间切换装载，无需清洗罐体</div>
+      <div class="compat-sel-count" id="compatSelCount">已选 <b>0</b> 种货物</div>
+      <div class="compat-cargo-list" id="compatCargoList">
+        <div class="compat-cargo-opt" onclick="toggleCompatItem(this,'甲醇')"><input type="checkbox" data-cargo="甲醇">甲醇</div>
+        <div class="compat-cargo-opt" onclick="toggleCompatItem(this,'甲基叔丁基醚（MTBE）')"><input type="checkbox" data-cargo="甲基叔丁基醚（MTBE）">甲基叔丁基醚（MTBE）</div>
+        <div class="compat-cargo-opt" onclick="toggleCompatItem(this,'碳四')"><input type="checkbox" data-cargo="碳四">碳四</div>
+        <div class="compat-cargo-opt" onclick="toggleCompatItem(this,'原油')"><input type="checkbox" data-cargo="原油">原油</div>
+        <div class="compat-cargo-opt" onclick="toggleCompatItem(this,'乙丁烷')"><input type="checkbox" data-cargo="乙丁烷">乙丁烷</div>
+        <div class="compat-cargo-opt" onclick="toggleCompatItem(this,'液化石油气（碳四）')"><input type="checkbox" data-cargo="液化石油气（碳四）">液化石油气（碳四）</div>
+        <div class="compat-cargo-opt" onclick="toggleCompatItem(this,'丙烯')"><input type="checkbox" data-cargo="丙烯">丙烯</div>
+      </div>
+    </div>
+  </div>
+  <div class="panel-footer">
+    <button class="fn-btn fn-btn--default" onclick="closeCompatPanel()">取消</button>
+    <button class="fn-btn" onclick="saveCompatGroup()">确认保存</button>
+  </div>
+</div>
+
 <script>
 function switchTab(n){
   [1,2,3,4,5].forEach(i=>{var c=document.getElementById('content'+i);if(c)c.style.display=i===n?'block':'none';});
@@ -502,17 +533,59 @@ function updateWeightDisplay(){
   if(tot){tot.className='weight-total '+(sum===100?'ok':'err');tot.innerHTML=(sum===100?'✅':'⚠️')+' 合计：'+sum+'%'+(sum===100?'':' （需等于100%）');}
 }
 function saveWeights(){alert('权重配置已保存！');}
-/* compat */
-function compatAddRow(){
-  var a=prompt('货物 A：');if(!a)return;
-  var b=prompt('货物 B：');if(!b)return;
-  var ok=confirm('是否相容？确定=相容，取消=不相容');
-  var tbody=document.getElementById('compatTbody');
-  var idx=tbody.rows.length+1;
-  var row=document.createElement('tr');
-  row.innerHTML='<td>'+idx+'</td><td>'+a+'</td><td>'+b+'</td><td><span class="compat-badge '+(ok?'ok':'no')+'">'+(ok?'✅ 相容':'❌ 不相容')+'</span></td><td>—</td><td><span style="color:#0cace7;cursor:pointer;font-size:12px">编辑</span></td>';
-  tbody.appendChild(row);
+/* compat group */
+var compatGroups=[
+  {name:'互融组1',cargo:['甲醇','甲基叔丁基醚（MTBE）','乙丁烷']},
+  {name:'互融组2',cargo:['碳四','液化石油气（碳四）']}
+];
+var editingGroupIdx=-1;
+function renderCompatGroups(){
+  var list=document.getElementById('compatGroupList');
+  if(!list)return;
+  if(!compatGroups.length){list.innerHTML='<div style="color:#bbb;font-size:13px;padding:24px 0 8px">暂无互融组，点击「新建互融组」开始配置</div>';return;}
+  list.innerHTML=compatGroups.map((g,i)=>'<div class="compat-group-card"><div class="compat-group-hd"><span class="compat-group-name">'+g.name+'</span><div class="compat-group-actions"><button class="fn-btn fn-btn--default fn-btn--sm" onclick="openCompatPanel('+i+')">编辑</button><button class="fn-btn fn-btn--default fn-btn--sm" style="color:#e05a5a;border-color:#e05a5a" onclick="deleteCompatGroup('+i+')">删除</button></div></div><div class="compat-group-body">'+g.cargo.map(c=>'<span class="cargo-tag">'+c+'</span>').join('')+'<span class="compat-hint">— 组内切换装载，无需清洗罐</span></div></div>').join('');
 }
+function openCompatPanel(idx){
+  editingGroupIdx=idx;
+  document.getElementById('compatPanelTitle').textContent=idx>=0?'编辑'+compatGroups[idx].name:'新建互融组';
+  var selected=idx>=0?compatGroups[idx].cargo:[];
+  document.querySelectorAll('#compatCargoList .compat-cargo-opt').forEach(opt=>{
+    var cb=opt.querySelector('input');
+    var checked=selected.includes(cb.dataset.cargo);
+    cb.checked=checked;
+    opt.classList.toggle('selected',checked);
+  });
+  updateCompatCount();
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('compatEditPanel').classList.add('open');
+}
+function closeCompatPanel(){
+  document.getElementById('compatEditPanel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+function toggleCompatItem(opt,name){
+  var cb=opt.querySelector('input');
+  cb.checked=!cb.checked;
+  opt.classList.toggle('selected',cb.checked);
+  updateCompatCount();
+}
+function updateCompatCount(){
+  var n=document.querySelectorAll('#compatCargoList .cargo-checkbox:checked, #compatCargoList input:checked').length;
+  var el=document.getElementById('compatSelCount');
+  if(el)el.innerHTML='已选 <b>'+n+'</b> 种货物';
+}
+function saveCompatGroup(){
+  var sel=Array.from(document.querySelectorAll('#compatCargoList input:checked')).map(cb=>cb.dataset.cargo);
+  if(sel.length<2){alert('请至少勾选2种货物');return;}
+  if(editingGroupIdx>=0){compatGroups[editingGroupIdx].cargo=sel;}
+  else{compatGroups.push({name:'互融组'+(compatGroups.length+1),cargo:sel});}
+  renderCompatGroups();
+  closeCompatPanel();
+}
+function deleteCompatGroup(idx){
+  if(confirm('确认删除 '+compatGroups[idx].name+'？')){compatGroups.splice(idx,1);renderCompatGroups();}
+}
+window.addEventListener('DOMContentLoaded',function(){renderCompatGroups();updateWeightDisplay();});
 /* agent */
 function startRecommend(){
   document.getElementById('agentThinking').style.display='flex';

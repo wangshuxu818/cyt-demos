@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI运力推荐 Demo</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-size:13px;background:#ecf0f4;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.topbar{height:50px;background:linear-gradient(180deg,#0a3d6b,#01224f);display:flex;align-items:center;padding:0 20px;flex-shrink:0;z-index:100}
+.topbar-logo{color:#fff;font-size:16px;font-weight:700;margin-right:40px}
+.topbar-nav{display:flex;gap:0}
+.topbar-nav a{color:rgba(255,255,255,.75);text-decoration:none;padding:0 18px;height:50px;display:flex;align-items:center;font-size:13px;transition:all .2s}
+.topbar-nav a:hover{color:#fff;background:rgba(255,255,255,.1)}
+.topbar-nav a.active{color:#fff;background:rgba(255,255,255,.15);border-bottom:2px solid #23c2ff}
+.app-body{display:flex;flex:1;overflow:hidden}
+.sidebar{width:200px;background:#fff;border-right:1px solid #e4e8ef;overflow-y:auto;flex-shrink:0}
+.sidebar-block{border-bottom:1px solid #f0f2f5}
+.sidebar-block.active .sidebar-title{color:#0cace7;background:#f0f8ff}
+.sidebar-title{padding:12px 16px;font-size:13px;font-weight:600;color:#333;cursor:default}
+.sidebar-item{padding:9px 16px 9px 28px;font-size:13px;color:#555;cursor:pointer}
+.sidebar-item:hover{background:#f5f7fa;color:#0cace7}
+.sidebar-item.active{color:#0cace7;background:#e8f5fe;font-weight:600}
+.main{flex:1;overflow-y:auto;padding:20px}
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.page-title{font-size:18px;font-weight:700;color:#1a2b45}
+.fn-btn{height:32px;padding:0 16px;border:none;border-radius:4px;cursor:pointer;font-size:13px;font-weight:500;background:linear-gradient(270deg,#0cace7,#23c2ff);color:#fff;transition:opacity .2s}
+.fn-btn:hover{opacity:.9}
+.fn-btn--default{background:#fff;color:#555;border:1px solid #d0d7e3}
+.fn-btn--default:hover{border-color:#0cace7;color:#0cace7}
+.fn-btn--sm{height:26px;padding:0 10px;font-size:12px}
+.demo-tabs{display:flex;gap:2px;margin-bottom:16px;background:#e4e8ef;padding:3px;border-radius:6px;width:fit-content}
+.demo-tab{padding:5px 20px;border-radius:4px;cursor:pointer;font-size:13px;color:#666;transition:all .2s}
+.demo-tab.active{background:#fff;color:#0cace7;font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.content-panel{background:#fff;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.06);padding:20px}
+.new-badge{display:inline-block;background:linear-gradient(135deg,#ff8c00,#ff5500);color:#fff;font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:6px;vertical-align:middle;letter-spacing:.5px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;display:none}
+.overlay.show{display:block}
+.side-panel{position:fixed;top:0;right:-720px;width:700px;height:100vh;background:#fff;z-index:300;display:flex;flex-direction:column;box-shadow:-4px 0 20px rgba(0,0,0,.15);transition:right .3s ease}
+.side-panel.open{right:0}
+.panel-header{padding:0 24px;height:56px;border-bottom:1px solid #e8edf3;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.panel-header h3{font-size:16px;font-weight:700;color:#1a2b45}
+.panel-close{width:32px;height:32px;border:none;background:none;cursor:pointer;font-size:20px;color:#999;border-radius:4px;display:flex;align-items:center;justify-content:center}
+.panel-close:hover{background:#f5f7fa;color:#333}
+.panel-body{flex:1;overflow-y:auto;padding:0}
+.panel-footer{padding:16px 24px;border-top:1px solid #e8edf3;display:flex;justify-content:flex-end;gap:10px;flex-shrink:0}
+.section-header{display:flex;align-items:center;padding:12px 24px;cursor:pointer;border-bottom:1px solid #f0f2f5;background:#fafbfc;user-select:none}
+.section-header:hover{background:#f5f7fa}
+.section-icon{width:18px;height:18px;border-radius:50%;background:#e8f0fe;color:#4a7fc1;font-size:11px;display:flex;align-items:center;justify-content:center;margin-right:8px;transition:all .2s;font-weight:700}
+.section-icon::after{content:'⊙'}
+.section-icon.collapsed::after{content:'|'}
+.section-title{font-size:13px;font-weight:600;color:#1a2b45}
+.section-body{padding:16px 24px}
+.form-row{display:flex;flex-wrap:wrap;gap:12px 0;margin-bottom:0}
+.form-item{width:33.33%;display:flex;align-items:center;padding-right:12px;margin-bottom:12px}
+.form-item.full{width:100%}
+.fn-label{width:80px;text-align:right;font-size:12px;color:#666;padding-right:8px;flex-shrink:0}
+.fn-input,.fn-select{flex:1;height:30px;border:1px solid #d0d7e3;border-radius:4px;padding:0 8px;font-size:12px;color:#333;outline:none}
+.fn-input:focus,.fn-select:focus{border-color:#0cace7}
+.fn-input[readonly]{background:#f5f7fa;color:#888;cursor:default}
+.mode-selector{display:flex;gap:8px;margin-bottom:12px}
+.mode-option{padding:6px 16px;border:1px solid #d0d7e3;border-radius:4px;cursor:pointer;font-size:12px;color:#555;background:#fff;transition:all .2s}
+.mode-option:hover{border-color:#0cace7;color:#0cace7}
+.mode-option.active{border-color:#0cace7;background:#e8f5fe;color:#0cace7;font-weight:600}
+.mode-desc{font-size:12px;color:#888;margin-bottom:14px}
+.vehicle-table{width:100%;border-collapse:collapse;font-size:12px}
+.vehicle-table th,.vehicle-table td{padding:8px 10px;border:1px solid #e8edf3;text-align:left}
+.vehicle-table th{background:#f5f7fa;color:#666;font-weight:600}
+.vehicle-table td.del-cell{text-align:center;color:#e05a5a;cursor:pointer;font-size:16px}
+.vehicle-table td.del-cell:hover{background:#fff0f0}
+.add-vehicle-bar{display:flex;gap:8px;margin-top:10px;align-items:center}
+.add-vehicle-bar .fn-input{width:130px;flex:none}
+.cargo-multiselect{position:relative;flex:1}
+.cargo-trigger{height:30px;border:1px solid #d0d7e3;border-radius:4px;padding:0 28px 0 8px;font-size:12px;color:#333;background:#fff;cursor:pointer;display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;user-select:none;position:relative}
+.cargo-trigger::after{content:'▾';position:absolute;right:8px;top:50%;transform:translateY(-50%);color:#aaa;font-size:11px}
+.cargo-dropdown{position:absolute;top:calc(100% + 4px);left:0;min-width:220px;background:#fff;border:1px solid #d0d7e3;border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,.1);z-index:400;display:none;max-height:260px;overflow-y:auto}
+.cargo-dropdown.show{display:block}
+.cargo-item{display:flex;align-items:center;padding:8px 12px;cursor:pointer;font-size:12px;color:#333}
+.cargo-item:hover{background:#f5f7fa}
+.cargo-checkbox{width:14px;height:14px;margin-right:8px;cursor:pointer;accent-color:#0cace7}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-logo">财运通</div>
+  <nav class="topbar-nav">
+    <a href="#" id="navCust" class="active" onclick="switchTab(1);return false">客户管理</a>
+    <a href="#" id="navVeh" onclick="switchTab(2);return false">车辆信息管理</a>
+    <a href="#">运单管理</a>
+    <a href="#">运力推荐设置</a>
+  </nav>
+</div>
+<div class="app-body">
+  <div class="sidebar">
+    <div class="sidebar-block active" id="sidebarCust">
+      <div class="sidebar-title">客户管理</div>
+      <div class="sidebar-item active">客户列表</div>
+    </div>
+    <div class="sidebar-block" id="sidebarVeh" style="display:none">
+      <div class="sidebar-title">车辆信息管理</div>
+      <div class="sidebar-item active">车辆列表</div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="demo-tabs">
+      <div class="demo-tab active" onclick="switchTab(1)">客户管理·在服车辆</div>
+      <div class="demo-tab" onclick="switchTab(2)">车辆管理·适装货物</div>
+    </div>
+    <div id="content1">
+      <div class="page-header">
+        <div class="page-title" id="pageTitle">客户详情</div>
+        <button class="fn-btn" id="demoBtn" onclick="openPanel('cust')">配置在服车辆 <span class="new-badge">NEW</span></button>
+      </div>
+      <div class="content-panel">
+        <div style="color:#888;font-size:13px;padding:20px 0">客户基本信息区域（演示略）</div>
+      </div>
+    </div>
+    <div id="content2" style="display:none">
+      <div class="page-header">
+        <div class="page-title">车辆列表</div>
+        <button class="fn-btn" onclick="openPanel('veh')">编辑车辆信息 <span class="new-badge">NEW</span></button>
+      </div>
+      <div class="content-panel">
+        <div style="color:#888;font-size:13px;padding:20px 0">车辆列表区域（演示略）</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- overlay -->
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+<!-- custPanel -->
+<div class="side-panel" id="custPanel">
+  <div class="panel-header">
+    <h3>配置在服车辆 <span class="new-badge">NEW</span></h3>
+    <button class="panel-close" onclick="closePanel('cust')">×</button>
+  </div>
+  <div class="panel-body">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon"></span><span class="section-title">客户基本信息</span>
+    </div>
+    <div class="section-body">
+      <div class="form-row">
+        <div class="form-item"><span class="fn-label">客户名称</span><input class="fn-input" readonly value="上海化工有限公司"></div>
+        <div class="form-item"><span class="fn-label">客户编号</span><input class="fn-input" readonly value="C-20240312"></div>
+        <div class="form-item"><span class="fn-label">联系人</span><input class="fn-input" readonly value="张经理"></div>
+      </div>
+    </div>
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon"></span><span class="section-title">在服车辆配置 <span class="new-badge">NEW</span></span>
+    </div>
+    <div class="section-body">
+      <div style="margin-bottom:8px;font-size:12px;color:#666">推荐模式</div>
+      <div class="mode-selector">
+        <div class="mode-option active" onclick="custSelectMode(this,'priority')">优先推荐</div>
+        <div class="mode-option" onclick="custSelectMode(this,'exclusive')">仅推荐</div>
+      </div>
+      <div class="mode-desc" id="custModeDesc">绑定车辆排名靠前，运力不足时其他车辆也可出现</div>
+      <table class="vehicle-table">
+        <thead><tr><th>#</th><th>车牌号</th><th>车型</th><th>司机</th><th>操作</th></tr></thead>
+        <tbody id="custVehicleTbody">
+          <tr><td>1</td><td>京A·12345</td><td>9.6米厢车</td><td>王师傅</td><td class="del-cell" onclick="custDeleteVehicle(this)">×</td></tr>
+          <tr><td>2</td><td>京B·67890</td><td>13米平板</td><td>李师傅</td><td class="del-cell" onclick="custDeleteVehicle(this)">×</td></tr>
+        </tbody>
+      </table>
+      <div class="add-vehicle-bar">
+        <input class="fn-input" id="custAddPlate" placeholder="输入车牌号">
+        <button class="fn-btn fn-btn--sm" onclick="custAddVehicle()">+ 添加车辆</button>
+        <span id="custVehicleCount" style="font-size:12px;color:#888">共 2 辆</span>
+      </div>
+    </div>
+  </div>
+  <div class="panel-footer">
+    <button class="fn-btn fn-btn--default" onclick="closePanel('cust')">取消</button>
+    <button class="fn-btn" onclick="closePanel('cust')">保存</button>
+  </div>
+</div>
+
+<!-- vehPanel -->
+<div class="side-panel" id="vehPanel">
+  <div class="panel-header">
+    <h3>编辑车辆信息 <span class="new-badge">NEW</span></h3>
+    <button class="panel-close" onclick="closePanel('veh')">×</button>
+  </div>
+  <div class="panel-body">
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon"></span><span class="section-title">车辆基本信息</span>
+    </div>
+    <div class="section-body">
+      <div class="form-row">
+        <div class="form-item"><span class="fn-label">车牌号</span><input class="fn-input" readonly value="沪A·88888"></div>
+        <div class="form-item"><span class="fn-label">车辆类型</span><input class="fn-input" readonly value="罐车"></div>
+        <div class="form-item"><span class="fn-label">额定载重</span><input class="fn-input" readonly value="30吨"></div>
+      </div>
+    </div>
+    <div class="section-header" onclick="toggleSection(this)">
+      <span class="section-icon"></span><span class="section-title">适装货物 <span class="new-badge">NEW</span></span>
+    </div>
+    <div class="section-body">
+      <div class="form-row">
+        <div class="form-item full">
+          <span class="fn-label">适装货物</span>
+          <div class="cargo-multiselect">
+            <div class="cargo-trigger" id="cargoTrigger" onclick="toggleDropdown()">
+              <span id="cargoTriggerText">请选择适装货物</span>
+            </div>
+            <div class="cargo-dropdown" id="cargoDropdown">
+              <div class="cargo-item" onclick="toggleCargo(this,'甲醇')"><input type="checkbox" class="cargo-checkbox">甲醇</div>
+              <div class="cargo-item" onclick="toggleCargo(this,'甲基叔丁基醚（MTBE）')"><input type="checkbox" class="cargo-checkbox">甲基叔丁基醚（MTBE）</div>
+              <div class="cargo-item" onclick="toggleCargo(this,'碳四')"><input type="checkbox" class="cargo-checkbox">碳四</div>
+              <div class="cargo-item" onclick="toggleCargo(this,'原油')"><input type="checkbox" class="cargo-checkbox">原油</div>
+              <div class="cargo-item" onclick="toggleCargo(this,'乙丁烷')"><input type="checkbox" class="cargo-checkbox">乙丁烷</div>
+              <div class="cargo-item" onclick="toggleCargo(this,'液化石油气（碳四）')"><input type="checkbox" class="cargo-checkbox">液化石油气（碳四）</div>
+              <div class="cargo-item" onclick="toggleCargo(this,'丙烯')"><input type="checkbox" class="cargo-checkbox">丙烯</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="panel-footer">
+    <button class="fn-btn fn-btn--default" onclick="closePanel('veh')">取消</button>
+    <button class="fn-btn" onclick="closePanel('veh')">保存</button>
+  </div>
+</div>
+
+<script>
+function switchTab(n){
+  document.getElementById('content1').style.display=n===1?'block':'none';
+  document.getElementById('content2').style.display=n===2?'block':'none';
+  document.getElementById('sidebarCust').style.display=n===1?'block':'none';
+  document.getElementById('sidebarVeh').style.display=n===2?'block':'none';
+  document.getElementById('navCust').className=n===1?'active':'';
+  document.getElementById('navVeh').className=n===2?'active':'';
+  document.querySelectorAll('.demo-tab').forEach((t,i)=>t.className='demo-tab'+(i===n-1?' active':''));
+}
+function openPanel(type){
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById(type+'Panel').classList.add('open');
+}
+function closePanel(type){
+  document.getElementById(type+'Panel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+function closeAll(){
+  document.querySelectorAll('.side-panel').forEach(p=>p.classList.remove('open'));
+  document.getElementById('overlay').classList.remove('show');
+}
+function toggleSection(header){
+  var icon=header.querySelector('.section-icon');
+  var body=header.nextElementSibling;
+  icon.classList.toggle('collapsed');
+  body.style.display=icon.classList.contains('collapsed')?'none':'block';
+}
+function custSelectMode(el,mode){
+  document.querySelectorAll('#custPanel .mode-option').forEach(o=>o.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('custModeDesc').textContent=mode==='priority'?'绑定车辆排名靠前，运力不足时其他车辆也可出现':'推荐列表只出现绑定车辆，其他车辆不出现';
+}
+function custAddVehicle(){
+  var plate=document.getElementById('custAddPlate').value.trim();
+  if(!plate)return;
+  var tbody=document.getElementById('custVehicleTbody');
+  var row=document.createElement('tr');
+  row.innerHTML='<td></td><td>'+plate+'</td><td>—</td><td>—</td><td class="del-cell" onclick="custDeleteVehicle(this)">×</td>';
+  tbody.appendChild(row);
+  reindexVehicles();
+  document.getElementById('custAddPlate').value='';
+}
+function custDeleteVehicle(el){
+  el.closest('tr').remove();
+  reindexVehicles();
+}
+function reindexVehicles(){
+  var rows=document.querySelectorAll('#custVehicleTbody tr');
+  rows.forEach((r,i)=>r.cells[0].textContent=i+1);
+  document.getElementById('custVehicleCount').textContent='共 '+rows.length+' 辆';
+}
+function toggleDropdown(){
+  document.getElementById('cargoDropdown').classList.toggle('show');
+}
+function toggleCargo(el,name){
+  var cb=el.querySelector('.cargo-checkbox');
+  cb.checked=!cb.checked;
+  updateTrigger();
+}
+function updateTrigger(){
+  var checked=Array.from(document.querySelectorAll('#cargoDropdown .cargo-checkbox:checked')).map(c=>c.parentElement.textContent.trim());
+  document.getElementById('cargoTriggerText').textContent=checked.length?checked.join('、'):'请选择适装货物';
+}
+document.addEventListener('click',function(e){
+  var dd=document.getElementById('cargoDropdown');
+  if(!dd.contains(e.target)&&!document.getElementById('cargoTrigger').contains(e.target))dd.classList.remove('show');
+});
+</script>
+</body>
+</html>

@@ -119,7 +119,34 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-size:13px;backg
 .rec-rank.rn{background:#dde2e8;color:#666}
 .score-bar{display:inline-block;height:5px;border-radius:3px;background:linear-gradient(270deg,#0cace7,#23c2ff);vertical-align:middle;margin-right:6px}
 .tag-g{display:inline-block;padding:1px 6px;border-radius:3px;font-size:11px;background:#e8f8f0;color:#1a9651;margin-right:3px}
-/* compat group cards */
+/* list page */
+.page-tabs{display:flex;border-bottom:2px solid #e4e8ef;margin-bottom:0;background:#fff;padding:0 16px}
+.page-tab{padding:10px 16px;font-size:13px;color:#666;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.page-tab:hover{color:#0cace7}
+.page-tab.active{color:#0cace7;font-weight:600;border-bottom-color:#0cace7}
+.filter-bar{display:flex;gap:8px;align-items:center;padding:8px 16px;background:#fff;border-bottom:1px solid #f0f2f5;flex-wrap:wrap}
+.filter-bar .fn-input{width:120px;flex:none}
+.filter-bar .fn-select{width:120px;flex:none}
+.filter-bar .fb-label{font-size:12px;color:#666;white-space:nowrap}
+.toolbar{display:flex;gap:3px;align-items:center;padding:7px 16px;background:#fff;border-bottom:1px solid #f0f2f5;flex-wrap:wrap}
+.tb-btn{height:26px;padding:0 9px;border:1px solid #d0d7e3;border-radius:3px;background:#fff;cursor:pointer;font-size:12px;color:#555;white-space:nowrap}
+.tb-btn:hover{border-color:#0cace7;color:#0cace7}
+.tb-btn.hi{background:linear-gradient(270deg,#0cace7,#23c2ff);color:#fff;border:none;opacity:.5;cursor:default}
+.tb-btn.hi.on{opacity:1;cursor:pointer}
+.tb-sep{width:1px;height:16px;background:#e4e8ef;margin:0 3px;flex-shrink:0}
+.list-table-wrap{overflow-x:auto}
+.list-table{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap}
+.list-table th{padding:7px 10px;background:#f5f7fa;color:#666;font-weight:600;border-bottom:2px solid #e8edf3;text-align:left}
+.list-table td{padding:7px 10px;border-bottom:1px solid #f0f2f5;color:#333}
+.list-table tr:hover td{background:#f8fbff}
+.list-table tr.selected td{background:#e8f5fe}
+.list-table td .link{color:#0cace7;cursor:pointer}
+.list-table td .link:hover{text-decoration:underline}
+.status-on::before{content:'';display:inline-block;width:6px;height:6px;background:#12b76a;border-radius:50%;margin-right:4px;vertical-align:middle}
+.status-on{color:#333}
+.status-busy::before{content:'';display:inline-block;width:6px;height:6px;background:#f79009;border-radius:50%;margin-right:4px;vertical-align:middle}
+.status-busy{color:#333}
+.list-panel{background:#fff;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.06);overflow:hidden}
 .compat-group-card{background:#fff;border:1px solid #e8edf3;border-radius:6px;margin-bottom:12px;overflow:hidden}
 .compat-group-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#fafbfc;border-bottom:1px solid #f0f2f5}
 .compat-group-name{font-size:13px;font-weight:600;color:#1a2b45}
@@ -177,20 +204,59 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;font-size:13px;backg
     </div>
     <div id="content1">
       <div class="page-header">
-        <div class="page-title" id="pageTitle">客户详情</div>
-        <button class="fn-btn" id="demoBtn" onclick="openPanel('cust')">配置在服车辆 <span class="new-badge">NEW</span></button>
+        <div class="page-title">客户管理</div>
+        <button class="fn-btn hi" id="custConfigBtn" onclick="custConfigSelected()">配置在服车辆 <span class="new-badge">NEW</span></button>
       </div>
-      <div class="content-panel">
-        <div style="color:#888;font-size:13px;padding:20px 0">客户基本信息区域（演示略）</div>
+      <div class="list-panel">
+        <div class="page-tabs">
+          <div class="page-tab active">客户</div><div class="page-tab">项目</div><div class="page-tab">发货人</div><div class="page-tab">收货人</div>
+        </div>
+        <div class="filter-bar">
+          <span class="fb-label">客户</span><input class="fn-input" placeholder="">
+          <span class="fb-label">客户类型</span>
+          <select class="fn-select"><option>全部</option><option>合同客户</option><option>意向客户</option></select>
+          <button class="tb-btn">🔍 查询</button>
+        </div>
+        <div class="toolbar">
+          <button class="tb-btn">✚ 新增</button>
+          <button class="tb-btn hi on" id="tbCustConfig" onclick="custConfigSelected()">配置在服车辆 <span class="new-badge" style="font-size:9px;padding:1px 4px">NEW</span></button>
+          <button class="tb-btn">✎ 修改</button><button class="tb-btn">新增合同</button><button class="tb-btn">删除</button><button class="tb-btn">停用</button><button class="tb-btn">启用</button>
+          <div class="tb-sep"></div>
+          <button class="tb-btn">↑ 导入</button><button class="tb-btn">↓ 导出</button><button class="tb-btn">🖨 打印</button>
+        </div>
+        <div class="list-table-wrap">
+          <table class="list-table">
+            <thead><tr><th style="width:32px">#</th><th style="width:28px"><input type="checkbox"></th><th>客户</th><th>客户类型</th><th>所属行业</th><th>启用状态</th><th>所属组织</th><th>联系人</th><th>联系电话</th><th>业务员</th></tr></thead>
+            <tbody id="custListTbody"><!-- rows --></tbody>
+          </table>
+        </div>
       </div>
     </div>
     <div id="content2" style="display:none">
       <div class="page-header">
-        <div class="page-title">车辆列表</div>
-        <button class="fn-btn" onclick="openPanel('veh')">编辑车辆信息 <span class="new-badge">NEW</span></button>
+        <div class="page-title">车辆信息管理</div>
       </div>
-      <div class="content-panel">
-        <div style="color:#888;font-size:13px;padding:20px 0">车辆列表区域（演示略）</div>
+      <div class="list-panel">
+        <div class="page-tabs">
+          <div class="page-tab active">全部车辆</div><div class="page-tab">自有车辆</div><div class="page-tab">加盟车辆</div><div class="page-tab">外调车辆</div><div class="page-tab">其他车辆</div>
+        </div>
+        <div class="filter-bar">
+          <span class="fb-label">车牌号</span><input class="fn-input" placeholder="">
+          <span class="fb-label">合作关系</span><select class="fn-select"><option>全部</option><option>自有</option><option>外调</option></select>
+          <span class="fb-label">是否车头</span><select class="fn-select"><option>全部</option><option>车头</option><option>挂车</option></select>
+          <button class="tb-btn">🔍 查询</button>
+        </div>
+        <div class="toolbar">
+          <button class="tb-btn">✚ 新增</button><button class="tb-btn">✎ 修改</button><button class="tb-btn">批量修改</button><button class="tb-btn">运力池</button><button class="tb-btn">车辆认证</button><button class="tb-btn">维修登记</button><button class="tb-btn">保养登记</button><button class="tb-btn">启用</button><button class="tb-btn">停用</button><button class="tb-btn">删除</button>
+          <div class="tb-sep"></div>
+          <button class="tb-btn">↑ 导入</button><button class="tb-btn">↓ 导出</button><button class="tb-btn">🖨 打印</button>
+        </div>
+        <div class="list-table-wrap">
+          <table class="list-table">
+            <thead><tr><th style="width:32px">#</th><th style="width:28px"><input type="checkbox"></th><th>车牌号</th><th>启用状态</th><th>车辆状态</th><th>合作关系</th><th>车型</th><th>车长(米)</th><th>主驾司机</th><th>主驾手机号</th><th>适装货物 <span class="new-badge">NEW</span></th></tr></thead>
+            <tbody id="vehListTbody"><!-- rows --></tbody>
+          </table>
+        </div>
       </div>
     </div>
     <!-- content3: 货物互融库 -->
@@ -585,7 +651,9 @@ function saveCompatGroup(){
 function deleteCompatGroup(idx){
   if(confirm('确认删除 '+compatGroups[idx].name+'？')){compatGroups.splice(idx,1);renderCompatGroups();}
 }
-window.addEventListener('DOMContentLoaded',function(){renderCompatGroups();updateWeightDisplay();});
+window.addEventListener('DOMContentLoaded',function(){
+  renderCompatGroups();updateWeightDisplay();renderCustList();renderVehList();
+});
 /* agent */
 function startRecommend(){
   document.getElementById('agentThinking').style.display='flex';
@@ -597,6 +665,65 @@ function startRecommend(){
 }
 function dispatchVehicle(plate){
   alert('已向'+plate+'的司机发送派车通知，运单创建成功！');
+}
+/* customer list */
+var custData=[
+  {name:'测试',type:'合同客户',ind:'快递',org:'天下',contact:'',phone:'',biz:''},
+  {name:'网点名称',type:'合同客户',ind:'快递',org:'网点名称',contact:'',phone:'',biz:'王述旭'},
+  {name:'罗宇测试客户停用',type:'合同客户',ind:'快递',org:'天下',contact:'',phone:'',biz:'毛毛'},
+  {name:'沪上阿姨',type:'合同客户',ind:'快递',org:'CH',contact:'测试下',phone:'15010011010',biz:''},
+  {name:'收货人客户',type:'合同客户',ind:'快递',org:'CH',contact:'',phone:'',biz:''},
+  {name:'收货客户',type:'合同客户',ind:'快递',org:'厚福才测试',contact:'',phone:'13730515679',biz:''},
+  {name:'发货客户',type:'合同客户',ind:'快递',org:'厚福才测试',contact:'发货客户',phone:'13730555678',biz:''},
+  {name:'测试客户上报',type:'合同客户',ind:'快递',org:'厚福才测试',contact:'测试客户上报',phone:'13730556678',biz:''},
+  {name:'到期客户',type:'合同客户',ind:'快递',org:'厚福才测试',contact:'',phone:'',biz:''},
+  {name:'宁波孚宝仓储有限公司',type:'合同客户',ind:'快递',org:'全集团',contact:'',phone:'',biz:'徐文斌'},
+  {name:'南京古杰物流有限公司',type:'合同客户',ind:'快递',org:'全集团',contact:'古杰',phone:'18858118760',biz:'徐文斌'},
+  {name:'达塔(上海)仓储服务有限公司',type:'合同客户',ind:'快递',org:'全集团',contact:'',phone:'',biz:'徐文斌'},
+];
+var selectedCust=null;
+function renderCustList(){
+  var tb=document.getElementById('custListTbody');if(!tb)return;
+  tb.innerHTML=custData.map((d,i)=>'<tr onclick="selectCustRow(this,\''+d.name+'\')"><td style="color:#999;text-align:center">'+(i+1)+'</td><td style="text-align:center"><input type="checkbox" onclick="event.stopPropagation()"></td><td><span class="link">'+d.name+'</span></td><td>'+d.type+'</td><td>'+d.ind+'</td><td><span class="status-on">启用</span></td><td>'+d.org+'</td><td>'+d.contact+'</td><td>'+d.phone+'</td><td>'+d.biz+'</td></tr>').join('');
+}
+function selectCustRow(tr,name){
+  document.querySelectorAll('#custListTbody tr').forEach(r=>r.classList.remove('selected'));
+  tr.classList.add('selected');selectedCust=name;
+  ['custConfigBtn','tbCustConfig'].forEach(id=>{var el=document.getElementById(id);if(el)el.classList.add('on');});
+}
+function custConfigSelected(){if(selectedCust)openPanel('cust');}
+/* vehicle list */
+var vehData=[
+  {plate:'新N27377',status:'已启用',vs:'空闲中',rel:'外调',type:'车头',len:'',driver:'毛海峰',phone:'17393727661',cargo:''},
+  {plate:'粤E55775',status:'已启用',vs:'装载中',rel:'外调',type:'车头',len:'',driver:'',phone:'',cargo:''},
+  {plate:'川A12123',status:'已启用',vs:'装载中',rel:'自有',type:'厢式',len:'',driver:'',phone:'',cargo:''},
+  {plate:'鲁US6260',status:'已启用',vs:'空闲中',rel:'外调',type:'车头',len:'',driver:'',phone:'',cargo:''},
+  {plate:'皖SE6X20',status:'已启用',vs:'空闲中',rel:'外调',type:'车头',len:'',driver:'',phone:'',cargo:''},
+  {plate:'辽ABD299',status:'已启用',vs:'空闲中',rel:'外调',type:'车头',len:'',driver:'',phone:'',cargo:''},
+  {plate:'赣C9R919',status:'已启用',vs:'空闲中',rel:'外调',type:'车头',len:'17.5',driver:'',phone:'',cargo:'甲醇、碳四'},
+  {plate:'粤BBP1953',status:'已启用',vs:'空闲中',rel:'外调',type:'其他',len:'4.2',driver:'',phone:'',cargo:''},
+  {plate:'赣GT2796',status:'已启用',vs:'空闲中',rel:'外调',type:'其他',len:'9.6',driver:'',phone:'',cargo:''},
+  {plate:'赣GM7278',status:'已启用',vs:'空闲中',rel:'外调',type:'其他',len:'',driver:'',phone:'',cargo:''},
+  {plate:'宫RT8817',status:'已启用',vs:'空闲中',rel:'外调',type:'其他',len:'9.6',driver:'',phone:'',cargo:''},
+  {plate:'晋KQ0793',status:'已启用',vs:'空闲中',rel:'外调',type:'车头',len:'',driver:'',phone:'',cargo:''},
+  {plate:'沪A·88888',status:'已启用',vs:'空闲中',rel:'自有',type:'罐车',len:'30',driver:'陈师傅',phone:'13812345678',cargo:'甲醇、MTBE'},
+];
+function renderVehList(){
+  var tb=document.getElementById('vehListTbody');if(!tb)return;
+  tb.innerHTML=vehData.map((d,i)=>{
+    var vs=d.vs==='装载中'?'<span class="status-busy">'+d.vs+'</span>':'<span class="status-on">'+d.vs+'</span>';
+    var cargo=d.cargo?'<span style="color:#0c5fa3">'+d.cargo+'</span>':'—';
+    return '<tr><td style="color:#999;text-align:center">'+(i+1)+'</td><td style="text-align:center"><input type="checkbox" onclick="event.stopPropagation()"></td><td><span class="link">'+d.plate+'</span></td><td><span class="status-on">'+d.status+'</span></td><td>'+vs+'</td><td>'+d.rel+'</td><td>'+d.type+'</td><td>'+d.len+'</td><td>'+d.driver+'</td><td>'+d.phone+'</td><td>'+cargo+' <span class="link" onclick="editVehicle(\''+d.plate+'\',\''+d.type+'\',\''+d.len+'\')">编辑</span></td></tr>';
+  }).join('');
+}
+function editVehicle(plate,type,len){
+  var inputs=document.querySelectorAll('#vehPanel .section-body .fn-input[readonly]');
+  if(inputs[0])inputs[0].value=plate;
+  if(inputs[1])inputs[1].value=type||'罐车';
+  if(inputs[2])inputs[2].value=(len?len+'米':'—');
+  document.querySelectorAll('#cargoDropdown .cargo-checkbox').forEach(cb=>cb.checked=false);
+  document.getElementById('cargoTriggerText').textContent='请选择适装货物';
+  openPanel('veh');
 }
 </script>
 </body>

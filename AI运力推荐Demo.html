@@ -850,7 +850,7 @@ var custData=[
 var selectedCust=null;
 function renderCustList(){
   var tb=document.getElementById('custListTbody');if(!tb)return;
-  tb.innerHTML=custData.map((d,i)=>'<tr onclick="selectCustRow(this,\''+d.name+'\')"><td style="color:#999;text-align:center">'+(i+1)+'</td><td style="text-align:center"><input type="checkbox" onclick="event.stopPropagation()"></td><td><span class="link">'+d.name+'</span></td><td>'+d.type+'</td><td>'+d.ind+'</td><td><span class="status-on">启用</span></td><td>'+d.org+'</td><td>'+d.contact+'</td><td>'+d.phone+'</td><td>'+d.biz+'</td></tr>').join('');
+  tb.innerHTML=custData.map((d,i)=>'<tr onclick="selectCustRow(this,\''+d.name+'\')"><td style="color:#999;text-align:center">'+(i+1)+'</td><td style="text-align:center"><input type="checkbox" onclick="event.stopPropagation();selectCustRow(this.closest(\'tr\'),\''+d.name+'\')"></td><td><span class="link" onclick="event.stopPropagation();selectCustRow(this.closest(\'tr\'),\''+d.name+'\');openPanel(\'cust\')">'+d.name+'</span></td><td>'+d.type+'</td><td>'+d.ind+'</td><td><span class="status-on">启用</span></td><td>'+d.org+'</td><td>'+d.contact+'</td><td>'+d.phone+'</td><td>'+d.biz+'</td></tr>').join('');
 }
 function selectCustRow(tr,name){
   document.querySelectorAll('#custListTbody tr').forEach(r=>r.classList.remove('selected'));

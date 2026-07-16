@@ -16,7 +16,7 @@
   --shadow-md:0 4px 12px rgba(0,0,0,.08),0 1px 3px rgba(0,0,0,.04);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;font-size:13px;color:var(--text-0);background:var(--bg-page);height:100vh;display:flex;flex-direction:column;overflow:hidden;-webkit-font-smoothing:antialiased}
+body{font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;font-size:14px;color:var(--text-0);background:var(--bg-page);height:100vh;display:flex;flex-direction:column;overflow:hidden;-webkit-font-smoothing:antialiased}
 /* 顶栏 */
 .topbar{height:48px;background:var(--bg-topbar);display:flex;align-items:center;padding:0 20px;gap:24px;flex-shrink:0;z-index:100;border-bottom:1px solid var(--border);box-shadow:var(--shadow-sm)}
 .topbar-logo{color:var(--text-0);font-size:15px;font-weight:700;letter-spacing:-.2px;display:flex;align-items:center;gap:8px}
@@ -56,7 +56,7 @@ body{font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;font-si
 .ai-bubble{background:var(--bg-card);color:var(--text-0);border-radius:4px 12px 12px 12px;border:1px solid var(--border);box-shadow:var(--shadow-sm)}
 .user-bubble{background:linear-gradient(135deg,#1677ff,#40a9ff);color:#fff;border-radius:12px 4px 12px 12px;box-shadow:0 2px 8px rgba(22,119,255,.25)}
 /* 意图卡片 */
-.intent-card{background:var(--bg-soft,#f8faff);border:1px solid var(--border);border-radius:8px;margin:8px 0;padding:12px;font-size:12px}
+.intent-card{background:var(--bg-soft,#f8faff);border:1px solid var(--border);border-radius:8px;margin:8px 0;padding:12px;font-size:13px}
 .intent-card-title{font-size:11px;color:var(--text-2);margin-bottom:8px;display:flex;align-items:center;gap:6px;font-weight:500;text-transform:uppercase;letter-spacing:.4px}
 .intent-card-title::before{content:'';display:inline-block;width:3px;height:11px;background:var(--brand);border-radius:2px}
 .intent-row{display:flex;align-items:center;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.04)}
@@ -69,26 +69,26 @@ body{font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;font-si
 .conf-bar{height:100%;border-radius:3px;background:linear-gradient(90deg,#1677ff,#40a9ff)}
 .conf-pct{width:36px;font-size:11px;font-weight:600;color:var(--brand);text-align:right}
 /* 追问 */
-.slot-ask{background:#fff7e6;border:1px solid #ffd591;border-radius:6px;padding:8px 10px;margin:6px 0;font-size:12px;color:#874d00}
+.slot-ask{background:#fff7e6;border:1px solid #ffd591;border-radius:6px;padding:8px 10px;margin:6px 0;font-size:13px;color:#874d00}
 .slot-ask b{color:#d46b08}
 /* 确认卡 */
 .confirm-card{background:var(--bg-card);border:1px solid rgba(22,119,255,.35);border-radius:8px;padding:12px;margin:8px 0;box-shadow:var(--shadow-sm)}
-.confirm-card-title{font-size:12px;color:var(--brand);margin-bottom:8px;font-weight:600}
-.confirm-row{display:flex;gap:8px;padding:4px 0;font-size:12px}
+.confirm-card-title{font-size:13px;color:var(--brand);margin-bottom:8px;font-weight:600}
+.confirm-row{display:flex;gap:8px;padding:4px 0;font-size:13px}
 .confirm-lbl{width:64px;color:var(--text-2);flex-shrink:0}
 .confirm-val{color:var(--text-0);font-weight:500}
 .btn-row{display:flex;gap:8px;margin-top:12px}
-.fn-btn{height:30px;padding:0 14px;border-radius:6px;font-size:12px;cursor:pointer;border:none;display:inline-flex;align-items:center;font-family:inherit;transition:all .15s}
+.fn-btn{height:30px;padding:0 14px;border-radius:6px;font-size:13px;cursor:pointer;border:none;display:inline-flex;align-items:center;font-family:inherit;transition:all .15s}
 .fn-btn-primary{background:linear-gradient(135deg,#1677ff,#40a9ff);color:#fff;box-shadow:0 2px 6px rgba(22,119,255,.25)}
 .fn-btn-primary:hover{background:linear-gradient(135deg,#0958d9,#1677ff)}
 .fn-btn-default{background:#fff;border:1px solid var(--border-2);color:var(--text-1)}
 .fn-btn-default:hover{border-color:var(--brand);color:var(--brand)}
 .fn-btn-danger{background:#fff;border:1px solid #ffa39e;color:#ff4d4f}
 /* 成功卡 */
-.success-card{background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;padding:12px;margin:8px 0;font-size:12px;color:#135200}
+.success-card{background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;padding:12px;margin:8px 0;font-size:13px;color:#135200}
 /* 推荐列表 */
 .rec-list{display:flex;flex-direction:column;gap:8px;margin:8px 0}
-.rec-item{border:1px solid var(--border);background:var(--bg-card);border-radius:8px;padding:10px 12px;cursor:pointer;font-size:12px;transition:all .15s;color:var(--text-1);box-shadow:var(--shadow-sm)}
+.rec-item{border:1px solid var(--border);background:var(--bg-card);border-radius:8px;padding:10px 12px;cursor:pointer;font-size:13px;transition:all .15s;color:var(--text-1);box-shadow:var(--shadow-sm)}
 .rec-item:hover{background:var(--bg-hover);border-color:var(--brand-hi)}
 .rec-item.selected{background:var(--brand-soft);border-color:var(--brand);box-shadow:0 0 0 2px rgba(22,119,255,.15)}
 .rec-item-top{display:flex;align-items:center;gap:8px;margin-bottom:2px}
@@ -106,21 +106,21 @@ body{font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;font-si
 .send-btn:hover{background:linear-gradient(135deg,#0958d9,#1677ff)}
 /* 快捷按钮 */
 .quick-btns{display:flex;flex-wrap:wrap;gap:6px}
-.quick-btn{padding:5px 12px;background:#fff;border:1px solid var(--border);border-radius:14px;font-size:12px;color:var(--text-1);cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
+.quick-btn{padding:5px 12px;background:#fff;border:1px solid var(--border);border-radius:14px;font-size:13px;color:var(--text-1);cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
 .quick-btn:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-soft)}
 /* 技能栏 */
 .skill-bar{display:flex;align-items:center;gap:2px;padding-top:4px;overflow:visible}
 .skill-add{width:26px;height:26px;border-radius:6px;border:none;background:transparent;color:var(--text-3);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-right:4px}
 .skill-add:hover{background:var(--bg-hover);color:var(--brand)}
 .skill-divider{width:1px;height:16px;background:var(--border);margin:0 6px;flex-shrink:0}
-.skill-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;cursor:pointer;white-space:nowrap;font-size:12px;color:var(--text-2);background:transparent;border:none;flex-shrink:0;transition:all .15s;font-family:inherit}
+.skill-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;cursor:pointer;white-space:nowrap;font-size:13px;color:var(--text-2);background:transparent;border:none;flex-shrink:0;transition:all .15s;font-family:inherit}
 .skill-btn:hover{background:var(--bg-hover);color:var(--brand)}
 .skill-btn.active{background:var(--brand-soft);color:var(--brand);font-weight:500}
 .skill-btn .sk-icon{font-size:14px;line-height:1}
-.skill-btn .sk-label{font-size:12px;font-weight:500}
+.skill-btn .sk-label{font-size:13px;font-weight:500}
 /* 技能选择（预留） */
 .skills-row{display:flex;gap:6px;flex-wrap:wrap;padding-bottom:4px}
-.skill-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border:1px solid var(--border);border-radius:14px;font-size:12px;color:var(--text-1);cursor:pointer;background:#fff;white-space:nowrap;transition:all .15s}
+.skill-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border:1px solid var(--border);border-radius:14px;font-size:13px;color:var(--text-1);cursor:pointer;background:#fff;white-space:nowrap;transition:all .15s}
 .skill-pill:hover{border-color:var(--brand);background:var(--brand-soft);color:var(--brand)}
 .skill-pill.active{background:var(--brand-soft);color:var(--brand);border-color:var(--brand)}
 .skill-pill .sp-icon{font-size:13px}
@@ -129,12 +129,12 @@ body{font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;font-si
 .engine-col::-webkit-scrollbar{width:5px}
 .engine-col::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 .panel-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow-sm)}
-.panel-card-hd{background:#fafbfc;padding:10px 14px;font-size:12px;font-weight:600;color:var(--text-1);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;letter-spacing:.3px}
+.panel-card-hd{background:#fafbfc;padding:10px 14px;font-size:13px;font-weight:600;color:var(--text-1);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;letter-spacing:.3px}
 .panel-card-bd{padding:14px}
 /* 五层漏斗（预留） */
 .funnel{display:flex;flex-direction:column;gap:4px}
 .funnel-layer{border-radius:6px;overflow:hidden;border:1px solid var(--border)}
-.funnel-layer-hd{display:flex;align-items:center;gap:8px;padding:8px 12px;font-size:12px;font-weight:600;color:var(--text-1)}
+.funnel-layer-hd{display:flex;align-items:center;gap:8px;padding:8px 12px;font-size:13px;font-weight:600;color:var(--text-1)}
 .funnel-layer-bd{padding:6px 12px 8px;font-size:11px;color:var(--text-2);background:#fafbfc;border-top:1px solid var(--border)}
 .layer-num{width:20px;height:20px;border-radius:50%;font-size:11px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:linear-gradient(135deg,#1677ff,#40a9ff)}
 .layer-status{margin-left:auto;font-size:11px;padding:1px 8px;border-radius:10px;font-weight:600}
@@ -154,7 +154,7 @@ body{font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;font-si
 .ec-unknown{background:#f5f5f5;color:#595959;border-color:#d9d9d9}
 /* 意图对比 */
 .intent-bars{display:flex;flex-direction:column;gap:8px;margin-top:4px}
-.intent-bar-row{display:flex;align-items:center;gap:10px;font-size:12px}
+.intent-bar-row{display:flex;align-items:center;gap:10px;font-size:13px}
 .intent-name{width:70px;color:var(--text-1);font-weight:500;flex-shrink:0;font-size:11px}
 .ibar-wrap{flex:1;height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden}
 .ibar{height:100%;border-radius:4px;transition:width .4s ease}
@@ -163,7 +163,7 @@ body{font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;font-si
 .ibar-low{background:#e8e8e8}
 .ipct{width:36px;font-size:11px;font-weight:600;text-align:right;flex-shrink:0}
 /* 槽位表 */
-.slot-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+.slot-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
 .slot-table th{background:#fafbfc;padding:7px 10px;text-align:left;font-weight:600;color:var(--text-2);border:1px solid var(--border);font-size:11px;letter-spacing:.3px}
 .slot-table td{padding:7px 10px;border:1px solid var(--border);vertical-align:middle;color:var(--text-1)}
 .slot-table tr:nth-child(even) td{background:#fafbfc}
@@ -181,15 +181,15 @@ body{font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;font-si
 .state-arrow{color:var(--text-3);font-size:14px;font-weight:400}
 .state-node.current{border-color:var(--brand);color:var(--brand);background:var(--brand-soft);box-shadow:0 0 0 3px rgba(22,119,255,.12);font-weight:600}
 /* thinking */
-.thinking{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--brand);padding:8px 12px;background:var(--brand-soft);border:1px solid rgba(22,119,255,.2);border-radius:6px}
+.thinking{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--brand);padding:8px 12px;background:var(--brand-soft);border:1px solid rgba(22,119,255,.2);border-radius:6px}
 .dots span{display:inline-block;width:5px;height:5px;background:var(--brand);border-radius:50%;margin:0 1px;animation:blink 1s infinite}
 .dots span:nth-child(2){animation-delay:.2s}
 .dots span:nth-child(3){animation-delay:.4s}
 @keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
 /* 场景选择 */
 .scene-bar{background:var(--bg-card);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap}
-.scene-label{font-size:12px;color:var(--text-2);font-weight:500}
-.scene-btn{padding:5px 14px;border:1px solid var(--border);border-radius:14px;font-size:12px;color:var(--text-1);cursor:pointer;background:#fff;font-family:inherit;transition:all .15s;white-space:nowrap}
+.scene-label{font-size:13px;color:var(--text-2);font-weight:500}
+.scene-btn{padding:5px 14px;border:1px solid var(--border);border-radius:14px;font-size:13px;color:var(--text-1);cursor:pointer;background:#fff;font-family:inherit;transition:all .15s;white-space:nowrap}
 .scene-btn:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-soft)}
 .scene-btn.active{background:linear-gradient(135deg,#1677ff,#40a9ff);color:#fff;border-color:var(--brand);box-shadow:0 2px 6px rgba(22,119,255,.3)}
 </style>
@@ -282,7 +282,7 @@ body{font-family:-apple-system,'PingFang SC','Helvetica Neue',sans-serif;font-si
           <div class="panel-card-hd">实体提取 <span style="font-size:10px;font-weight:400;color:var(--text-3);text-transform:none;letter-spacing:0" id="entitySrc">—</span></div>
           <div class="panel-card-bd">
             <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">识别到的实体</div>
-            <div class="entity-chips" id="entityChips"><span style="color:var(--text-3);font-size:12px">等待输入…</span></div>
+            <div class="entity-chips" id="entityChips"><span style="color:var(--text-3);font-size:13px">等待输入…</span></div>
           </div>
         </div>
         <!-- 意图置信度 -->
@@ -419,7 +419,7 @@ function loadScene(idx){
 function resetEngine(){
   setStateMachine('idle');
   document.getElementById('entitySrc').textContent='—';
-  document.getElementById('entityChips').innerHTML='<span style="color:#ccc;font-size:12px">等待输入…</span>';
+  document.getElementById('entityChips').innerHTML='<span style="color:#ccc;font-size:13px">等待输入…</span>';
   renderIntentBars([0,0,0,0,0]);
   document.getElementById('slotIntent').textContent='—';
   document.getElementById('slotTbody').innerHTML='<tr><td colspan="4" style="color:#ccc;text-align:center;padding:14px">等待意图锁定…</td></tr>';
@@ -456,7 +456,7 @@ function renderSlots(slots,intentName){
 function renderEntities(entities,src){
   document.getElementById('entitySrc').textContent=src||'';
   document.getElementById('entityChips').innerHTML=!entities||!entities.length
-    ?'<span style="color:#ccc;font-size:12px">未识别到实体</span>'
+    ?'<span style="color:#ccc;font-size:13px">未识别到实体</span>'
     :entities.map(e=>`<span class="entity-chip ${e.t}">${e.l}</span>`).join('');
 }
 

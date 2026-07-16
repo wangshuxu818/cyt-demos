@@ -5,160 +5,195 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>物流管理助手 — 意图识别交互原型</title>
 <style>
+:root{
+  --bg-0:#0f1117;--bg-1:#141520;--bg-2:#1a1d2e;
+  --border:#1e2030;--border-2:#2a2d42;
+  --text-0:#f4f4f7;--text-1:#d0d2dc;--text-2:#8b8fa8;--text-3:#6b7280;
+  --brand:#7c3aed;--brand-2:#5b4de8;--brand-hi:#a78bfa;
+  --brand-soft:#2d2060;--brand-soft-2:#1e1b3a;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:"Microsoft YaHei",tahoma,arial,sans-serif;font-size:12px;color:#333;background:#ecf0f4;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+body{font-family:-apple-system,'Inter','PingFang SC',sans-serif;font-size:13px;color:var(--text-0);background:var(--bg-0);height:100vh;display:flex;flex-direction:column;overflow:hidden;-webkit-font-smoothing:antialiased}
 /* 顶栏 */
-.topbar{height:44px;background:linear-gradient(180deg,#0a3d6b,#01224f);display:flex;align-items:center;padding:0 16px;gap:20px;flex-shrink:0;z-index:100}
-.topbar-logo{color:#fff;font-size:15px;font-weight:700;letter-spacing:1px}
-.topbar-nav a{color:rgba(255,255,255,.75);text-decoration:none;font-size:13px;padding:0 14px;height:44px;display:inline-flex;align-items:center}
-.topbar-nav a:hover,.topbar-nav a.active{color:#fff;background:rgba(255,255,255,.12);border-bottom:2px solid #23c2ff}
+.topbar{height:48px;background:var(--bg-0);display:flex;align-items:center;padding:0 20px;gap:24px;flex-shrink:0;z-index:100;border-bottom:1px solid var(--border)}
+.topbar-logo{color:#fff;font-size:14px;font-weight:600;letter-spacing:.3px;display:flex;align-items:center;gap:8px}
+.topbar-logo::before{content:'';display:inline-block;width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#7c3aed,#5b4de8);box-shadow:0 2px 8px rgba(124,58,237,.4)}
+.topbar-nav a{color:var(--text-2);text-decoration:none;font-size:13px;padding:0 14px;height:48px;display:inline-flex;align-items:center;transition:color .15s}
+.topbar-nav a:hover{color:var(--text-0)}
+.topbar-nav a.active{color:#fff;border-bottom:2px solid var(--brand)}
 /* 侧边栏 */
 .layout{display:flex;flex:1;overflow:hidden}
-.sidebar{width:180px;background:#fff;border-right:1px solid #d3d3d3;flex-shrink:0;overflow-y:auto}
-.sidebar-group-title{font-size:12px;color:#999;padding:8px 14px 4px}
-.sidebar-item{height:34px;padding:0 14px;display:flex;align-items:center;font-size:13px;color:#333;cursor:pointer;white-space:nowrap;overflow:hidden}
-.sidebar-item:hover{background:#e4eef6;color:#0097cf}
-.sidebar-item.active{background:#a9dafb;color:#0097cf}
+.sidebar{width:180px;background:var(--bg-1);border-right:1px solid var(--border);flex-shrink:0;overflow-y:auto;padding:8px 0}
+.sidebar-group-title{font-size:11px;color:var(--text-3);padding:12px 16px 6px;text-transform:uppercase;letter-spacing:.5px}
+.sidebar-item{height:34px;padding:0 14px;display:flex;align-items:center;font-size:13px;color:var(--text-1);cursor:pointer;white-space:nowrap;overflow:hidden;border-radius:6px;margin:1px 8px;transition:all .15s}
+.sidebar-item:hover{background:var(--brand-soft-2);color:#fff}
+.sidebar-item.active{background:var(--brand-soft);color:var(--brand-hi)}
 /* 主内容 */
 .main{flex:1;overflow:hidden;display:flex;flex-direction:column}
-/* 顶部 tab 演示选择 */
-.demo-nav{background:#fff;border-bottom:1px solid #d3d3d3;padding:0 14px;display:flex;align-items:center;gap:2px;flex-shrink:0}
-.demo-tab{height:36px;padding:0 16px;display:inline-flex;align-items:center;font-size:13px;color:#666;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
-.demo-tab:hover{color:#0097cf}
-.demo-tab.active{color:#0097cf;font-weight:600;border-bottom-color:#0097cf}
+/* 顶部 tab */
+.demo-nav{background:var(--bg-0);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:4px;flex-shrink:0}
+.demo-tab{height:38px;padding:0 14px;display:inline-flex;align-items:center;font-size:13px;color:var(--text-2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s}
+.demo-tab:hover{color:var(--text-0)}
+.demo-tab.active{color:var(--brand-hi);font-weight:600;border-bottom-color:var(--brand)}
 /* 两栏布局 */
 .content-wrap{flex:1;overflow:hidden;display:flex;gap:0}
-/* 左侧：对话区 */
-.chat-col{width:480px;flex-shrink:0;display:flex;flex-direction:column;background:#fff;border-right:1px solid #d3d3d3}
-.chat-header{padding:10px 14px;background:#f0f6fa;border-bottom:1px solid #d3d3d3;font-size:13px;font-weight:700;color:#0097cf;display:flex;align-items:center;gap:8px}
-.chat-header span.badge{background:#532fe6;color:#fff;font-size:11px;padding:1px 6px;border-radius:3px}
-.chat-messages{flex:1;overflow-y:auto;padding:14px 14px;display:flex;flex-direction:column;gap:12px}
-.msg{display:flex;gap:8px;align-items:flex-start}
+/* 左侧：对话 */
+.chat-col{width:520px;flex-shrink:0;display:flex;flex-direction:column;background:var(--bg-0);border-right:1px solid var(--border)}
+.chat-header{padding:12px 16px;background:var(--bg-1);border-bottom:1px solid var(--border);font-size:13px;font-weight:600;color:var(--text-0);display:flex;align-items:center;gap:8px}
+.chat-header span.badge{background:linear-gradient(135deg,#7c3aed,#5b4de8);color:#fff;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:transparent}
+.chat-messages::-webkit-scrollbar{width:6px}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:3px}
+.msg{display:flex;gap:10px;align-items:flex-start}
 .msg.user{flex-direction:row-reverse}
-.msg-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
-.avatar-ai{background:linear-gradient(135deg,#0cace7,#0097cf);color:#fff}
-.avatar-user{background:linear-gradient(135deg,#532fe6,#4788ec);color:#fff}
-.msg-bubble{max-width:78%;padding:9px 12px;border-radius:6px;font-size:12px;line-height:1.7}
-.ai-bubble{background:#f5f7fa;color:#333;border-radius:2px 8px 8px 8px;border:1px solid #e8edf3}
-.user-bubble{background:linear-gradient(135deg,#0c5fa3,#0cace7);color:#fff;border-radius:8px 2px 8px 8px}
-/* 对话中的识别卡片 */
-.intent-card{background:#fff;border:1px solid #d3d3d3;border-radius:4px;margin:6px 0;padding:10px 12px;font-size:12px}
-.intent-card-title{font-size:11px;color:#999;margin-bottom:6px;display:flex;align-items:center;gap:5px}
-.intent-card-title::before{content:'';display:inline-block;width:3px;height:11px;background:#0097cf;border-radius:2px}
-.intent-row{display:flex;align-items:center;padding:4px 0;border-bottom:1px solid #f5f7fa}
+.msg-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0}
+.avatar-ai{background:linear-gradient(135deg,#7c3aed,#5b4de8);color:#fff;box-shadow:0 2px 8px rgba(124,58,237,.3)}
+.avatar-user{background:#2a2d42;color:var(--text-1)}
+.msg-bubble{max-width:78%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.65}
+.ai-bubble{background:var(--bg-2);color:var(--text-0);border-radius:4px 12px 12px 12px;border:1px solid var(--border-2)}
+.user-bubble{background:linear-gradient(135deg,#5b4de8,#7c3aed);color:#fff;border-radius:12px 4px 12px 12px;box-shadow:0 2px 12px rgba(124,58,237,.25)}
+/* 意图卡片 */
+.intent-card{background:var(--bg-2);border:1px solid var(--border-2);border-radius:8px;margin:8px 0;padding:12px;font-size:12px}
+.intent-card-title{font-size:11px;color:var(--text-2);margin-bottom:8px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.4px}
+.intent-card-title::before{content:'';display:inline-block;width:3px;height:11px;background:var(--brand);border-radius:2px}
+.intent-row{display:flex;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)}
 .intent-row:last-child{border-bottom:none}
-.intent-lbl{width:72px;color:#999;flex-shrink:0}
-.intent-val{color:#333;font-weight:600}
-.intent-val.hi{color:#0097cf}
-.intent-val.warn{color:#e35d00}
-.conf-bar-wrap{flex:1;height:6px;background:#eee;border-radius:3px;overflow:hidden;margin:0 8px}
-.conf-bar{height:100%;border-radius:3px;background:linear-gradient(90deg,#0cace7,#23c2ff)}
-.conf-pct{width:30px;font-size:11px;font-weight:700;color:#0097cf;text-align:right}
-/* 缺失槽位追问 */
-.slot-ask{background:#fffbea;border:1px solid #ffe58f;border-radius:4px;padding:8px 10px;margin:4px 0;font-size:12px;color:#7a5c00}
-.slot-ask b{color:#e35d00}
-/* 确认卡片 */
-.confirm-card{background:#f0f8ff;border:1px solid #b8d8f0;border-radius:4px;padding:10px 12px;margin:6px 0}
-.confirm-card-title{font-size:11px;color:#0097cf;margin-bottom:8px;font-weight:700}
-.confirm-row{display:flex;gap:6px;padding:3px 0;font-size:12px}
-.confirm-lbl{width:60px;color:#999;flex-shrink:0}
-.confirm-val{color:#333;font-weight:600}
-.btn-row{display:flex;gap:8px;margin-top:10px}
-.fn-btn{height:26px;padding:0 12px;border-radius:2px;font-size:12px;cursor:pointer;border:none;display:inline-flex;align-items:center}
-.fn-btn-primary{background:linear-gradient(270deg,#0cace7,#23c2ff);color:#fff}
-.fn-btn-primary:hover{opacity:.9}
-.fn-btn-default{background:linear-gradient(-180deg,#fff,#f7f7f7);border:1px solid #b9ccd7;color:#0097cf}
-.fn-btn-default:hover{background:#378cbe;color:#fff;border-color:#378cbe}
-.fn-btn-danger{background:linear-gradient(-180deg,#fff,#f7f7f7);border:1px solid #f5c6c6;color:#f12222}
-/* 成功卡片 */
-.success-card{background:#f0fff4;border:1px solid #b7eb8f;border-radius:4px;padding:10px 12px;margin:6px 0;font-size:12px}
-/* 多选推荐 */
-.rec-list{display:flex;flex-direction:column;gap:6px;margin:6px 0}
-.rec-item{border:1px solid #d3d3d3;border-radius:4px;padding:8px 10px;cursor:pointer;font-size:12px;transition:all .15s}
-.rec-item:hover{border-color:#0097cf;background:#f0f8ff}
-.rec-item.selected{border-color:#0097cf;background:#e2f7ff}
+.intent-lbl{width:80px;color:var(--text-2);flex-shrink:0}
+.intent-val{color:var(--text-0);font-weight:500}
+.intent-val.hi{color:var(--brand-hi)}
+.intent-val.warn{color:#fb923c}
+.conf-bar-wrap{flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin:0 10px}
+.conf-bar{height:100%;border-radius:3px;background:linear-gradient(90deg,#5b4de8,#a78bfa)}
+.conf-pct{width:36px;font-size:11px;font-weight:600;color:var(--brand-hi);text-align:right}
+/* 追问 */
+.slot-ask{background:rgba(251,146,60,.08);border:1px solid rgba(251,146,60,.3);border-radius:6px;padding:8px 10px;margin:6px 0;font-size:12px;color:#fbbf77}
+.slot-ask b{color:#fb923c}
+/* 确认卡 */
+.confirm-card{background:var(--bg-2);border:1px solid rgba(124,58,237,.4);border-radius:8px;padding:12px;margin:8px 0}
+.confirm-card-title{font-size:12px;color:var(--brand-hi);margin-bottom:8px;font-weight:600}
+.confirm-row{display:flex;gap:8px;padding:4px 0;font-size:12px}
+.confirm-lbl{width:64px;color:var(--text-2);flex-shrink:0}
+.confirm-val{color:var(--text-0);font-weight:500}
+.btn-row{display:flex;gap:8px;margin-top:12px}
+.fn-btn{height:30px;padding:0 14px;border-radius:6px;font-size:12px;cursor:pointer;border:none;display:inline-flex;align-items:center;font-family:inherit;transition:all .15s}
+.fn-btn-primary{background:linear-gradient(135deg,#5b4de8,#7c3aed);color:#fff;box-shadow:0 2px 8px rgba(124,58,237,.3)}
+.fn-btn-primary:hover{opacity:.92;transform:translateY(-1px)}
+.fn-btn-default{background:transparent;border:1px solid var(--border-2);color:var(--text-1)}
+.fn-btn-default:hover{border-color:var(--brand);color:var(--brand-hi)}
+.fn-btn-danger{background:transparent;border:1px solid rgba(239,68,68,.4);color:#ef4444}
+/* 成功卡 */
+.success-card{background:#0d2015;border:1px solid #22c55e;border-radius:8px;padding:12px;margin:8px 0;font-size:12px;color:#86efac}
+/* 推荐列表 */
+.rec-list{display:flex;flex-direction:column;gap:8px;margin:8px 0}
+.rec-item{border:1px solid var(--border-2);background:var(--bg-2);border-radius:8px;padding:10px 12px;cursor:pointer;font-size:12px;transition:all .15s;color:var(--text-1)}
+.rec-item:hover{background:var(--brand-soft-2);border-color:var(--brand)}
+.rec-item.selected{background:var(--brand-soft-2);border-color:var(--brand-hi);box-shadow:0 0 0 2px rgba(124,58,237,.2)}
 .rec-item-top{display:flex;align-items:center;gap:8px;margin-bottom:2px}
-.rec-rank{width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rec-rank{width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .r1{background:linear-gradient(135deg,#f6c000,#e8a000)}
-.r2{background:#b0b8c1}.r3{background:#b87333}
-.rec-reason{font-size:11px;color:#0097cf;background:#e2f7ff;padding:1px 6px;border-radius:3px}
+.r2{background:#6b7280}.r3{background:#b87333}
+.rec-reason{font-size:10px;color:var(--brand-hi);background:var(--brand-soft);padding:2px 8px;border-radius:4px}
 /* 输入区 */
-.chat-input-area{border-top:1px solid #d3d3d3;padding:10px 12px;background:#fafbfc;display:flex;flex-direction:column;gap:8px}
-.quick-btns{display:flex;gap:6px;flex-wrap:wrap}
-.quick-btn{padding:3px 10px;border:1px solid #b9ccd7;border-radius:12px;font-size:11px;color:#0097cf;cursor:pointer;background:#fff;white-space:nowrap}
-.quick-btn:hover{background:#0097cf;color:#fff;border-color:#0097cf}
+.chat-input-area{border-top:1px solid var(--border);padding:12px 14px 10px;background:var(--bg-1);display:flex;flex-direction:column;gap:8px}
 .input-row{display:flex;gap:8px;align-items:flex-end}
-.chat-textarea{flex:1;border:1px solid rgba(34,36,38,.2);border-radius:2px;padding:5px 8px;font-size:12px;resize:none;outline:none;font-family:inherit;color:#333}
-.chat-textarea:focus{border-color:#0097cf;background:#e2f7ff}
-/* 右侧：意图引擎可视化 */
-.engine-col{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
-.panel-card{background:#fff;border:1px solid #d3d3d3;border-radius:4px;overflow:hidden}
-.panel-card-hd{background:#f0f6fa;padding:8px 12px;font-size:13px;font-weight:700;color:#0097cf;border-bottom:1px solid #d3d3d3;display:flex;align-items:center;justify-content:space-between}
-.panel-card-bd{padding:12px}
-/* 五层漏斗 */
+.chat-textarea{flex:1;border:1px solid var(--border-2);border-radius:10px;padding:10px 12px;font-size:13px;resize:none;outline:none;font-family:inherit;color:var(--text-0);line-height:1.5;background:var(--bg-2);transition:border-color .15s}
+.chat-textarea::placeholder{color:var(--text-3)}
+.chat-textarea:focus{border-color:var(--brand)}
+.send-btn{height:48px;padding:0 18px;border-radius:8px;font-size:13px;cursor:pointer;border:none;background:linear-gradient(135deg,#5b4de8,#7c3aed);color:#fff;font-weight:600;box-shadow:0 2px 10px rgba(124,58,237,.35);transition:all .15s;font-family:inherit;display:inline-flex;align-items:center;gap:6px}
+.send-btn:hover{opacity:.92;transform:translateY(-1px)}
+/* 快捷按钮 */
+.quick-btns{display:flex;flex-wrap:wrap;gap:6px}
+.quick-btn{padding:5px 12px;background:transparent;border:1px solid var(--border-2);border-radius:14px;font-size:12px;color:var(--text-1);cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
+.quick-btn:hover{border-color:var(--brand);color:var(--brand-hi);background:var(--brand-soft-2)}
+/* 技能栏 */
+.skill-bar{display:flex;align-items:center;gap:2px;padding-top:8px;overflow:visible}
+.skill-add{width:26px;height:26px;border-radius:6px;border:none;background:transparent;color:var(--text-3);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-right:4px}
+.skill-add:hover{background:var(--brand-soft-2);color:var(--brand-hi)}
+.skill-divider{width:1px;height:16px;background:var(--border-2);margin:0 6px;flex-shrink:0}
+.skill-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;cursor:pointer;white-space:nowrap;font-size:12px;color:var(--text-3);background:transparent;border:none;flex-shrink:0;transition:all .15s;font-family:inherit}
+.skill-btn:hover{background:var(--brand-soft-2);color:#fff}
+.skill-btn.active{background:var(--brand-soft);color:var(--brand-hi)}
+.skill-btn .sk-icon{font-size:14px;line-height:1}
+.skill-btn .sk-label{font-size:12px;font-weight:500}
+/* 技能选择（预留） */
+.skills-row{display:flex;gap:6px;flex-wrap:wrap;padding-bottom:4px}
+.skill-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border:1px solid var(--border-2);border-radius:14px;font-size:12px;color:var(--text-1);cursor:pointer;background:transparent;white-space:nowrap;transition:all .15s}
+.skill-pill:hover{border-color:var(--brand);background:var(--brand-soft-2);color:var(--brand-hi)}
+.skill-pill.active{background:var(--brand-soft);color:var(--brand-hi);border-color:var(--brand)}
+.skill-pill .sp-icon{font-size:13px}
+/* 意图引擎 */
+.engine-col{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--bg-0)}
+.engine-col::-webkit-scrollbar{width:6px}
+.engine-col::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:3px}
+.panel-card{background:var(--bg-1);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.panel-card-hd{background:var(--bg-2);padding:10px 14px;font-size:12px;font-weight:600;color:var(--brand-hi);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;text-transform:uppercase;letter-spacing:.4px}
+.panel-card-bd{padding:14px}
+/* 五层漏斗（预留） */
 .funnel{display:flex;flex-direction:column;gap:4px}
-.funnel-layer{border-radius:3px;overflow:hidden;border:1px solid #e0e7f0}
-.funnel-layer-hd{display:flex;align-items:center;gap:8px;padding:7px 12px;font-size:12px;font-weight:600}
-.funnel-layer-bd{padding:6px 12px 8px;font-size:11px;color:#666;background:#fafbfc;border-top:1px solid #f0f2f5}
-.layer-num{width:20px;height:20px;border-radius:50%;font-size:11px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.funnel-layer{border-radius:6px;overflow:hidden;border:1px solid var(--border-2)}
+.funnel-layer-hd{display:flex;align-items:center;gap:8px;padding:8px 12px;font-size:12px;font-weight:600;color:var(--text-1)}
+.funnel-layer-bd{padding:6px 12px 8px;font-size:11px;color:var(--text-2);background:var(--bg-2);border-top:1px solid var(--border)}
+.layer-num{width:20px;height:20px;border-radius:50%;font-size:11px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:linear-gradient(135deg,#5b4de8,#7c3aed)}
 .layer-status{margin-left:auto;font-size:11px;padding:1px 8px;border-radius:10px;font-weight:600}
-.st-hit{background:#e8f8f0;color:#14aa65}
-.st-skip{background:#f0f6fa;color:#999}
-.st-active{background:#e2f7ff;color:#0097cf}
-.st-wait{background:#f5f7fa;color:#bbb}
-/* 实体提取 */
-.entity-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-.entity-chip{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;border:1px solid}
-.ec-action{background:#e8f8f0;color:#14aa65;border-color:#b7eb8f}
-.ec-route{background:#e2f7ff;color:#0097cf;border-color:#91d5ff}
-.ec-weight{background:#fff7e6;color:#d46b08;border-color:#ffd591}
-.ec-cargo{background:#f9f0ff;color:#531dab;border-color:#d3adf7}
-.ec-plate{background:#fff0f6;color:#c41d7f;border-color:#ffadd2}
-.ec-time{background:#f0f5ff;color:#1d39c4;border-color:#adc6ff}
-.ec-unknown{background:#f5f5f5;color:#8c8c8c;border-color:#d9d9d9}
-/* 意图置信度对比 */
-.intent-bars{display:flex;flex-direction:column;gap:6px;margin-top:4px}
-.intent-bar-row{display:flex;align-items:center;gap:8px;font-size:12px}
-.intent-name{width:70px;color:#333;font-weight:600;flex-shrink:0;font-size:11px}
-.ibar-wrap{flex:1;height:8px;background:#eee;border-radius:4px;overflow:hidden}
+.st-hit{background:rgba(34,197,94,.12);color:#86efac}
+.st-skip{background:var(--bg-2);color:var(--text-3)}
+.st-active{background:var(--brand-soft);color:var(--brand-hi)}
+.st-wait{background:var(--bg-2);color:var(--text-3)}
+/* 实体 */
+.entity-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.entity-chip{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:500;border:1px solid}
+.ec-action{background:rgba(34,197,94,.12);color:#86efac;border-color:rgba(34,197,94,.35)}
+.ec-route{background:rgba(59,130,246,.12);color:#93c5fd;border-color:rgba(59,130,246,.35)}
+.ec-weight{background:rgba(251,146,60,.12);color:#fbbf77;border-color:rgba(251,146,60,.35)}
+.ec-cargo{background:rgba(167,139,250,.12);color:#c4b5fd;border-color:rgba(167,139,250,.35)}
+.ec-plate{background:rgba(236,72,153,.12);color:#f9a8d4;border-color:rgba(236,72,153,.35)}
+.ec-time{background:rgba(96,165,250,.12);color:#93c5fd;border-color:rgba(96,165,250,.35)}
+.ec-unknown{background:rgba(148,163,184,.12);color:#cbd5e1;border-color:rgba(148,163,184,.35)}
+/* 意图对比 */
+.intent-bars{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.intent-bar-row{display:flex;align-items:center;gap:10px;font-size:12px}
+.intent-name{width:70px;color:var(--text-1);font-weight:500;flex-shrink:0;font-size:11px}
+.ibar-wrap{flex:1;height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden}
 .ibar{height:100%;border-radius:4px;transition:width .4s ease}
-.ibar-primary{background:linear-gradient(90deg,#0cace7,#23c2ff)}
-.ibar-secondary{background:linear-gradient(90deg,#aaa,#ccc)}
-.ibar-low{background:linear-gradient(90deg,#e8edf3,#d3d3d3)}
-.ipct{width:32px;font-size:11px;font-weight:700;text-align:right;flex-shrink:0}
-/* 槽位状态 */
+.ibar-primary{background:linear-gradient(90deg,#5b4de8,#a78bfa)}
+.ibar-secondary{background:linear-gradient(90deg,#3f4256,#5f6480)}
+.ibar-low{background:rgba(255,255,255,.06)}
+.ipct{width:36px;font-size:11px;font-weight:600;text-align:right;flex-shrink:0}
+/* 槽位表 */
 .slot-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
-.slot-table th{background:#f0f6fa;padding:5px 8px;text-align:left;font-weight:600;color:#666;border:1px solid #d3d3d3}
-.slot-table td{padding:5px 8px;border:1px solid #eee;vertical-align:middle}
-.slot-ok{color:#14aa65;font-weight:700}
-.slot-miss{color:#f12222;font-weight:700}
-.slot-infer{color:#e35d00;font-weight:700}
+.slot-table th{background:var(--bg-2);padding:7px 10px;text-align:left;font-weight:600;color:var(--text-2);border:1px solid var(--border-2);font-size:11px;text-transform:uppercase;letter-spacing:.3px}
+.slot-table td{padding:7px 10px;border:1px solid var(--border);vertical-align:middle;color:var(--text-1)}
+.slot-table tr:nth-child(even) td{background:var(--bg-1)}
+.slot-ok{color:#22c55e;font-weight:600}
+.slot-miss{color:#ef4444;font-weight:600}
+.slot-infer{color:#fb923c;font-weight:600}
 /* 状态机 */
-.state-machine{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px}
-.state-node{padding:5px 14px;border-radius:14px;font-size:12px;font-weight:600;border:2px solid}
-.sn-idle{background:#f5f5f5;color:#999;border-color:#d9d9d9}
-.sn-classify{background:#e2f7ff;color:#0097cf;border-color:#91d5ff}
-.sn-execute{background:#e8f8f0;color:#14aa65;border-color:#b7eb8f}
-.sn-ask{background:#fff7e6;color:#d46b08;border-color:#ffd591}
-.sn-confirm{background:#f0f5ff;color:#1d39c4;border-color:#adc6ff}
-.state-arrow{color:#bbb;font-size:16px;font-weight:700}
-.state-node.current{box-shadow:0 0 0 3px rgba(0,151,207,.25)}
+.state-machine{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px}
+.state-node{padding:5px 12px;border-radius:16px;font-size:11px;font-weight:600;border:1.5px solid;background:var(--bg-2);transition:all .2s}
+.sn-idle{color:var(--text-2);border-color:var(--border-2)}
+.sn-classify{color:#93c5fd;border-color:rgba(59,130,246,.5)}
+.sn-execute{color:#86efac;border-color:rgba(34,197,94,.5)}
+.sn-ask{color:#fbbf77;border-color:rgba(251,146,60,.5)}
+.sn-confirm{color:var(--brand-hi);border-color:rgba(124,58,237,.5)}
+.state-arrow{color:var(--text-3);font-size:14px;font-weight:600}
+.state-node.current{background:linear-gradient(135deg,rgba(124,58,237,.18),rgba(91,77,232,.18));border-color:var(--brand);color:var(--brand-hi);box-shadow:0 0 0 3px rgba(124,58,237,.3)}
 /* thinking */
-.thinking{display:flex;align-items:center;gap:6px;font-size:12px;color:#0097cf;padding:8px 12px;background:#f0f8ff;border:1px solid #b8d8f0;border-radius:4px}
-.dots span{display:inline-block;width:6px;height:6px;background:#0097cf;border-radius:50%;margin:0 1px;animation:blink 1s infinite}
+.thinking{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--brand-hi);padding:8px 12px;background:var(--brand-soft-2);border:1px solid rgba(124,58,237,.3);border-radius:6px}
+.dots span{display:inline-block;width:5px;height:5px;background:var(--brand-hi);border-radius:50%;margin:0 1px;animation:blink 1s infinite}
 .dots span:nth-child(2){animation-delay:.2s}
 .dots span:nth-child(3){animation-delay:.4s}
 @keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
 /* 场景选择 */
-.scene-bar{background:#fff;border-bottom:1px solid #d3d3d3;padding:8px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0}
-.scene-label{font-size:12px;color:#666}
-.scene-btn{padding:3px 12px;border:1px solid #b9ccd7;border-radius:2px;font-size:12px;color:#0097cf;cursor:pointer;background:#fff}
-.scene-btn:hover,.scene-btn.active{background:#0097cf;color:#fff;border-color:#0097cf}
+.scene-bar{background:var(--bg-1);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap}
+.scene-label{font-size:12px;color:var(--text-2)}
+.scene-btn{padding:5px 14px;border:1px solid var(--border-2);border-radius:14px;font-size:12px;color:var(--text-1);cursor:pointer;background:transparent;font-family:inherit;transition:all .15s;white-space:nowrap}
+.scene-btn:hover{border-color:var(--brand);color:var(--brand-hi)}
+.scene-btn.active{background:linear-gradient(135deg,#5b4de8,#7c3aed);color:#fff;border-color:var(--brand);box-shadow:0 2px 8px rgba(124,58,237,.3)}
 </style>
 </head>
 <body>
 <div class="topbar">
-  <div class="topbar-logo">财运通</div>
+  <div class="topbar-logo">物流管理助手</div>
   <nav class="topbar-nav">
     <a href="#" class="active">智能助手</a>
     <a href="#">运单管理</a>
@@ -169,14 +204,14 @@ body{font-family:"Microsoft YaHei",tahoma,arial,sans-serif;font-size:12px;color:
 <div class="layout">
   <div class="sidebar">
     <div class="sidebar-group-title">智能助手</div>
-    <div class="sidebar-item active">💬 物流助手</div>
-    <div class="sidebar-item">📋 对话记录</div>
+    <div class="sidebar-item active">物流助手</div>
+    <div class="sidebar-item">对话记录</div>
     <div class="sidebar-group-title">快捷功能</div>
-    <div class="sidebar-item">➕ 快速建单</div>
-    <div class="sidebar-item">🚛 找空车</div>
-    <div class="sidebar-item">📊 数据查询</div>
-    <div class="sidebar-item">🔗 单据匹配</div>
-    <div class="sidebar-item">📥 批量导入</div>
+    <div class="sidebar-item">快速建单</div>
+    <div class="sidebar-item">找空车</div>
+    <div class="sidebar-item">数据查询</div>
+    <div class="sidebar-item">单据匹配</div>
+    <div class="sidebar-item">批量导入</div>
   </div>
   <div class="main">
     <div class="demo-nav">
@@ -186,7 +221,7 @@ body{font-family:"Microsoft YaHei",tahoma,arial,sans-serif;font-size:12px;color:
     </div>
     <!-- 场景快选 -->
     <div class="scene-bar">
-      <span class="scene-label">演示场景：</span>
+      <span class="scene-label">演示场景</span>
       <button class="scene-btn active" onclick="loadScene(0)">建单（高置信）</button>
       <button class="scene-btn" onclick="loadScene(1)">找车（中置信·追问）</button>
       <button class="scene-btn" onclick="loadScene(2)">查数据（低置信）</button>
@@ -200,14 +235,23 @@ body{font-family:"Microsoft YaHei",tahoma,arial,sans-serif;font-size:12px;color:
         <div class="chat-header">
           <span>物流管理助手</span>
           <span class="badge">AI</span>
-          <span style="margin-left:auto;font-size:11px;color:#14aa65;font-weight:600">● 在线</span>
+          <span style="margin-left:auto;font-size:11px;color:#22c55e;font-weight:500;display:inline-flex;align-items:center;gap:5px"><span style="width:6px;height:6px;background:#22c55e;border-radius:50%;box-shadow:0 0 6px #22c55e"></span>在线</span>
         </div>
         <div class="chat-messages" id="chatMessages"></div>
         <div class="chat-input-area">
-          <div class="quick-btns" id="quickBtns"></div>
+          <div id="quickBtns" class="quick-btns"></div>
           <div class="input-row">
             <textarea class="chat-textarea" id="chatInput" rows="2" placeholder="输入运输指令，支持自然语言…" onkeydown="inputKeyDown(event)"></textarea>
-            <button class="fn-btn fn-btn-primary" onclick="sendMsg()" style="height:46px;padding:0 16px">发送</button>
+            <button class="send-btn" onclick="sendMsg()">发送</button>
+          </div>
+          <div class="skill-bar">
+            <div class="skill-add" title="更多">+</div>
+            <div class="skill-divider"></div>
+            <div class="skill-btn" onclick="useSkill('create')" id="sk_create"><span class="sk-icon">＋</span><span class="sk-label">建单</span></div>
+            <div class="skill-btn" onclick="useSkill('recommend')" id="sk_recommend"><span class="sk-icon">◈</span><span class="sk-label">找车</span></div>
+            <div class="skill-btn" onclick="useSkill('query')" id="sk_query"><span class="sk-icon">◧</span><span class="sk-label">查数据</span></div>
+            <div class="skill-btn" onclick="useSkill('match')" id="sk_match"><span class="sk-icon">⇌</span><span class="sk-label">匹配单据</span></div>
+            <div class="skill-btn" onclick="useSkill('import')" id="sk_import"><span class="sk-icon">↥</span><span class="sk-label">批量导入</span></div>
           </div>
         </div>
       </div>
@@ -215,7 +259,7 @@ body{font-family:"Microsoft YaHei",tahoma,arial,sans-serif;font-size:12px;color:
       <div class="engine-col" id="engineCol">
         <!-- 状态机 -->
         <div class="panel-card">
-          <div class="panel-card-hd">会话状态机 <span style="font-size:11px;font-weight:400;color:#999">当前状态</span></div>
+          <div class="panel-card-hd">会话状态机 <span style="font-size:10px;font-weight:400;color:var(--text-3);text-transform:none;letter-spacing:0">当前状态</span></div>
           <div class="panel-card-bd">
             <div class="state-machine" id="stateMachine">
               <div class="state-node sn-idle current" id="sn_idle">空闲</div>
@@ -232,10 +276,10 @@ body{font-family:"Microsoft YaHei",tahoma,arial,sans-serif;font-size:12px;color:
         </div>
         <!-- 实体提取 -->
         <div class="panel-card">
-          <div class="panel-card-hd">实体提取 <span style="font-size:11px;font-weight:400;color:#999" id="entitySrc">—</span></div>
+          <div class="panel-card-hd">实体提取 <span style="font-size:10px;font-weight:400;color:var(--text-3);text-transform:none;letter-spacing:0" id="entitySrc">—</span></div>
           <div class="panel-card-bd">
-            <div style="font-size:11px;color:#999;margin-bottom:4px">识别到的实体</div>
-            <div class="entity-chips" id="entityChips"><span style="color:#ccc;font-size:12px">等待输入…</span></div>
+            <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">识别到的实体</div>
+            <div class="entity-chips" id="entityChips"><span style="color:var(--text-3);font-size:12px">等待输入…</span></div>
           </div>
         </div>
         <!-- 意图置信度 -->
@@ -243,21 +287,21 @@ body{font-family:"Microsoft YaHei",tahoma,arial,sans-serif;font-size:12px;color:
           <div class="panel-card-hd">意图置信度分布</div>
           <div class="panel-card-bd">
             <div class="intent-bars" id="intentBars">
-              <div class="intent-bar-row"><div class="intent-name">建单</div><div class="ibar-wrap"><div class="ibar ibar-low" style="width:0%"></div></div><div class="ipct" style="color:#ccc">—</div></div>
-              <div class="intent-bar-row"><div class="intent-name">推荐运力</div><div class="ibar-wrap"><div class="ibar ibar-low" style="width:0%"></div></div><div class="ipct" style="color:#ccc">—</div></div>
-              <div class="intent-bar-row"><div class="intent-name">查数据</div><div class="ibar-wrap"><div class="ibar ibar-low" style="width:0%"></div></div><div class="ipct" style="color:#ccc">—</div></div>
-              <div class="intent-bar-row"><div class="intent-name">匹配单据</div><div class="ibar-wrap"><div class="ibar ibar-low" style="width:0%"></div></div><div class="ipct" style="color:#ccc">—</div></div>
-              <div class="intent-bar-row"><div class="intent-name">导入数据</div><div class="ibar-wrap"><div class="ibar ibar-low" style="width:0%"></div></div><div class="ipct" style="color:#ccc">—</div></div>
+              <div class="intent-bar-row"><div class="intent-name">建单</div><div class="ibar-wrap"><div class="ibar ibar-low" style="width:0%"></div></div><div class="ipct" style="color:var(--text-3)">—</div></div>
+              <div class="intent-bar-row"><div class="intent-name">推荐运力</div><div class="ibar-wrap"><div class="ibar ibar-low" style="width:0%"></div></div><div class="ipct" style="color:var(--text-3)">—</div></div>
+              <div class="intent-bar-row"><div class="intent-name">查数据</div><div class="ibar-wrap"><div class="ibar ibar-low" style="width:0%"></div></div><div class="ipct" style="color:var(--text-3)">—</div></div>
+              <div class="intent-bar-row"><div class="intent-name">匹配单据</div><div class="ibar-wrap"><div class="ibar ibar-low" style="width:0%"></div></div><div class="ipct" style="color:var(--text-3)">—</div></div>
+              <div class="intent-bar-row"><div class="intent-name">导入数据</div><div class="ibar-wrap"><div class="ibar ibar-low" style="width:0%"></div></div><div class="ipct" style="color:var(--text-3)">—</div></div>
             </div>
           </div>
         </div>
         <!-- 槽位状态 -->
         <div class="panel-card">
-          <div class="panel-card-hd">槽位填充状态 <span style="font-size:11px;font-weight:400;color:#999" id="slotIntent">—</span></div>
+          <div class="panel-card-hd">槽位填充状态 <span style="font-size:10px;font-weight:400;color:var(--text-3);text-transform:none;letter-spacing:0" id="slotIntent">—</span></div>
           <div class="panel-card-bd">
             <table class="slot-table" id="slotTable">
               <thead><tr><th>槽位</th><th>必填</th><th>当前值</th><th>状态</th></tr></thead>
-              <tbody id="slotTbody"><tr><td colspan="4" style="color:#ccc;text-align:center;padding:14px">等待意图锁定…</td></tr></tbody>
+              <tbody id="slotTbody"><tr><td colspan="4" style="color:var(--text-3);text-align:center;padding:16px">等待意图锁定…</td></tr></tbody>
             </table>
           </div>
         </div>
@@ -514,6 +558,34 @@ window.addEventListener('DOMContentLoaded',()=>{
   addAiMsg('您好！我是物流管理助手，支持建单、找车、查数据、单据匹配、批量导入。<br><span style="color:#999;font-size:11px">请选择上方演示场景，或直接输入指令开始体验。</span>');
   setQuickBtns(['帮我派个车去上海，钢材20吨','有没有去上海的空车','那个单子怎么样了']);
 });
+const skillSceneMap={create:0,recommend:1,query:2,match:3,import:4};
+const skillPlaceholder={
+  create:'输入建单信息，例如：帮我派个车去上海，钢材20吨…',
+  recommend:'输入找车需求，例如：有没有去上海的空车…',
+  query:'输入查询条件，例如：昨天发了多少吨…',
+  match:'输入匹配指令，例如：把PC-001派给京A12345…',
+  import:'输入导入指令，例如：导入昨天收到的回单照片…'
+};
+var activeSkill=null;
+function useSkill(type){
+  if(activeSkill===type){
+    activeSkill=null;
+    document.querySelectorAll('.skill-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('chatInput').placeholder='输入运输指令，支持自然语言…';
+    return;
+  }
+  activeSkill=type;
+  document.querySelectorAll('.skill-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sk_'+type).classList.add('active');
+  document.getElementById('chatInput').placeholder=skillPlaceholder[type]||'输入指令…';
+  document.getElementById('chatInput').focus();
+  // 同步切换演示场景
+  var idx=skillSceneMap[type];
+  if(idx!==undefined){
+    document.querySelectorAll('.scene-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+    loadScene(idx);
+  }
+}
 </script>
 </body>
 </html>

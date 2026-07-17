@@ -171,10 +171,162 @@ body { background: #e8e8e8; font-family: -apple-system, "PingFang SC", "Microsof
 .linked-tag { display: inline-flex; align-items: center; gap: 6px; background: #f0f8ff; border: 1px solid #91d5ff; border-radius: 6px; padding: 4px 10px; font-size: 13px; color: #1890ff; }
 .linked-tag .lt-no { font-weight: 600; }
 .linked-tag .lt-name { color: #666; font-size: 12px; }
+
+/* ===== 订单列表页 ===== */
+.order-list-page { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #f5f6f7; display: flex; flex-direction: column; z-index: 10; }
+.order-list-page.hidden { display: none; }
+
+/* tabs */
+.order-tabs { background: #fff; border-bottom: 1px solid #f0f0f0; display: flex; overflow-x: auto; flex-shrink: 0; }
+.order-tabs::-webkit-scrollbar { display: none; }
+.order-tab { padding: 11px 14px; font-size: 14px; color: #666; white-space: nowrap; cursor: pointer; position: relative; flex-shrink: 0; }
+.order-tab.active { color: #1890ff; font-weight: 600; }
+.order-tab.active::after { content: ''; position: absolute; bottom: 0; left: 14px; right: 14px; height: 2px; background: #1890ff; border-radius: 1px; }
+
+/* filter bar */
+.order-filter-bar { background: #fff; padding: 8px 12px; display: flex; align-items: center; justify-content: flex-end; border-bottom: 1px solid #f0f0f0; flex-shrink: 0; }
+.filter-btn { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #666; cursor: pointer; }
+
+/* order list scroll */
+.order-list-scroll { flex: 1; overflow-y: auto; padding: 8px 12px; }
+.order-list-scroll::-webkit-scrollbar { display: none; }
+
+/* order card */
+.ol-card { background: #fff; border-radius: 8px; margin-bottom: 10px; overflow: hidden; }
+.ol-card-header { display: flex; align-items: center; padding: 12px 14px 10px; }
+.ol-checkbox { width: 18px; height: 18px; border: 1.5px solid #d9d9d9; border-radius: 3px; margin-right: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.ol-checkbox.checked { background: #1890ff; border-color: #1890ff; }
+.ol-checkbox.checked::after { content: '✓'; color: #fff; font-size: 11px; }
+.ol-order-no { font-size: 15px; font-weight: 600; color: #222; flex: 1; }
+.ol-status-badge { font-size: 11px; padding: 2px 8px; border-radius: 4px; }
+.ol-status-badge.pending { color: #fa8c16; background: #fff7e6; border: 1px solid #ffd591; }
+.ol-status-badge.warehoused { color: #52c41a; background: #f6ffed; border: 1px solid #b7eb8f; }
+
+.ol-card-route { padding: 0 14px 8px 42px; display: flex; align-items: center; gap: 6px; font-size: 13px; color: #666; }
+.ol-route-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.ol-route-dot.s { background: #1890ff; }
+.ol-route-dot.e { background: #ff6422; }
+.ol-route-line { flex: 0 0 20px; height: 1px; background: #ddd; }
+.ol-route-addr { color: #999; }
+
+.ol-card-meta { padding: 0 14px 8px 42px; display: flex; align-items: center; gap: 4px; font-size: 12px; color: #999; }
+.ol-card-meta .meta-icon { font-size: 13px; }
+
+.ol-card-actions { padding: 8px 14px; border-top: 1px solid #f5f5f5; display: flex; justify-content: flex-end; align-items: center; gap: 8px; }
+.ol-action-btn { height: 32px; padding: 0 16px; border-radius: 6px; font-size: 14px; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: #333; }
+.ol-action-btn.split { color: #ff4d4f; border-color: #ff4d4f; font-weight: 500; }
+.ol-action-btn.split:active { background: #fff1f0; }
+.ol-action-btn:active { background: #f5f5f5; }
+
+/* order list bottom bar */
+.ol-bottom-bar { background: #fff; padding: 8px 16px; padding-bottom: calc(8px + env(safe-area-inset-bottom)); border-top: 1px solid #f0f0f0; display: flex; align-items: center; flex-shrink: 0; }
+.ol-select-all { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #333; flex: 1; cursor: pointer; }
+.ol-selected-count { font-size: 12px; color: #999; margin-right: 12px; }
+.ol-dispatch-btn { height: 36px; padding: 0 24px; background: #1890ff; border: none; border-radius: 8px; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; }
+.ol-dispatch-btn:active { opacity: 0.85; }
+
+/* fab */
+.ol-fab { position: absolute; bottom: 70px; right: 16px; width: 48px; height: 48px; background: #1890ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(24,144,255,0.4); cursor: pointer; font-size: 26px; color: #fff; line-height: 1; }
 </style>
 </head>
 <body>
 <div class="phone">
+  <!-- ===== 订单列表页 ===== -->
+  <div class="order-list-page" id="orderListPage">
+    <!-- Status bar -->
+    <div class="status-bar">
+      <span class="time">16:57</span>
+      <div class="icons">
+        <span>🔵</span><span>📶</span><span style="background:#333;color:#fff;padding:1px 5px;border-radius:3px;font-size:10px">91</span>
+      </div>
+    </div>
+    <!-- Header -->
+    <div class="header">
+      <span class="back">‹</span>
+      <span class="title">订单列表</span>
+      <div class="more"><span>···</span><span style="font-size:22px">⊙</span></div>
+    </div>
+    <!-- Tabs -->
+    <div class="order-tabs">
+      <div class="order-tab active">全部</div>
+      <div class="order-tab" style="color:#1890ff;font-weight:600;position:relative;">待配载<span style="position:absolute;bottom:0;left:14px;right:14px;height:2px;background:#1890ff;border-radius:1px;display:block"></span></div>
+      <div class="order-tab">干线运输中</div>
+      <div class="order-tab">干线运输</div>
+      <div class="order-tab">筛选↑</div>
+    </div>
+    <!-- Filter bar -->
+    <div class="order-filter-bar">
+      <div class="filter-btn">筛选 <span style="font-size:11px">↑</span></div>
+    </div>
+    <!-- List -->
+    <div class="order-list-scroll">
+      <!-- 订单1：有库存 → 有拆单按钮 -->
+      <div class="ol-card">
+        <div class="ol-card-header">
+          <div class="ol-checkbox"></div>
+          <div class="ol-order-no">251120122</div>
+          <div class="ol-status-badge warehoused">⏱ 已入库</div>
+        </div>
+        <div class="ol-card-route">
+          <div class="ol-route-dot s"></div>
+          <span class="ol-route-addr">—</span>
+          <div class="ol-route-line"></div>
+          <div class="ol-route-dot e"></div>
+          <span class="ol-route-addr">—</span>
+        </div>
+        <div class="ol-card-meta">
+          <span class="meta-icon">🚛</span>
+          <span>0吨 | 0方 | 100件 | 100套</span>
+          <span style="margin-left:6px">⏱</span>
+          <span>2026-07-10 17:31:47</span>
+        </div>
+        <div class="ol-card-actions">
+          <button class="ol-action-btn split" onclick="goSplitOrder('251120122')">拆单</button>
+          <button class="ol-action-btn">修改</button>
+          <button class="ol-action-btn">删除</button>
+        </div>
+      </div>
+      <!-- 订单2：无库存 → 无拆单按钮 -->
+      <div class="ol-card">
+        <div class="ol-card-header">
+          <div class="ol-checkbox"></div>
+          <div class="ol-order-no">251120121</div>
+          <div class="ol-status-badge warehoused">⏱ 已入库</div>
+        </div>
+        <div class="ol-card-route">
+          <div class="ol-route-dot s"></div>
+          <span class="ol-route-addr">—</span>
+          <div class="ol-route-line"></div>
+          <div class="ol-route-dot e"></div>
+          <span class="ol-route-addr">—</span>
+        </div>
+        <div class="ol-card-meta">
+          <span class="meta-icon">🚛</span>
+          <span>100吨 | 0方 | 100件 | 0套</span>
+          <span style="margin-left:6px">⏱</span>
+          <span>2026-07-10 17:28:45</span>
+        </div>
+        <div class="ol-card-actions">
+          <button class="ol-action-btn">修改</button>
+          <button class="ol-action-btn">删除</button>
+        </div>
+      </div>
+    </div>
+    <!-- Bottom bar -->
+    <div class="ol-bottom-bar">
+      <div class="ol-select-all">
+        <div class="ol-checkbox"></div>
+        全选
+      </div>
+      <span class="ol-selected-count">已选 0单</span>
+      <button class="ol-dispatch-btn">去配载</button>
+    </div>
+    <!-- FAB -->
+    <div class="ol-fab" onclick="showToastOl('新建订单')">+</div>
+  </div>
+
+  <!-- ===== 创建运单页 ===== -->
+  <div id="waybillPage" style="position:absolute;top:0;left:0;right:0;bottom:0;background:#f5f6f7;display:none;flex-direction:column;">
   <!-- Status bar -->
   <div class="status-bar">
     <span class="time">16:02</span>
@@ -185,7 +337,7 @@ body { background: #e8e8e8; font-family: -apple-system, "PingFang SC", "Microsof
 
   <!-- Header -->
   <div class="header">
-    <span class="back">‹</span>
+    <span class="back" onclick="backToOrderList()" style="cursor:pointer">‹</span>
     <span class="title">创建运单</span>
     <div class="more"><span>···</span><span style="font-size:22px">⊙</span></div>
   </div>
@@ -476,6 +628,11 @@ body { background: #e8e8e8; font-family: -apple-system, "PingFang SC", "Microsof
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
+  </div><!-- end waybillPage -->
+
+  <!-- Toast（phone根层，两页共用） -->
+  <div class="toast" id="toastOl" style="bottom:80px"></div>
+
 </div><!-- end phone -->
 
 <script>
@@ -483,6 +640,58 @@ body { background: #e8e8e8; font-family: -apple-system, "PingFang SC", "Microsof
 const RATIOS = { weight: 1, vol: 2, cnt: 10, set: 1 };
 let stock = { weight: 980, vol: 1960, cnt: 9800, set: 980 };
 let currentOrder = null;
+
+// ===== 页面切换 =====
+function goSplitOrder(orderNo) {
+  // 隐藏订单列表页，显示创建运单页
+  document.getElementById('orderListPage').style.display = 'none';
+  const wp = document.getElementById('waybillPage');
+  wp.style.display = 'flex';
+
+  // 将订单号预填到关联订单字段，并展示 toast 提示
+  // 模拟带入：直接触发 selectOrder 逻辑（使用订单1数据）
+  const orderMap = {
+    '251120122': { no: '251120122', project: '煤炭运输项目-华北', cargo: '煤炭（大同优混）', w: 980, v: 1960, c: 9800, s: 980 }
+  };
+  const order = orderMap[orderNo];
+  if (order) {
+    prefillOrder(order.no, order.project, order.cargo, order.w, order.v, order.c, order.s);
+  }
+}
+
+function prefillOrder(no, project, cargo, w, v, c, s) {
+  currentOrder = { no, project, cargo, w, v, c, s };
+  stock = { weight: w, vol: v, cnt: c, set: s };
+
+  const field = document.getElementById('assocOrderField');
+  const val = document.getElementById('assocOrderValue');
+  val.className = 'aof-value set';
+  val.innerHTML = `<span class="linked-tag"><span class="lt-no">${no}</span><span class="lt-name">${project}</span></span>`;
+  field.classList.add('has-value');
+
+  // 带入货物信息
+  document.getElementById('cargoSection').style.display = 'block';
+  document.getElementById('weightInput').value = w;
+  document.getElementById('volInput').value = v;
+  document.getElementById('cntInput').value = c;
+  document.getElementById('setInput').value = s;
+
+  setTimeout(() => showToast(`已带入订单 ${no}，请填写本次运输数量`), 300);
+}
+
+function backToOrderList() {
+  document.getElementById('waybillPage').style.display = 'none';
+  document.getElementById('orderListPage').style.display = 'flex';
+}
+
+let olToastTimer;
+function showToastOl(msg) {
+  const t = document.getElementById('toastOl');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(olToastTimer);
+  olToastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
 
 function toggleSection(id) {
   const header = document.getElementById(id + 'Header');

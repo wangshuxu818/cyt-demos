@@ -217,6 +217,23 @@ body { font-family: "Microsoft YaHei", tahoma, arial, sans-serif; font-size: 12p
               </div>
             </div>
           </div>
+          <!-- 是否车头筛选 -->
+          <div class="coop-filter" id="vtypeFilter">
+            <div class="coop-trigger" id="vtypeTrigger" onclick="toggleVtype(event)">
+              <span id="vtypeLabel">车头、整车</span>
+              <span class="caret">▼</span>
+            </div>
+            <div class="coop-dropdown" id="vtypeDropdown" style="display:none;">
+              <label class="coop-option"><input type="checkbox" value="全部" onchange="onVtypeChange(this)"> 全部</label>
+              <label class="coop-option"><input type="checkbox" value="车头" checked onchange="onVtypeChange(this)"> 车头</label>
+              <label class="coop-option"><input type="checkbox" value="整车" checked onchange="onVtypeChange(this)"> 整车</label>
+              <label class="coop-option"><input type="checkbox" value="挂车" onchange="onVtypeChange(this)"> 挂车</label>
+              <div class="coop-actions">
+                <button class="coop-btn-cancel" onclick="cancelVtype()">取消</button>
+                <button class="coop-btn-ok" onclick="confirmVtype()">确定</button>
+              </div>
+            </div>
+          </div>
           <span style="font-size:11px;color:#aaa;background:#f5f5f5;padding:2px 8px;border-radius:10px;">实时</span>
           <button class="refresh-btn">↻ 刷新</button>
         </div>
@@ -431,74 +448,90 @@ body { font-family: "Microsoft YaHei", tahoma, arial, sans-serif; font-size: 12p
 </div><!-- /main -->
 
 <script>
-// 各合作关系的模拟车辆数据
-const COOP_DATA = {
-  '自有':  { '空闲中':25, '装载中':10, '在途中':30, '维修中':4, '保养中':3, '停驶中':2 },
-  '外调':  { '空闲中':12, '装载中':6,  '在途中':18, '维修中':2, '保养中':1, '停驶中':1 },
-  '加盟':  { '空闲中':5,  '装载中':2,  '在途中':5,  '维修中':0, '保养中':1, '停驶中':1 },
-};
 const LABELS = ['空闲中','装载中','在途中','维修中','保养中','停驶中'];
-const TOTAL = { '空闲中':42,'装载中':18,'在途中':53,'维修中':6,'保养中':5,'停驶中':4 };
 const PCT_COLORS = { '空闲中':'#1dbb73','装载中':'#0097cf','在途中':'#f7992b','维修中':'#e64340','保养中':'#e89c20','停驶中':'#7b8fa1' };
 
-// 记忆上次选择 (localStorage)
-const LS_KEY = 'vehicleCoopFilter';
-let pendingSelected = [];   // 下拉打开时暂存
-let currentSelected = [];   // 已确定的选择
+// 3D 数据：合作关系 × 是否车头 × 车辆状态
+const DATA = {
+  '自有': {
+    '车头': { '空闲中':12,'装载中':5,'在途中':15,'维修中':2,'保养中':2,'停驶中':1 },
+    '整车': { '空闲中':10,'装载中':4,'在途中':12,'维修中':2,'保养中':1,'停驶中':1 },
+    '挂车': { '空闲中':3, '装载中':1,'在途中':3, '维修中':0,'保养中':0,'停驶中':0 },
+  },
+  '外调': {
+    '车头': { '空闲中':6, '装载中':3,'在途中':9, '维修中':1,'保养中':1,'停驶中':0 },
+    '整车': { '空闲中':5, '装载中':2,'在途中':8, '维修中':1,'保养中':0,'停驶中':1 },
+    '挂车': { '空闲中':1, '装载中':1,'在途中':1, '维修中':0,'保养中':0,'停驶中':0 },
+  },
+  '加盟': {
+    '车头': { '空闲中':3, '装载中':1,'在途中':3, '维修中':0,'保养中':1,'停驶中':0 },
+    '整车': { '空闲中':2, '装载中':1,'在途中':2, '维修中':0,'保养中':0,'停驶中':1 },
+    '挂车': { '空闲中':0, '装载中':0,'在途中':0, '维修中':0,'保养中':0,'停驶中':0 },
+  },
+};
+const ALL_COOPS = ['自有','外调','加盟'];
+const ALL_VTYPES = ['车头','整车','挂车'];
 
-function loadSaved() {
-  try {
-    const s = localStorage.getItem(LS_KEY);
-    if (s) return JSON.parse(s);
-  } catch(e) {}
+const LS_COOP = 'vehicleCoopFilter';
+const LS_VTYPE = 'vehicleVtypeFilter';
+
+// --- 合作关系 ---
+let coopPending = [], coopCurrent = [];
+// --- 是否车头 ---
+let vtypePending = [], vtypeCurrent = [];
+
+function loadSaved(key, def) {
+  try { const s = localStorage.getItem(key); if (s) return JSON.parse(s); } catch(e) {}
   return null;
 }
 
-function initFilter() {
-  const saved = loadSaved();
-  if (saved && saved.length) {
-    currentSelected = saved;
-  } else {
-    // 默认自有；若自有数据全为0则回落全部
-    const ziyouEmpty = Object.values(COOP_DATA['自有']).every(v => v === 0);
-    currentSelected = ziyouEmpty ? ['全部'] : ['自有'];
-  }
-  syncCheckboxes(currentSelected);
-  updateLabel(currentSelected);
-  renderData(currentSelected);
+function initFilters() {
+  // 合作关系
+  const savedCoop = loadSaved(LS_COOP);
+  coopCurrent = (savedCoop && savedCoop.length) ? savedCoop : (['自有']);
+  syncCheckboxes('coopDropdown', coopCurrent);
+  updateLabel('coopLabel', coopCurrent);
+
+  // 是否车头
+  const savedVtype = loadSaved(LS_VTYPE);
+  vtypeCurrent = (savedVtype && savedVtype.length) ? savedVtype : ['车头','整车'];
+  syncCheckboxes('vtypeDropdown', vtypeCurrent);
+  updateLabel('vtypeLabel', vtypeCurrent);
+
+  renderData();
 }
 
-function syncCheckboxes(selected) {
-  document.querySelectorAll('#coopDropdown input[type=checkbox]').forEach(cb => {
+function syncCheckboxes(dropdownId, selected) {
+  document.querySelectorAll('#' + dropdownId + ' input[type=checkbox]').forEach(cb => {
     cb.checked = selected.includes(cb.value);
   });
 }
 
-function updateLabel(selected) {
-  const el = document.getElementById('coopLabel');
+function updateLabel(labelId, selected) {
+  const el = document.getElementById(labelId);
   if (!selected.length || selected.includes('全部')) {
     el.textContent = '全部';
-  } else if (selected.length === 1) {
-    el.textContent = selected[0];
   } else {
     el.textContent = selected.join('、');
   }
 }
 
-function computeCounts(selected) {
-  if (!selected.length || selected.includes('全部')) return TOTAL;
+function computeCounts() {
+  const useCoops = (!coopCurrent.length || coopCurrent.includes('全部')) ? ALL_COOPS : coopCurrent;
+  const useVtypes = (!vtypeCurrent.length || vtypeCurrent.includes('全部')) ? ALL_VTYPES : vtypeCurrent;
   const result = {};
   LABELS.forEach(l => {
-    result[l] = selected.reduce((sum, k) => sum + (COOP_DATA[k] ? (COOP_DATA[k][l] || 0) : 0), 0);
+    result[l] = useCoops.reduce((sum, c) =>
+      sum + useVtypes.reduce((s2, v) =>
+        s2 + (DATA[c] && DATA[c][v] ? (DATA[c][v][l] || 0) : 0), 0), 0);
   });
   return result;
 }
 
-function renderData(selected) {
-  const counts = computeCounts(selected);
+function renderData() {
+  const counts = computeCounts();
   const total = Object.values(counts).reduce((a, b) => a + b, 0) || 1;
-  const cells = document.querySelectorAll('.v-cell');
-  cells.forEach((cell, i) => {
+  document.querySelectorAll('.v-cell').forEach((cell, i) => {
     const label = LABELS[i];
     const cnt = counts[label] || 0;
     const pct = ((cnt / total) * 100).toFixed(1) + '%';
@@ -508,66 +541,87 @@ function renderData(selected) {
   });
 }
 
+// --- 合作关系 下拉 ---
 function toggleCoop(e) {
   e.stopPropagation();
-  const filter = document.getElementById('coopFilter');
   const dd = document.getElementById('coopDropdown');
-  const isOpen = dd.style.display !== 'none';
-  if (isOpen) {
-    closeCoop(false);
-  } else {
-    pendingSelected = [...currentSelected];
-    syncCheckboxes(pendingSelected);
-    dd.style.display = 'block';
-    filter.classList.add('open');
-  }
+  if (dd.style.display !== 'none') { closeCoop(false); return; }
+  closeVtype(false);
+  coopPending = [...coopCurrent];
+  syncCheckboxes('coopDropdown', coopPending);
+  dd.style.display = 'block';
+  document.getElementById('coopFilter').classList.add('open');
 }
-
 function onCoopChange(cb) {
-  if (cb.value === '全部') {
-    if (cb.checked) {
-      // 选全部 → 取消其他
-      document.querySelectorAll('#coopDropdown input[type=checkbox]').forEach(c => {
-        c.checked = c.value === '全部';
-      });
-      pendingSelected = ['全部'];
-    } else {
-      pendingSelected = [];
-    }
-  } else {
-    // 选具体项 → 取消「全部」
-    const allCb = document.querySelector('#coopDropdown input[value="全部"]');
-    if (allCb) allCb.checked = false;
-    pendingSelected = Array.from(document.querySelectorAll('#coopDropdown input[type=checkbox]'))
-      .filter(c => c.checked).map(c => c.value);
-  }
+  handleChange(cb, 'coopDropdown', coopPending);
 }
-
 function confirmCoop() {
-  if (!pendingSelected.length) pendingSelected = ['全部'];
-  currentSelected = [...pendingSelected];
-  localStorage.setItem(LS_KEY, JSON.stringify(currentSelected));
-  updateLabel(currentSelected);
-  renderData(currentSelected);
+  if (!coopPending.length) coopPending = ['全部'];
+  coopCurrent = [...coopPending];
+  localStorage.setItem(LS_COOP, JSON.stringify(coopCurrent));
+  updateLabel('coopLabel', coopCurrent);
+  renderData();
   closeCoop(false);
 }
-
 function cancelCoop() { closeCoop(true); }
-
 function closeCoop(restore) {
-  const dd = document.getElementById('coopDropdown');
-  dd.style.display = 'none';
+  document.getElementById('coopDropdown').style.display = 'none';
   document.getElementById('coopFilter').classList.remove('open');
-  if (restore) syncCheckboxes(currentSelected);
+  if (restore) syncCheckboxes('coopDropdown', coopCurrent);
+}
+
+// --- 是否车头 下拉 ---
+function toggleVtype(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('vtypeDropdown');
+  if (dd.style.display !== 'none') { closeVtype(false); return; }
+  closeCoop(false);
+  vtypePending = [...vtypeCurrent];
+  syncCheckboxes('vtypeDropdown', vtypePending);
+  dd.style.display = 'block';
+  document.getElementById('vtypeFilter').classList.add('open');
+}
+function onVtypeChange(cb) {
+  handleChange(cb, 'vtypeDropdown', vtypePending);
+}
+function confirmVtype() {
+  if (!vtypePending.length) vtypePending = ['全部'];
+  vtypeCurrent = [...vtypePending];
+  localStorage.setItem(LS_VTYPE, JSON.stringify(vtypeCurrent));
+  updateLabel('vtypeLabel', vtypeCurrent);
+  renderData();
+  closeVtype(false);
+}
+function cancelVtype() { closeVtype(true); }
+function closeVtype(restore) {
+  document.getElementById('vtypeDropdown').style.display = 'none';
+  document.getElementById('vtypeFilter').classList.remove('open');
+  if (restore) syncCheckboxes('vtypeDropdown', vtypeCurrent);
+}
+
+// 通用多选逻辑
+function handleChange(cb, dropdownId, pending) {
+  if (cb.value === '全部') {
+    document.querySelectorAll('#' + dropdownId + ' input[type=checkbox]').forEach(c => {
+      c.checked = c.value === '全部';
+    });
+    pending.length = 0; pending.push('全部');
+  } else {
+    const allCb = document.querySelector('#' + dropdownId + ' input[value="全部"]');
+    if (allCb) allCb.checked = false;
+    const vals = Array.from(document.querySelectorAll('#' + dropdownId + ' input[type=checkbox]'))
+      .filter(c => c.checked).map(c => c.value);
+    pending.length = 0; vals.forEach(v => pending.push(v));
+  }
 }
 
 // 点击外部关闭
 document.addEventListener('click', function(e) {
-  const filter = document.getElementById('coopFilter');
-  if (filter && !filter.contains(e.target)) closeCoop(true);
+  if (!document.getElementById('coopFilter').contains(e.target)) closeCoop(true);
+  if (!document.getElementById('vtypeFilter').contains(e.target)) closeVtype(true);
 });
 
-initFilter();
+initFilters();
 </script>
 </body>
 </html>

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>各状态车辆情况 — 工作台看板 UI设计稿</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "Microsoft YaHei", tahoma, arial, sans-serif; font-size: 12px; color: #333; background: #ecf0f4; }
+
+.topbar { height: 44px; background: linear-gradient(180deg, #0a3d6b, #01224f); display: flex; align-items: center; padding: 0 16px; color: #fff; font-size: 14px; position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+.sidebar { position: fixed; top: 44px; left: 0; bottom: 0; width: 180px; background: #fff; border-right: 1px solid #d3d3d3; padding-top: 8px; }
+.sidebar-item { height: 34px; padding: 0 14px; font-size: 13px; color: #333; display: flex; align-items: center; cursor: pointer; }
+.sidebar-item.active { background: #a9dafb; color: #0097cf; }
+.sidebar-item:hover:not(.active) { background: #e4eef6; color: #0097cf; }
+.main { margin-left: 180px; margin-top: 44px; padding: 10px; min-height: calc(100vh - 44px); }
+
+.tabs { display: flex; margin-bottom: 10px; border-bottom: 2px solid #d8e0e8; }
+.tab { height: 36px; padding: 0 20px; font-size: 14px; display: flex; align-items: center; cursor: pointer; color: #666; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+.tab.active { color: #532fe6; border-bottom-color: #532fe6; font-weight: 600; }
+
+.card { background: #fff; border: 1px solid #e0e6ed; border-radius: 2px; padding: 0; }
+.card-header { display: flex; align-items: center; justify-content: space-between; height: 36px; padding: 0 12px; border-bottom: 1px solid #e8edf2; flex-shrink: 0; }
+.card-body { padding: 10px 12px 12px; }
+.card-title { font-size: 14px; font-weight: 600; color: #333; display: flex; align-items: center; gap: 8px; }
+.edit-btn { font-size: 12px; color: #0097cf; cursor: pointer; font-weight: 400; }
+.hdr-right { display: flex; align-items: center; gap: 6px; }
+.seg-btn-group { display: flex; }
+.seg-btn { height: 24px; padding: 0 11px; border: 1px solid #b9ccd7; background: linear-gradient(-180deg, #fff, #f7f7f7 96%); font-size: 12px; color: #666; cursor: pointer; margin-left: -1px; }
+.seg-btn.active { background: linear-gradient(270deg, #5a35ed, #7c5cf5); border-color: #5a35ed; color: #fff; z-index: 1; position: relative; }
+.seg-btn:first-child { border-radius: 2px 0 0 2px; }
+.seg-btn:last-child { border-radius: 0 2px 2px 0; }
+.refresh-btn { height: 24px; padding: 0 10px; border: 1px solid #b9ccd7; border-radius: 2px; background: linear-gradient(-180deg, #fff, #f7f7f7 96%); font-size: 12px; color: #0097cf; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+
+/* 顶部左右双栏 */
+.top-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: stretch; }
+.col-waybill { flex: 55; min-width: 0; }
+.col-vehicle { flex: 45; min-width: 0; }
+
+/* 运单状态子磁片 — 3×2 网格，每格图标+状态名+数字一行 */
+.waybill-tiles { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid #e8edf2; border-radius: 0 0 2px 2px; overflow: hidden; }
+.waybill-tile { display: flex; align-items: center; padding: 9px 12px; gap: 8px; border-right: 1px solid #e8edf2; border-bottom: 1px solid #e8edf2; cursor: pointer; }
+.waybill-tile:nth-child(3n) { border-right: none; }
+.waybill-tile:nth-child(4), .waybill-tile:nth-child(5), .waybill-tile:nth-child(6) { border-bottom: none; }
+.waybill-tile:hover { background: #f5f9fc; }
+.w-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.w-tile-row { display: flex; align-items: baseline; gap: 6px; flex: 1; min-width: 0; }
+.w-label { font-size: 12px; color: #555; white-space: nowrap; }
+.w-count { font-size: 14px; font-weight: 700; color: #222; line-height: 1; margin-left: auto; }
+.w-count em { font-size: 11px; font-weight: 400; color: #aaa; font-style: normal; margin-left: 1px; }
+
+/* 各状态车辆子格 — 3×2 网格，每格图标+状态名+数字一行 */
+.v-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 8px 10px; }
+.v-cell { display: flex; align-items: center; padding: 7px 8px; gap: 7px; border: 1px solid #e8edf2; border-radius: 2px; cursor: pointer; }
+.v-cell:hover { background: #f5f9fc; }
+.v-cell-icon { width: 26px; height: 26px; border-radius: 5px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.v-cell-row { display: flex; align-items: baseline; gap: 5px; flex: 1; min-width: 0; }
+.v-cell-label { font-size: 12px; color: #555; white-space: nowrap; }
+.v-cell-count { font-size: 14px; font-weight: 700; color: #222; line-height: 1; margin-left: auto; }
+.v-cell-count em { font-size: 10px; font-weight: 400; color: #aaa; font-style: normal; margin-left: 1px; }
+.v-cell-pct { font-size: 10px; color: #aaa; }
+
+/* 审核中心 — 磁贴卡片版 */
+.audit-subtabs { display: flex; margin-bottom: 12px; border-bottom: 1px solid #e8edf2; }
+.audit-subtab { height: 30px; padding: 0 14px; font-size: 12px; color: #666; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; display: flex; align-items: center; }
+.audit-subtab.active { color: #532fe6; border-bottom-color: #532fe6; font-weight: 600; }
+.audit-subtab:hover:not(.active) { color: #532fe6; }
+
+.audit-tiles { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin-bottom: 10px; }
+.audit-tile { border: 1px solid #e0e6ed; border-radius: 2px; padding: 6px 8px; cursor: pointer; background: #fff; min-width: 0; }
+.audit-tile:hover { border-color: #b0c4d8; }
+.audit-tile.active { border-color: #532fe6; border-width: 1.5px; background: #faf8ff; }
+.audit-tile.zero { opacity: .6; cursor: default; }
+.audit-tile { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.audit-tile-name { font-size: 12px; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
+.audit-tile-bottom { display: flex; align-items: baseline; gap: 5px; flex-shrink: 0; }
+.audit-tile-count { font-size: 15px; font-weight: 700; color: #f7992b; line-height: 1; }
+.audit-tile.active .audit-tile-count { color: #532fe6; }
+.audit-tile.zero .audit-tile-count { color: #bbb; font-size: 14px; }
+.audit-tile-link { font-size: 11px; color: #0097cf; cursor: pointer; }
+.audit-tile-link:hover { text-decoration: underline; }
+
+/* 内嵌列表表格 */
+.audit-table-wrap { overflow-x: auto; }
+.audit-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.audit-table th { background: #f5f7fa; color: #666; font-weight: 500; height: 30px; padding: 0 8px; text-align: left; border-bottom: 1px solid #e0e6ed; white-space: nowrap; }
+.audit-table td { height: 34px; padding: 0 8px; border-bottom: 1px solid #eef1f5; color: #333; white-space: nowrap; }
+.audit-table tr:last-child td { border-bottom: none; }
+.audit-table tr:hover td { background: #f8fafb; }
+.audit-op-btn { height: 22px; padding: 0 8px; border: 1px solid #0097cf; border-radius: 2px; background: #fff; font-size: 11px; color: #0097cf; cursor: pointer; }
+.audit-op-btn:hover { background: #e8f6fd; }
+.audit-attach { color: #0097cf; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<!-- 顶栏 -->
+<div class="topbar">
+  <span style="font-size:13px;opacity:.7;margin-right:16px;">≡</span>
+  财运通
+  <span style="margin-left:auto;display:flex;gap:10px;font-size:12px;opacity:.8;">
+    <span>创建订单</span>
+    <span>创建运单</span>
+    <span style="background:#532fe6;padding:3px 12px;border-radius:2px;opacity:1;">快捷建单</span>
+  </span>
+</div>
+
+<!-- 侧边栏 -->
+<div class="sidebar">
+  <div class="sidebar-item active">工作台</div>
+  <div class="sidebar-item">运单管理</div>
+  <div class="sidebar-item">财务管理</div>
+  <div class="sidebar-item">车务中心</div>
+  <div class="sidebar-item">报表中心</div>
+</div>
+
+<!-- 主内容 -->
+<div class="main">
+  <div class="tabs">
+    <div class="tab active">工作台</div>
+    <div class="tab">业务流程</div>
+  </div>
+
+  <!-- 顶部左右双栏 -->
+  <div class="top-row">
+
+    <!-- 左栏：运单状态 -->
+    <div class="card col-waybill" style="padding:0;">
+      <div class="card-header">
+        <div class="card-title">运单状态 <span class="edit-btn">✎ 编辑</span></div>
+        <div class="hdr-right">
+          <div class="seg-btn-group">
+            <button class="seg-btn">日</button>
+            <button class="seg-btn active">周</button>
+            <button class="seg-btn">月</button>
+          </div>
+          <button class="refresh-btn">↻ 刷新</button>
+        </div>
+      </div>
+      <div class="waybill-tiles">
+        <div class="waybill-tile">
+          <div class="w-icon" style="background:linear-gradient(135deg,#6a45e6,#8b67f5);">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><rect x="5" y="3" width="14" height="2" rx="1"/><rect x="3" y="7" width="18" height="2" rx="1"/><rect x="3" y="11" width="18" height="9" rx="2"/></svg>
+          </div>
+          <div class="w-tile-row"><span class="w-label">待接单</span><span class="w-count">3<em>单</em></span></div>
+        </div>
+        <div class="waybill-tile">
+          <div class="w-icon" style="background:linear-gradient(135deg,#4788ec,#6aaeff);">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+          </div>
+          <div class="w-tile-row"><span class="w-label">待签到</span><span class="w-count">5<em>单</em></span></div>
+        </div>
+        <div class="waybill-tile">
+          <div class="w-icon" style="background:linear-gradient(135deg,#532fe6,#7c5cf5);">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 4v5M15 4v5" stroke="#fff" stroke-width="1.5" fill="none"/></svg>
+          </div>
+          <div class="w-tile-row"><span class="w-label">待靠台</span><span class="w-count">2<em>单</em></span></div>
+        </div>
+        <div class="waybill-tile">
+          <div class="w-icon" style="background:linear-gradient(135deg,#0cace7,#23c2ff);">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><rect x="3" y="8" width="14" height="10" rx="1"/><rect x="17" y="11" width="4" height="7" rx="1"/><circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/></svg>
+          </div>
+          <div class="w-tile-row"><span class="w-label">待装车</span><span class="w-count">12<em>单</em></span></div>
+        </div>
+        <div class="waybill-tile">
+          <div class="w-icon" style="background:linear-gradient(135deg,#e08c1a,#ffb74d);">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><rect x="2" y="9" width="16" height="9" rx="1"/><rect x="18" y="12" width="4" height="6" rx="1"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></svg>
+          </div>
+          <div class="w-tile-row"><span class="w-label">待发车</span><span class="w-count">8<em>单</em></span></div>
+        </div>
+        <div class="waybill-tile">
+          <div class="w-icon" style="background:linear-gradient(135deg,#1dbb73,#35cd90);">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><rect x="2" y="8" width="16" height="10" rx="1"/><rect x="18" y="11" width="4" height="7" rx="1"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></svg>
+          </div>
+          <div class="w-tile-row"><span class="w-label">运输中</span><span class="w-count">53<em>单</em></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右栏：各状态车辆情况 -->
+    <div class="card col-vehicle" style="padding:0;">
+      <div class="card-header">
+        <div class="card-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#532fe6" style="flex-shrink:0;"><rect x="2" y="8" width="16" height="10" rx="1"/><rect x="18" y="11" width="4" height="7" rx="1"/><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="19" r="2.5"/></svg>
+          各状态车辆情况
+        </div>
+        <div class="hdr-right">
+          <span style="font-size:11px;color:#aaa;background:#f5f5f5;padding:2px 8px;border-radius:10px;">实时</span>
+          <button class="refresh-btn">↻ 刷新</button>
+        </div>
+      </div>
+      <div class="v-grid">
+        <div class="v-cell">
+          <div class="v-cell-icon" style="background:linear-gradient(135deg,#1dbb73,#35cd90);">
+            <svg viewBox="0 0 24 24" fill="#fff" width="15" height="15"><circle cx="12" cy="12" r="9" fill="none" stroke="#fff" stroke-width="2"/><path d="M8 12l3 3 5-5" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+          </div>
+          <div class="v-cell-row"><span class="v-cell-label">空闲中</span><span class="v-cell-count">42<em>辆</em></span><span class="v-cell-pct" style="color:#1dbb73;">32.8%</span></div>
+        </div>
+        <div class="v-cell">
+          <div class="v-cell-icon" style="background:linear-gradient(135deg,#0cace7,#23c2ff);">
+            <svg viewBox="0 0 24 24" fill="#fff" width="15" height="15"><rect x="4" y="11" width="16" height="7" rx="1" fill="none" stroke="#fff" stroke-width="1.5"/><path d="M8 11V8a2 2 0 014 0v3M12 11V8a2 2 0 014 0v3" stroke="#fff" stroke-width="1.5" fill="none"/></svg>
+          </div>
+          <div class="v-cell-row"><span class="v-cell-label">装载中</span><span class="v-cell-count">18<em>辆</em></span><span class="v-cell-pct" style="color:#0097cf;">14.1%</span></div>
+        </div>
+        <div class="v-cell" style="background:#fffdf8;">
+          <div class="v-cell-icon" style="background:linear-gradient(135deg,#f7992b,#ffb84d);">
+            <svg viewBox="0 0 24 24" fill="#fff" width="15" height="15"><path d="M3 12h18M15 6l6 6-6 6" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="v-cell-row"><span class="v-cell-label">在途中</span><span class="v-cell-count" style="color:#f7992b;">53<em>辆</em></span><span class="v-cell-pct" style="color:#f7992b;">41.4%</span></div>
+        </div>
+        <div class="v-cell">
+          <div class="v-cell-icon" style="background:linear-gradient(135deg,#e64340,#ff6b6b);">
+            <svg viewBox="0 0 24 24" fill="#fff" width="15" height="15"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l2.5-2.5a6 6 0 01-7.59 7.91l-3.76 3.76a2 2 0 01-2.83-2.83l3.76-3.76A6 6 0 0114.7 6.3z" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+          </div>
+          <div class="v-cell-row"><span class="v-cell-label">维修中</span><span class="v-cell-count">6<em>辆</em></span><span class="v-cell-pct" style="color:#e64340;">4.7%</span></div>
+        </div>
+        <div class="v-cell">
+          <div class="v-cell-icon" style="background:linear-gradient(135deg,#e89c20,#f5bc48);">
+            <svg viewBox="0 0 24 24" fill="#fff" width="15" height="15"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </div>
+          <div class="v-cell-row"><span class="v-cell-label">保养中</span><span class="v-cell-count">5<em>辆</em></span><span class="v-cell-pct" style="color:#e89c20;">3.9%</span></div>
+        </div>
+        <div class="v-cell">
+          <div class="v-cell-icon" style="background:linear-gradient(135deg,#7b8fa1,#a0b4c4);">
+            <svg viewBox="0 0 24 24" fill="#fff" width="15" height="15"><circle cx="12" cy="12" r="9" fill="none" stroke="#fff" stroke-width="2"/><rect x="9" y="8" width="2" height="8" rx="1"/><rect x="13" y="8" width="2" height="8" rx="1"/></svg>
+          </div>
+          <div class="v-cell-row"><span class="v-cell-label">停驶中</span><span class="v-cell-count">4<em>辆</em></span><span class="v-cell-pct" style="color:#7b8fa1;">3.1%</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /top-row -->
+
+  <!-- 审核中心 -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">审核中心 <span class="edit-btn">✎ 编辑</span></div>
+      <div class="hdr-right">
+        <div class="seg-btn-group">
+          <button class="seg-btn">近7天</button>
+          <button class="seg-btn active">近30天</button>
+          <button class="seg-btn">近90天</button>
+        </div>
+        <button class="refresh-btn">↻ 刷新</button>
+      </div>
+    </div>
+    <div style="padding:10px 12px 12px;">
+
+    <!-- 待我审核 / 我发起的 子tab -->
+    <div class="audit-subtabs">
+      <div class="audit-subtab active">待我审核</div>
+      <div class="audit-subtab">我发起的</div>
+    </div>
+
+    <!-- 审核类型磁贴网格 -->
+    <div class="audit-tiles">
+      <div class="audit-tile">
+        <div class="audit-tile-name">运单修改审核</div>
+        <div class="audit-tile-bottom"><span class="audit-tile-count">24</span><span class="audit-tile-link">列表 &gt;</span></div>
+      </div>
+      <div class="audit-tile">
+        <div class="audit-tile-name">在途费用</div>
+        <div class="audit-tile-bottom"><span class="audit-tile-count">37</span><span class="audit-tile-link">列表 &gt;</span></div>
+      </div>
+      <div class="audit-tile">
+        <div class="audit-tile-name">收款单-订单</div>
+        <div class="audit-tile-bottom"><span class="audit-tile-count">15</span><span class="audit-tile-link">列表 &gt;</span></div>
+      </div>
+      <div class="audit-tile">
+        <div class="audit-tile-name">报销单</div>
+        <div class="audit-tile-bottom"><span class="audit-tile-count">8</span><span class="audit-tile-link">列表 &gt;</span></div>
+      </div>
+      <div class="audit-tile">
+        <div class="audit-tile-name">收款单-运单</div>
+        <div class="audit-tile-bottom"><span class="audit-tile-count">3</span><span class="audit-tile-link">列表 &gt;</span></div>
+      </div>
+      <div class="audit-tile">
+        <div class="audit-tile-name">付款单</div>
+        <div class="audit-tile-bottom"><span class="audit-tile-count">9</span><span class="audit-tile-link">列表 &gt;</span></div>
+      </div>
+      <div class="audit-tile active">
+        <div class="audit-tile-name">日常收支</div>
+        <div class="audit-tile-bottom"><span class="audit-tile-count">1</span><span class="audit-tile-link">列表 &gt;</span></div>
+      </div>
+      <div class="audit-tile">
+        <div class="audit-tile-name">运单创建</div>
+        <div class="audit-tile-bottom"><span class="audit-tile-count">4</span><span class="audit-tile-link">列表 &gt;</span></div>
+      </div>
+      <div class="audit-tile">
+        <div class="audit-tile-name">异常登记</div>
+        <div class="audit-tile-bottom"><span class="audit-tile-count">6</span><span class="audit-tile-link">列表 &gt;</span></div>
+      </div>
+      <div class="audit-tile">
+        <div class="audit-tile-name">客户考核</div>
+        <div class="audit-tile-bottom"><span class="audit-tile-count">2</span><span class="audit-tile-link">列表 &gt;</span></div>
+      </div>
+      <div class="audit-tile">
+        <div class="audit-tile-name">运力考核</div>
+        <div class="audit-tile-bottom"><span class="audit-tile-count">5</span><span class="audit-tile-link">列表 &gt;</span></div>
+      </div>
+      <div class="audit-tile">
+        <div class="audit-tile-name">司机借支</div>
+        <div class="audit-tile-bottom"><span class="audit-tile-count">6</span><span class="audit-tile-link">列表 &gt;</span></div>
+      </div>
+      <div class="audit-tile">
+        <div class="audit-tile-name">车辆借支</div>
+        <div class="audit-tile-bottom"><span class="audit-tile-count">2</span><span class="audit-tile-link">列表 &gt;</span></div>
+      </div>
+      <div class="audit-tile">
+        <div class="audit-tile-name">员工借支</div>
+        <div class="audit-tile-bottom"><span class="audit-tile-count">0</span><span class="audit-tile-link">列表 &gt;</span></div>
+      </div>
+      <div class="audit-tile zero">
+        <div class="audit-tile-name">物料发放</div>
+        <div class="audit-tile-bottom"><span class="audit-tile-count">0</span><span class="audit-tile-link">列表 &gt;</span></div>
+      </div>
+      <div class="audit-tile zero">
+        <div class="audit-tile-name">合同审核</div>
+        <div class="audit-tile-bottom"><span class="audit-tile-count">0</span><span class="audit-tile-link">列表 &gt;</span></div>
+      </div>
+      <div class="audit-tile zero">
+        <div class="audit-tile-name">保养结算单</div>
+        <div class="audit-tile-bottom"><span class="audit-tile-count">0</span><span class="audit-tile-link">列表 &gt;</span></div>
+      </div>
+      <div class="audit-tile zero">
+        <div class="audit-tile-name">磅单回单审核</div>
+        <div class="audit-tile-bottom"><span class="audit-tile-count">0</span><span class="audit-tile-link">列表 &gt;</span></div>
+      </div>
+    </div>
+
+    <!-- 内嵌列表表格（当前选中：日常收支） -->
+    <div class="audit-table-wrap">
+      <table class="audit-table">
+        <thead>
+          <tr>
+            <th>操作</th>
+            <th>单据编号</th>
+            <th>申请人</th>
+            <th>费用名称</th>
+            <th>金额</th>
+            <th>客户</th>
+            <th>项目</th>
+            <th>司机</th>
+            <th>车辆</th>
+            <th>附件</th>
+            <th>申请时间</th>
+            <th>审核备注</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><button class="audit-op-btn">审核</button></td>
+            <td style="color:#0097cf;cursor:pointer;">RC2026071600001</td>
+            <td>张伟</td>
+            <td>日常收支</td>
+            <td>1,200.00</td>
+            <td>广州联运物流</td>
+            <td>广州-深圳线</td>
+            <td>李师傅</td>
+            <td>粤A·12345</td>
+            <td><span class="audit-attach">1份</span></td>
+            <td>2026-07-16 09:32</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><button class="audit-op-btn">审核</button></td>
+            <td style="color:#0097cf;cursor:pointer;">RC2026071500023</td>
+            <td>王芳</td>
+            <td>日常收支</td>
+            <td>850.00</td>
+            <td>东莞恒达物流</td>
+            <td>—</td>
+            <td>陈师傅</td>
+            <td>粤B·67890</td>
+            <td><span class="audit-attach">2份</span></td>
+            <td>2026-07-15 14:18</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><button class="audit-op-btn">审核</button></td>
+            <td style="color:#0097cf;cursor:pointer;">RC2026071400087</td>
+            <td>刘洋</td>
+            <td>日常收支</td>
+            <td>3,400.00</td>
+            <td>佛山运通供应链</td>
+            <td>佛山项目</td>
+            <td>周师傅</td>
+            <td>粤C·11223</td>
+            <td><span class="audit-attach">3份</span></td>
+            <td>2026-07-14 16:05</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    </div><!-- /padding wrapper -->
+  </div>
+
+</div><!-- /main -->
+</body>
+</html>
